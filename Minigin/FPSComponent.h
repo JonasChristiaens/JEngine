@@ -17,8 +17,8 @@ namespace dae
 	private:
 		float m_fpsUpdateInterval{ 0.1f };
 		float m_timeSinceLastUpdate{ 0.0f };
-		int m_frameCount{ 0 };
 		float m_currentFPS{ 0.0f };
+		int m_frameCount{ 0 };
 
 		TextComponent* m_textComponent{ nullptr };
 	};
