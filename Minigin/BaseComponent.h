@@ -16,7 +16,7 @@ namespace dae
 		BaseComponent& operator=(BaseComponent&& other) = delete;
 
 		virtual void Update(float deltaTime) = 0;
-		virtual void Render() const = 0;
+		virtual void Render() const {};
 
 		GameObject* GetOwner() const { return m_pOwner; }
 
