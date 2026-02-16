@@ -13,6 +13,7 @@
 #include "TransformComponent.h"
 #include "RenderComponent.h"
 #include "TextComponent.h"
+#include "FPSComponent.h"
 
 #include <filesystem>
 namespace fs = std::filesystem;
@@ -43,6 +44,15 @@ static void load()
 	transform->SetPosition(292, 20);
 	auto text = go->AddComponent<dae::TextComponent>("Programming 4 Assignment", font);
 	text->SetColor({ 255, 255, 0, 255 });
+	scene.Add(std::move(go));
+
+	// FPS Counter
+	go = std::make_unique<dae::GameObject>();
+	transform = go->AddComponent<dae::TransformComponent>();
+	transform->SetPosition(10, 10);
+	text = go->AddComponent<dae::TextComponent>("0.0 FPS", font);
+	text->SetColor({ 255, 255, 255, 255 });
+	go->AddComponent<dae::FPSComponent>();
 	scene.Add(std::move(go));
 }
 
