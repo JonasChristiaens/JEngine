@@ -7,7 +7,7 @@ namespace dae
 	class BaseComponent
 	{
 	public:
-		BaseComponent(GameObject* pOwner);
+		BaseComponent(GameObject* pOwner) : m_pOwner(pOwner) {}
 		virtual ~BaseComponent() = default;
 
 		BaseComponent(const BaseComponent& other) = delete;
