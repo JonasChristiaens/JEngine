@@ -8,7 +8,7 @@ dae::FPSComponent::FPSComponent(GameObject* pOwner)
 	: BaseComponent(pOwner)
 {
 	// Get the TextComponent from the same GameObject
-	m_textComponent = m_pOwner->GetComponent<TextComponent>();
+	m_textComponent = GetOwner()->GetComponent<TextComponent>();
 }
 
 void dae::FPSComponent::Update(float deltaTime)

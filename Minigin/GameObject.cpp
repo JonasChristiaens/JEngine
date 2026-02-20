@@ -18,3 +18,13 @@ void dae::GameObject::Render() const
 		component->Render();
 	}
 }
+
+void dae::GameObject::MarkForDeletion()
+{
+	m_markedForDeletion = true;
+}
+
+bool dae::GameObject::IsMarkedForDeletion() const
+{
+	return m_markedForDeletion;
+}

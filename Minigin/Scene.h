@@ -1,6 +1,5 @@
 #pragma once
 #include <memory>
-#include <string>
 #include <vector>
 #include "GameObject.h"
 
@@ -10,10 +9,10 @@ namespace dae
 	{
 	public:
 		void Add(std::unique_ptr<GameObject> object);
-		void Remove(const GameObject& object);
 		void RemoveAll();
 
 		void Update(float deltaTime);
+		void LateUpdate();
 		void Render() const;
 
 		~Scene() = default;

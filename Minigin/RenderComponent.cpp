@@ -15,7 +15,7 @@ void dae::RenderComponent::Render() const
 	if (m_texture == nullptr)
 		return;
 
-	auto transform = m_pOwner->GetComponent<TransformComponent>();
+	auto transform = GetOwner()->GetComponent<TransformComponent>();
 	if (transform == nullptr)
 		return;
 
@@ -26,4 +26,9 @@ void dae::RenderComponent::Render() const
 void dae::RenderComponent::SetTexture(const std::string& filename)
 {
 	m_texture = ResourceManager::GetInstance().LoadTexture(filename);
+}
+
+void dae::RenderComponent::SetTexture(std::shared_ptr<Texture2D> texture)
+{
+	m_texture = std::move(texture);
 }

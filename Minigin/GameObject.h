@@ -23,6 +23,9 @@ namespace dae
 		void Update(float deltaTime);
 		void Render() const;
 
+		void MarkForDeletion();
+		bool IsMarkedForDeletion() const;
+
 
 		// Component template management
 		template<typename T, typename... Args>
@@ -40,6 +43,8 @@ namespace dae
 	private:
 		std::vector<std::unique_ptr<BaseComponent>> m_components{};
 		std::unordered_map<std::type_index, BaseComponent*> m_componentMap{};
+
+		bool m_markedForDeletion{ false };
 	};
 
 

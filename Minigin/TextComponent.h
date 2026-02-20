@@ -8,7 +8,7 @@ namespace dae
 {
 	class Font;
 	class Texture2D;
-	class TransformComponent;
+	class RenderComponent;
 
 	class TextComponent final : public BaseComponent
 	{
@@ -27,6 +27,6 @@ namespace dae
 		std::string m_text{};
 		SDL_Color m_color{ 255, 255, 255, 255 };
 		std::shared_ptr<Font> m_font{};
-		std::shared_ptr<Texture2D> m_textTexture{};
+		RenderComponent* m_pRenderComponent{};
 	};
 }
