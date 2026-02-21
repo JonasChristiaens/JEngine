@@ -3,6 +3,7 @@
 #include <vector>
 #include <typeindex>
 #include <unordered_map>
+#include <glm/vec3.hpp>
 
 namespace dae
 {
@@ -19,18 +20,27 @@ namespace dae
 		GameObject& operator=(const GameObject& other) = delete;
 		GameObject& operator=(GameObject&& other) = delete;
 
-
+		// Core functions
 		void Update(float deltaTime);
 		void Render() const;
 
-		void MarkForDeletion();
-		bool IsMarkedForDeletion() const;
+		// Getters
+		bool IsMarkedForDeletion() const { return m_markedForDeletion; }
 
-		// Hierarchy management
-		void SetParent(GameObject* pParent, bool keepWorldTransform = true);
 		GameObject* GetParent() const { return m_pParent; }
 		const std::vector<GameObject*>& GetChildren() const { return m_children; }
 
+		const glm::vec3& GetWorldPosition() const;
+		const glm::vec3& GetLocalPosition() const { return m_localPosition; }
+		
+		// Setters
+		void MarkForDeletion() { m_markedForDeletion = true; }
+
+		void SetParent(GameObject* pParent, bool keepWorldPosition = true);
+
+		void SetLocalPosition(const glm::vec3& localPos);
+		void UpdateWorldPosition() const;
+		void SetPositionDirty();
 
 		// Component template management
 		template<typename T, typename... Args>
@@ -51,9 +61,13 @@ namespace dae
 
 		bool m_markedForDeletion{ false };
 
-		// Hierarchy
 		GameObject* m_pParent{ nullptr };
 		std::vector<GameObject*> m_children{};
+
+		glm::vec3 m_localPosition{ 0.f, 0.f, 0.f };
+		mutable glm::vec3 m_worldPosition{ 0.f, 0.f, 0.f };
+
+		mutable bool m_positionIsDirty{ false };
 
 		// Helper functions
 		void AddChild(GameObject* pChild);
