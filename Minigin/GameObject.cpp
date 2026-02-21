@@ -4,6 +4,16 @@
 
 dae::GameObject::~GameObject()
 {
+	// Clear children's parent pointers first
+	for (auto* child : m_children)
+	{
+		if (child)
+		{
+			child->m_pParent = nullptr;
+		}
+	}
+	
+	// Then remove from parent if still valid
 	if (m_pParent)
 	{
 		m_pParent->RemoveChild(this);

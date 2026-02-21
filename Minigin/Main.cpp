@@ -14,6 +14,7 @@
 #include "RenderComponent.h"
 #include "TextComponent.h"
 #include "FPSComponent.h"
+#include "MoveComponent.h"
 
 #include <filesystem>
 namespace fs = std::filesystem;
@@ -55,7 +56,8 @@ static void load()
 	go->AddComponent<dae::FPSComponent>();
 	scene.Add(std::move(go));
 
-	// Bomberman character
+
+	// First Bomberman character
 	go = std::make_unique<dae::GameObject>();
 	transform = go->AddComponent<dae::TransformComponent>();
 	transform->SetLocalPosition(300, 300);
@@ -64,7 +66,24 @@ static void load()
 	render->SetSpriteSheet(16, 16, 6, 2);
 	render->SetSprite(4, 0);
 	render->SetScale(3.0f);
+	auto move = go->AddComponent<dae::MoveComponent>(100.0f, 2.0f); // radius: 100, speed: 1 rad/s
+	move->SetRotationCenter(300, 300); // Rotate around this point
+	auto* pBomberman = go.get();
 	scene.Add(std::move(go));
+
+	// Second Bomberman character orbiting around the first
+	go = std::make_unique<dae::GameObject>();
+	transform = go->AddComponent<dae::TransformComponent>();
+	transform->SetLocalPosition(0, 0); // Local position relative to parent
+	render = go->AddComponent<dae::RenderComponent>();
+	render->SetTexture("../Resources/BombermanSprites_General.png");
+	render->SetSpriteSheet(16, 16, 6, 2);
+	render->SetSprite(0, 0);
+	render->SetScale(3.0f);
+	go->AddComponent<dae::MoveComponent>(50.0f, 2.0f); // radius: 50, speed: 2 rad/s
+	auto* pChild = go.get();
+	scene.Add(std::move(go));
+	pChild->SetParent(pBomberman, false); // Set parent-child relationship
 }
 
 int main(int, char*[]) {
