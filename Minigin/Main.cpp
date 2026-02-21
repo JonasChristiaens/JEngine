@@ -56,6 +56,15 @@ static void load()
 	scene.Add(std::move(go));
 
 	// Bomberman character
+	go = std::make_unique<dae::GameObject>();
+	transform = go->AddComponent<dae::TransformComponent>();
+	transform->SetLocalPosition(300, 300);
+	render = go->AddComponent<dae::RenderComponent>();
+	render->SetTexture("../Resources/BombermanSprites_General.png");
+	render->SetSpriteSheet(16, 16, 6, 2);
+	render->SetSprite(4, 0);
+	render->SetScale(3.0f);
+	scene.Add(std::move(go));
 }
 
 int main(int, char*[]) {
