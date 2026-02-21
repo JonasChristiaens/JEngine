@@ -26,6 +26,11 @@ namespace dae
 		void MarkForDeletion();
 		bool IsMarkedForDeletion() const;
 
+		// Hierarchy management
+		void SetParent(GameObject* pParent, bool keepWorldTransform = true);
+		GameObject* GetParent() const { return m_pParent; }
+		const std::vector<GameObject*>& GetChildren() const { return m_children; }
+
 
 		// Component template management
 		template<typename T, typename... Args>
@@ -45,6 +50,15 @@ namespace dae
 		std::unordered_map<std::type_index, BaseComponent*> m_componentMap{};
 
 		bool m_markedForDeletion{ false };
+
+		// Hierarchy
+		GameObject* m_pParent{ nullptr };
+		std::vector<GameObject*> m_children{};
+
+		// Helper functions
+		void AddChild(GameObject* pChild);
+		void RemoveChild(GameObject* pChild);
+		bool IsChild(GameObject* pGameObject) const;
 	};
 
 

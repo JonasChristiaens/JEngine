@@ -25,6 +25,7 @@ void Scene::Update(float deltaTime)
 
 void Scene::LateUpdate()
 {
+	// Remove objects that are marked for deletion after all updates are done
 	m_objects.erase(
 		std::remove_if(
 			m_objects.begin(),
