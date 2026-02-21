@@ -19,7 +19,7 @@ void dae::RenderComponent::Render() const
 	if (transform == nullptr)
 		return;
 
-	const auto& pos = transform->GetPosition();
+	const auto& pos = transform->GetLocalPosition();
 	Renderer::GetInstance().RenderTexture(*m_texture, pos.x, pos.y);
 }
 

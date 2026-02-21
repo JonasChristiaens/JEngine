@@ -31,15 +31,14 @@ namespace dae
 		const std::vector<GameObject*>& GetChildren() const { return m_children; }
 
 		const glm::vec3& GetWorldPosition() const;
-		const glm::vec3& GetLocalPosition() const { return m_localPosition; }
-		
+		const glm::vec3& GetLocalPosition() const;
+
 		// Setters
 		void MarkForDeletion() { m_markedForDeletion = true; }
 
 		void SetParent(GameObject* pParent, bool keepWorldPosition = true);
 
 		void SetLocalPosition(const glm::vec3& localPos);
-		void UpdateWorldPosition() const;
 		void SetPositionDirty();
 
 		// Component template management
@@ -63,11 +62,6 @@ namespace dae
 
 		GameObject* m_pParent{ nullptr };
 		std::vector<GameObject*> m_children{};
-
-		glm::vec3 m_localPosition{ 0.f, 0.f, 0.f };
-		mutable glm::vec3 m_worldPosition{ 0.f, 0.f, 0.f };
-
-		mutable bool m_positionIsDirty{ false };
 
 		// Helper functions
 		void AddChild(GameObject* pChild);

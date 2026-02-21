@@ -1,5 +1,6 @@
 #include "GameObject.h"
 #include "BaseComponent.h"
+#include "TransformComponent.h"
 
 dae::GameObject::~GameObject()
 {
@@ -93,37 +94,38 @@ bool dae::GameObject::IsChild(GameObject* pChild) const
 
 void dae::GameObject::SetLocalPosition(const glm::vec3& pos)
 {
-	m_localPosition = pos;
-	SetPositionDirty();
+	if (auto* pTransform = GetComponent<TransformComponent>())
+	{
+		pTransform->SetLocalPosition(pos);
+	}
+}
+
+const glm::vec3& dae::GameObject::GetLocalPosition() const
+{
+	if (auto* pTransform = GetComponent<TransformComponent>())
+	{
+		return pTransform->GetLocalPosition();
+	}
+
+	static const glm::vec3 zero{ 0.f, 0.f, 0.f };
+	return zero;
 }
 
 const glm::vec3& dae::GameObject::GetWorldPosition() const
 {
-	if (m_positionIsDirty)
-		UpdateWorldPosition();
+	if (auto* pTransform = GetComponent<TransformComponent>())
+	{
+		return pTransform->GetWorldPosition();
+	}
 
-	return m_worldPosition;
+	static const glm::vec3 zero{ 0.f, 0.f, 0.f };
+	return zero;
 }
 
 void dae::GameObject::SetPositionDirty()
 {
-	m_positionIsDirty = true;
-
-	// Mark all children as dirty
-	for (auto* pChild : m_children)
+	if (auto* pTransform = GetComponent<TransformComponent>())
 	{
-		pChild->SetPositionDirty();
+		pTransform->SetPositionDirty();
 	}
-}
-
-void dae::GameObject::UpdateWorldPosition() const
-{
-	if (m_positionIsDirty)
-	{
-		if (m_pParent == nullptr)
-			m_worldPosition = m_localPosition;
-		else
-			m_worldPosition = m_pParent->GetWorldPosition() + m_localPosition;
-	}
-	m_positionIsDirty = false;
 }
