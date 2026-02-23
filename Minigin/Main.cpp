@@ -69,6 +69,10 @@ static void load()
 	render->SetSprite(4, 0);
 
 	// Bomberman circular rotation
+	/*
+	* NOTE:  Currently the position of the gameobject is set as the top left corner of the sprite.
+	* -> until this needs to change, I will keep it like so.
+	*/
 	auto move = go->AddComponent<dae::MoveComponent>(15.0f, -10.0f);
 	move->SetRotationCenter(300, 300);
 	auto* pBomberman = go.get();
