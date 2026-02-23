@@ -10,7 +10,7 @@ namespace dae
 		TransformComponent(GameObject* pOwner);
 		virtual ~TransformComponent() = default;
 
-		void Update(float /*deltaTime*/) override {}
+		void Update(float /*deltaTime*/) override;
 
 		const glm::vec3& GetWorldPosition() const;
 		const glm::vec3& GetLocalPosition() const { return m_localPosition; }

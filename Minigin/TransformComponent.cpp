@@ -1,5 +1,6 @@
 #include "TransformComponent.h"
 #include "GameObject.h"
+#include <iostream>
 
 dae::TransformComponent::TransformComponent(GameObject* pOwner)
 	: BaseComponent(pOwner)
@@ -18,6 +19,11 @@ void dae::TransformComponent::SetLocalPosition(const glm::vec3& position)
 {
 	m_localPosition = position;
 	SetPositionDirty();
+}
+
+void dae::TransformComponent::Update(float)
+{
+	UpdateWorldPosition();
 }
 
 const glm::vec3& dae::TransformComponent::GetWorldPosition() const

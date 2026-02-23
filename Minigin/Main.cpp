@@ -61,29 +61,36 @@ static void load()
 	go = std::make_unique<dae::GameObject>();
 	transform = go->AddComponent<dae::TransformComponent>();
 	transform->SetLocalPosition(300, 300);
+
+	// Bomberman sprite
 	render = go->AddComponent<dae::RenderComponent>();
 	render->SetTexture("../Resources/BombermanSprites_General.png");
 	render->SetSpriteSheet(16, 16, 6, 2);
 	render->SetSprite(4, 0);
-	render->SetScale(3.0f);
-	auto move = go->AddComponent<dae::MoveComponent>(100.0f, 2.0f); // radius: 100, speed: 1 rad/s
-	move->SetRotationCenter(300, 300); // Rotate around this point
+
+	// Bomberman circular rotation
+	auto move = go->AddComponent<dae::MoveComponent>(15.0f, -10.0f);
+	move->SetRotationCenter(300, 300);
 	auto* pBomberman = go.get();
 	scene.Add(std::move(go));
+
 
 	// Second Bomberman character orbiting around the first
 	go = std::make_unique<dae::GameObject>();
 	transform = go->AddComponent<dae::TransformComponent>();
-	transform->SetLocalPosition(0, 0); // Local position relative to parent
+	transform->SetLocalPosition(10, 10);
+
+	// Bomberman sprite
 	render = go->AddComponent<dae::RenderComponent>();
 	render->SetTexture("../Resources/BombermanSprites_General.png");
 	render->SetSpriteSheet(16, 16, 6, 2);
 	render->SetSprite(0, 0);
-	render->SetScale(3.0f);
-	go->AddComponent<dae::MoveComponent>(50.0f, 2.0f); // radius: 50, speed: 2 rad/s
+
+	// Bomberman circular rotation
+	go->AddComponent<dae::MoveComponent>(40.0f, 3.0f);
 	auto* pChild = go.get();
 	scene.Add(std::move(go));
-	pChild->SetParent(pBomberman, false); // Set parent-child relationship
+	pChild->SetParent(pBomberman, false);
 }
 
 int main(int, char*[]) {

@@ -19,7 +19,7 @@ void dae::RenderComponent::Render() const
 	if (transform == nullptr)
 		return;
 
-	const auto& pos = transform->GetLocalPosition();
+	const auto& pos = transform->GetWorldPosition();
 
 	if (m_useSourceRect)
 	{
