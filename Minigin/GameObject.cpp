@@ -2,23 +2,7 @@
 #include "BaseComponent.h"
 #include "TransformComponent.h"
 
-dae::GameObject::~GameObject()
-{
-	// Clear children's parent pointers first
-	for (auto* child : m_children)
-	{
-		if (child)
-		{
-			child->m_pParent = nullptr;
-		}
-	}
-	
-	// Then remove from parent if still valid
-	if (m_pParent)
-	{
-		m_pParent->RemoveChild(this);
-	}
-}
+dae::GameObject::~GameObject() = default;
 
 void dae::GameObject::Update(float deltaTime)
 {
@@ -45,6 +29,17 @@ void dae::GameObject::Render() const
 	for (const auto* pChild : m_children)
 	{
 		pChild->Render();
+	}
+}
+
+void dae::GameObject::MarkForDeletion()
+{
+	m_markedForDeletion = true;
+
+	// Mark children for deletion as well
+	for (auto* pChild : m_children)
+	{
+		pChild->MarkForDeletion();
 	}
 }
 

@@ -70,7 +70,7 @@ static void load()
 
 	// Bomberman sprite
 	render = go->AddComponent<dae::RenderComponent>();
-	render->SetTexture("../Data/Resources/BombermanSprites_General.png");
+	render->SetTexture("Resources/BombermanSprites_General.png");
 	render->SetSpriteSheet(16, 16, 6, 2);
 	render->SetSprite(4, 0);
 
@@ -87,7 +87,7 @@ static void load()
 
 	// Bomberman sprite
 	render = go->AddComponent<dae::RenderComponent>();
-	render->SetTexture("../Data/Resources/BombermanSprites_General.png");
+	render->SetTexture("Resources/BombermanSprites_General.png");
 	render->SetSpriteSheet(16, 16, 6, 2);
 	render->SetSprite(0, 0);
 

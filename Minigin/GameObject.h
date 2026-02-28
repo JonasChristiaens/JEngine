@@ -34,7 +34,7 @@ namespace dae
 		const glm::vec3& GetLocalPosition() const;
 
 		// Setters
-		void MarkForDeletion() { m_markedForDeletion = true; }
+		void MarkForDeletion();
 
 		void SetParent(GameObject* pParent, bool keepWorldPosition = true);
 

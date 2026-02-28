@@ -11,6 +11,8 @@ From there, I’ve expanded and customized the code to develop my own engine str
 This repository documents my progress throughout the project.  
 You’ll find build instructions, design notes, and demonstrations of how each engine system works as the project evolves.
 
+This is the website version of my project [JEngine](https://jonaschristiaens.github.io/JEngine/).
+
 # Minigin
 
 Minigin is a very small project using [SDL3](https://www.libsdl.org/) and [glm](https://github.com/g-truc/glm) for 2D c++ game projects. It is in no way a game engine, only a barebone start project where everything sdl related has been set up. It contains glm for vector math, to aleviate the need to write custom vector and matrix classes.
@@ -18,8 +20,6 @@ Minigin is a very small project using [SDL3](https://www.libsdl.org/) and [glm](
 [![Build Status](https://github.com/avadae/minigin/actions/workflows/cmake.yml/badge.svg)](https://github.com/JonasChristiaens/JEngine)
 [![Build Status](https://github.com/avadae/minigin/actions/workflows/emscripten.yml/badge.svg)](https://github.com/JonasChristiaens/JEngine)
 [![GitHub Release](https://img.shields.io/github/v/release/avadae/minigin?logo=github&sort=semver)](https://github.com/JonasChristiaens/JEngine)
-
-This is the website version of my project [JEngine](https://jonaschristiaens.github.io/JEngine/).
 
 # Goal
 
