@@ -144,6 +144,7 @@ target_include_directories(imgui PUBLIC
 target_link_libraries(imgui PUBLIC SDL3::SDL3)
 # enable c++20 features
 target_compile_features(imgui PUBLIC cxx_std_20)
+target_compile_definitions(imgui PUBLIC IMGUI_DEFINE_MATH_OPERATORS)
 
 # Add imgui-plot
 set(IMGUI_INCLUDE_DIR ${imgui_SOURCE_DIR})
