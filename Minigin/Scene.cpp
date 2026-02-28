@@ -19,7 +19,12 @@ void Scene::Update(float deltaTime)
 {
 	for(auto& object : m_objects)
 	{
-		object->Update(deltaTime);
+		// Only update root objects (objects without a parent)
+		// Children will be updated by their parents
+		if (object->GetParent() == nullptr)
+		{
+			object->Update(deltaTime);
+		}
 	}
 }
 
@@ -40,7 +45,12 @@ void Scene::Render() const
 {
 	for (const auto& object : m_objects)
 	{
-		object->Render();
+		// Only render root objects (objects without a parent)
+		// Children will be rendered by their parents
+		if (object->GetParent() == nullptr)
+		{
+			object->Render();
+		}
 	}
 }
 
