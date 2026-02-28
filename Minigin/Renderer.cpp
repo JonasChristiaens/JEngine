@@ -12,22 +12,6 @@
 
 void dae::Renderer::Init(SDL_Window* window)
 {
-	/*m_window = window;
-
-	SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
-
-#if defined(__EMSCRIPTEN__)
-	m_renderer = SDL_CreateRenderer(window, nullptr);
-#else
-	m_renderer = SDL_CreateRenderer(window, nullptr);
-#endif
-
-	if (m_renderer == nullptr)
-	{
-		std::cout << "Failed to create the renderer: " << SDL_GetError() << "\n";
-		throw std::runtime_error(std::string("SDL_CreateRenderer Error: ") + SDL_GetError());
-	}*/
-
 	m_window = window;
 	SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
 	m_renderer = SDL_CreateRenderer(window, nullptr);
@@ -54,14 +38,6 @@ void dae::Renderer::Init(SDL_Window* window)
 
 void dae::Renderer::Render() const
 {
-	/*const auto& color = GetBackgroundColor();
-	SDL_SetRenderDrawColor(m_renderer, color.r, color.g, color.b, color.a);
-	SDL_RenderClear(m_renderer);
-
-	SceneManager::GetInstance().Render();
-
-	SDL_RenderPresent(m_renderer);*/
-
 	ImGui_ImplSDLRenderer3_NewFrame();
 	ImGui_ImplSDL3_NewFrame();
 	ImGui::NewFrame();
@@ -83,12 +59,6 @@ void dae::Renderer::Render() const
 
 void dae::Renderer::Destroy()
 {
-	/*if (m_renderer != nullptr)
-	{
-		SDL_DestroyRenderer(m_renderer);
-		m_renderer = nullptr;
-	}*/
-
 	ImGui_ImplSDLRenderer3_Shutdown();
 	ImGui_ImplSDL3_Shutdown();
 	ImGui::DestroyContext();

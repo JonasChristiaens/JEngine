@@ -57,45 +57,6 @@ static void load()
 	scene.Add(std::move(go));
 
 
-	// Stationary root object
-	go = std::make_unique<dae::GameObject>();
-	transform = go->AddComponent<dae::TransformComponent>();
-	transform->SetLocalPosition(300, 300);
-	auto* pRoot = go.get();
-	scene.Add(std::move(go));
-
-	// First Bomberman character
-	go = std::make_unique<dae::GameObject>();
-	transform = go->AddComponent<dae::TransformComponent>();
-
-	// Bomberman sprite
-	render = go->AddComponent<dae::RenderComponent>();
-	render->SetTexture("Resources/BombermanSprites_General.png");
-	render->SetSpriteSheet(16, 16, 6, 2);
-	render->SetSprite(4, 0);
-
-	// Counter-clockwise rotation
-	go->AddComponent<dae::MoveComponent>(15.0f, -5.0f);
-	auto* pBomberman = go.get();
-	scene.Add(std::move(go));
-	pBomberman->SetParent(pRoot, false);
-
-
-	// Second Bomberman character
-	go = std::make_unique<dae::GameObject>();
-	transform = go->AddComponent<dae::TransformComponent>();
-
-	// Bomberman sprite
-	render = go->AddComponent<dae::RenderComponent>();
-	render->SetTexture("Resources/BombermanSprites_General.png");
-	render->SetSpriteSheet(16, 16, 6, 2);
-	render->SetSprite(0, 0);
-
-	// Clockwise rotation
-	go->AddComponent<dae::MoveComponent>(50.0f, 3.0f);
-	auto* pChild = go.get();
-	scene.Add(std::move(go));
-	pChild->SetParent(pBomberman, false);
 }
 
 
