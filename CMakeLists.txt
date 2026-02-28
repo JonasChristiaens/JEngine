@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.26)
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 project(Minigin)
 
 if(EMSCRIPTEN)
@@ -144,10 +145,10 @@ target_include_directories(imgui PUBLIC
 target_link_libraries(imgui PUBLIC SDL3::SDL3)
 # enable c++20 features
 target_compile_features(imgui PUBLIC cxx_std_20)
-#target_compile_definitions(imgui PUBLIC IMGUI_DEFINE_MATH_OPERATORS)
+target_compile_definitions(imgui PUBLIC IMGUI_DEFINE_MATH_OPERATORS)
 
 # Add imgui-plot
-set(IMGUI_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/imgui)
+set(IMGUI_INCLUDE_DIR ${imgui_SOURCE_DIR})
 
 FetchContent_Declare(
     imgui_plot
@@ -157,6 +158,9 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(imgui_plot)
+
+# Link imgui_plot to imgui so it inherits include dirs and compile definitions
+target_link_libraries(imgui_plot PUBLIC imgui)
 
 target_include_directories("${TARGET_NAME}" PUBLIC 
   ${CMAKE_SOURCE_DIR}/Minigin/
