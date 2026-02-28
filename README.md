@@ -1,10 +1,25 @@
-﻿# Minigin
+﻿# JEngine — Programming 4 Game Engine Project  
+
+Welcome to **JEngine**, my personal game engine developed for the *Programming 4* course at [DAE](https://digitalartsandentertainment.be/).  
+This project aims to put game programming patterns and engine architecture principles into practice by building a reusable 2D C++ game engine from the ground up.  
+
+The ultimate goal of this assignment is to recreate a classic 80’s arcade game, in my case, **Bomberman**, while exploring how to design efficient systems for rendering, input, and game logic.  
+
+'JEngine' started from the **[Minigin](https://github.com/avadae/minigin)** template created by *Alex Vanden Abeele*, which provides a minimal SDL3 setup and basic scaffolding.  
+From there, I’ve expanded and customized the code to develop my own engine structure, patterns, and features.  
+
+This repository documents my progress throughout the project.  
+You’ll find build instructions, design notes, and demonstrations of how each engine system works as the project evolves.
+
+# Minigin
 
 Minigin is a very small project using [SDL3](https://www.libsdl.org/) and [glm](https://github.com/g-truc/glm) for 2D c++ game projects. It is in no way a game engine, only a barebone start project where everything sdl related has been set up. It contains glm for vector math, to aleviate the need to write custom vector and matrix classes.
 
-[![Build Status](https://github.com/avadae/minigin/actions/workflows/cmake.yml/badge.svg)](https://github.com/avadae/cmake/actions)
-[![Build Status](https://github.com/avadae/minigin/actions/workflows/emscripten.yml/badge.svg)](https://github.com/avadae/emscripten/actions)
-[![GitHub Release](https://img.shields.io/github/v/release/avadae/minigin?logo=github&sort=semver)](https://github.com/avadae/minigin/releases/latest)
+[![Build Status](https://github.com/avadae/minigin/actions/workflows/cmake.yml/badge.svg)](https://github.com/JonasChristiaens/JEngine)
+[![Build Status](https://github.com/avadae/minigin/actions/workflows/emscripten.yml/badge.svg)](https://github.com/JonasChristiaens/JEngine)
+[![GitHub Release](https://img.shields.io/github/v/release/avadae/minigin?logo=github&sort=semver)](https://github.com/JonasChristiaens/JEngine)
+
+This is the website version of my project [JEngine](https://jonaschristiaens.github.io/JEngine/).
 
 # Goal
 

@@ -26,7 +26,7 @@ void dae::TransformComponent::Update(float)
 	UpdateWorldPosition();
 }
 
-const glm::vec3& dae::TransformComponent::GetWorldPosition() const
+const glm::vec3& dae::TransformComponent::GetWorldPosition()
 {
 	if (m_positionIsDirty)
 		UpdateWorldPosition();
@@ -49,7 +49,7 @@ void dae::TransformComponent::SetPositionDirty()
 	}
 }
 
-void dae::TransformComponent::UpdateWorldPosition() const
+void dae::TransformComponent::UpdateWorldPosition()
 {
 	if (m_positionIsDirty)
 	{

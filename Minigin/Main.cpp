@@ -57,10 +57,16 @@ static void load()
 	scene.Add(std::move(go));
 
 
-	// First Bomberman character
+	// Stationary root object
 	go = std::make_unique<dae::GameObject>();
 	transform = go->AddComponent<dae::TransformComponent>();
 	transform->SetLocalPosition(300, 300);
+	auto* pRoot = go.get();
+	scene.Add(std::move(go));
+
+	// First Bomberman character
+	go = std::make_unique<dae::GameObject>();
+	transform = go->AddComponent<dae::TransformComponent>();
 
 	// Bomberman sprite
 	render = go->AddComponent<dae::RenderComponent>();
@@ -68,21 +74,16 @@ static void load()
 	render->SetSpriteSheet(16, 16, 6, 2);
 	render->SetSprite(4, 0);
 
-	// Bomberman circular rotation
-	/*
-	* NOTE:  Currently the position of the gameobject is set as the top left corner of the sprite.
-	* -> until this needs to change, I will keep it like so.
-	*/
-	auto move = go->AddComponent<dae::MoveComponent>(15.0f, -10.0f);
-	move->SetRotationCenter(300, 300);
+	// Counter-clockwise rotation
+	go->AddComponent<dae::MoveComponent>(15.0f, -5.0f);
 	auto* pBomberman = go.get();
 	scene.Add(std::move(go));
+	pBomberman->SetParent(pRoot, false);
 
 
-	// Second Bomberman character orbiting around the first
+	// Second Bomberman character
 	go = std::make_unique<dae::GameObject>();
 	transform = go->AddComponent<dae::TransformComponent>();
-	transform->SetLocalPosition(10, 10);
 
 	// Bomberman sprite
 	render = go->AddComponent<dae::RenderComponent>();
@@ -90,12 +91,13 @@ static void load()
 	render->SetSpriteSheet(16, 16, 6, 2);
 	render->SetSprite(0, 0);
 
-	// Bomberman circular rotation
-	go->AddComponent<dae::MoveComponent>(40.0f, 3.0f);
+	// Clockwise rotation
+	go->AddComponent<dae::MoveComponent>(50.0f, 3.0f);
 	auto* pChild = go.get();
 	scene.Add(std::move(go));
 	pChild->SetParent(pBomberman, false);
 }
+
 
 int main(int, char*[]) {
 #if __EMSCRIPTEN__
