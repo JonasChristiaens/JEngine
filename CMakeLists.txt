@@ -144,16 +144,18 @@ target_include_directories(imgui PUBLIC
 target_link_libraries(imgui PUBLIC SDL3::SDL3)
 # enable c++20 features
 target_compile_features(imgui PUBLIC cxx_std_20)
-target_compile_definitions(imgui PUBLIC IMGUI_DEFINE_MATH_OPERATORS)
+#target_compile_definitions(imgui PUBLIC IMGUI_DEFINE_MATH_OPERATORS)
 
 # Add imgui-plot
-set(IMGUI_INCLUDE_DIR ${imgui_SOURCE_DIR})
+set(IMGUI_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/imgui)
+
 FetchContent_Declare(
-  imgui_plot
-  GIT_REPOSITORY https://github.com/soulthreads/imgui-plot.git
-  GIT_TAG v0.1.0
-  GIT_SHALLOW TRUE
+    imgui_plot
+    GIT_REPOSITORY https://github.com/soulthreads/imgui-plot.git
+    GIT_TAG v0.1.0
+    EXCLUDE_FROM_ALL
 )
+
 FetchContent_MakeAvailable(imgui_plot)
 
 target_include_directories("${TARGET_NAME}" PUBLIC 
