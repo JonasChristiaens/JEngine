@@ -31,6 +31,7 @@ add_executable(${TARGET_NAME} ${TARGET_PARAM}
   Minigin/TextComponent.cpp
   Minigin/FPSComponent.cpp
   Minigin/MoveComponent.cpp
+  Minigin/CacheExerciseComponent.cpp
 )
 
 # enable c++20 features
@@ -153,8 +154,8 @@ set(IMGUI_INCLUDE_DIR ${imgui_SOURCE_DIR})
 FetchContent_Declare(
     imgui_plot
     GIT_REPOSITORY https://github.com/soulthreads/imgui-plot.git
-    GIT_TAG v0.1.0
-    EXCLUDE_FROM_ALL
+    GIT_TAG master
+    GIT_SHALLOW TRUE
 )
 
 FetchContent_MakeAvailable(imgui_plot)
