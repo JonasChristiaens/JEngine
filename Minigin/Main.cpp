@@ -14,7 +14,7 @@
 #include "RenderComponent.h"
 #include "TextComponent.h"
 #include "FPSComponent.h"
-#include "MoveComponent.h"
+#include "CacheExerciseComponent.h"
 
 #include <filesystem>
 namespace fs = std::filesystem;
@@ -56,7 +56,10 @@ static void load()
 	go->AddComponent<dae::FPSComponent>();
 	scene.Add(std::move(go));
 
-
+	// Cache Exercise ImGui windows
+	go = std::make_unique<dae::GameObject>();
+	go->AddComponent<dae::CacheExerciseComponent>();
+	scene.Add(std::move(go));
 }
 
 
