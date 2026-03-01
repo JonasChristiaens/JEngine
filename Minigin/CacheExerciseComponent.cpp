@@ -56,6 +56,7 @@ namespace
 				timings[i] = benchmarkStep(stepsize);
 			}
 
+			// Sort so we can trim outliers from both ends
 			std::sort(timings.begin(), timings.end());
 
 			// Remove top and bottom outliers
@@ -216,7 +217,6 @@ void dae::CacheExerciseComponent::RenderExercise2() const
 }
 
 // --- Benchmark implementations ----------------------------------------
-
 std::vector<float> dae::CacheExerciseComponent::BenchmarkIntegers(int samples, int bufferPow2)
 {
 	const std::size_t N = BufferSizeFromPow2(bufferPow2);
