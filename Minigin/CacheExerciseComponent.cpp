@@ -7,7 +7,6 @@
 #include <chrono>
 #include <vector>
 #include <algorithm>
-#include <numeric>
 
 namespace
 {
@@ -35,9 +34,13 @@ namespace
 		int ID{};
 	};
 
-	constexpr int ARR_SIZE = 1 << 26; // 2^26
+	inline std::size_t BufferSizeFromPow2(int pow2)
+	{
+		if (pow2 < 1) pow2 = 1;
+		if (pow2 > 30) pow2 = 30;
+		return std::size_t{ 1 } << pow2;
+	}
 
-	// Runs `samples` iterations, removes top/bottom outliers, returns the average in microseconds
 	std::vector<float> RunBenchmark(int samples, int stepCount, auto benchmarkStep)
 	{
 		std::vector<float> results;
@@ -102,18 +105,15 @@ void dae::CacheExerciseComponent::RenderExercise1() const
 
 	if (ImGui::Button("Trash the cache"))
 	{
-		m_Ex1Results = BenchmarkIntegers(m_Ex1Samples);
+		m_Ex1Results = BenchmarkIntegers(m_Ex1Samples, BUFFER_POW2);
 	}
 
 	if (!m_Ex1Results.empty())
 	{
-		ImU32 color = ImColor(255, 165, 0); // Orange
-
 		ImGui::PlotConfig conf{};
 		conf.values.xs = STEP_SIZES;
 		conf.values.ys = m_Ex1Results.data();
 		conf.values.count = STEP_COUNT;
-		conf.values.colors = &color;
 		conf.scale.min = *std::min_element(m_Ex1Results.begin(), m_Ex1Results.end());
 		conf.scale.max = *std::max_element(m_Ex1Results.begin(), m_Ex1Results.end());
 		conf.tooltip.show = true;
@@ -144,18 +144,15 @@ void dae::CacheExerciseComponent::RenderExercise2() const
 	// --- GameObject3D ---
 	if (ImGui::Button("Trash the cache with GameObject3D"))
 	{
-		m_Ex2Results3D = BenchmarkGameObject3D(m_Ex2Samples);
+		m_Ex2Results3D = BenchmarkGameObject3D(m_Ex2Samples, BUFFER_POW2);
 	}
 
 	if (!m_Ex2Results3D.empty())
 	{
-		ImU32 color = ImColor(0, 200, 0); // Green
-
 		ImGui::PlotConfig conf{};
 		conf.values.xs = STEP_SIZES;
 		conf.values.ys = m_Ex2Results3D.data();
 		conf.values.count = STEP_COUNT;
-		conf.values.colors = &color;
 		conf.scale.min = *std::min_element(m_Ex2Results3D.begin(), m_Ex2Results3D.end());
 		conf.scale.max = *std::max_element(m_Ex2Results3D.begin(), m_Ex2Results3D.end());
 		conf.tooltip.show = true;
@@ -167,18 +164,15 @@ void dae::CacheExerciseComponent::RenderExercise2() const
 	// --- GameObject3DAlt ---
 	if (ImGui::Button("Trash the cache with GameObject3DAlt"))
 	{
-		m_Ex2Results3DAlt = BenchmarkGameObject3DAlt(m_Ex2Samples);
+		m_Ex2Results3DAlt = BenchmarkGameObject3DAlt(m_Ex2Samples, BUFFER_POW2);
 	}
 
 	if (!m_Ex2Results3DAlt.empty())
 	{
-		ImU32 color = ImColor(0, 200, 200); // Teal
-
 		ImGui::PlotConfig conf{};
 		conf.values.xs = STEP_SIZES;
 		conf.values.ys = m_Ex2Results3DAlt.data();
 		conf.values.count = STEP_COUNT;
-		conf.values.colors = &color;
 		conf.scale.min = *std::min_element(m_Ex2Results3DAlt.begin(), m_Ex2Results3DAlt.end());
 		conf.scale.max = *std::max_element(m_Ex2Results3DAlt.begin(), m_Ex2Results3DAlt.end());
 		conf.tooltip.show = true;
@@ -223,14 +217,15 @@ void dae::CacheExerciseComponent::RenderExercise2() const
 
 // --- Benchmark implementations ----------------------------------------
 
-std::vector<float> dae::CacheExerciseComponent::BenchmarkIntegers(int samples)
+std::vector<float> dae::CacheExerciseComponent::BenchmarkIntegers(int samples, int bufferPow2)
 {
-	std::vector<int> arr(ARR_SIZE);
+	const std::size_t N = BufferSizeFromPow2(bufferPow2);
+	std::vector<int> arr(N, 1);
 
 	return RunBenchmark(samples, STEP_COUNT, [&](int stepsize) -> long long
 		{
 			auto start = std::chrono::high_resolution_clock::now();
-			for (int i = 0; i < ARR_SIZE; i += stepsize)
+			for (std::size_t i = 0; i < N; i += static_cast<std::size_t>(stepsize))
 			{
 				arr[i] *= 2;
 			}
@@ -239,14 +234,16 @@ std::vector<float> dae::CacheExerciseComponent::BenchmarkIntegers(int samples)
 		});
 }
 
-std::vector<float> dae::CacheExerciseComponent::BenchmarkGameObject3D(int samples)
+std::vector<float> dae::CacheExerciseComponent::BenchmarkGameObject3D(int samples, int bufferPow2)
 {
-	std::vector<GameObject3D> arr(ARR_SIZE);
+	const std::size_t N = BufferSizeFromPow2(bufferPow2);
+	std::vector<GameObject3D> arr(N);
+	for (auto& e : arr) e.id = 1;
 
 	return RunBenchmark(samples, STEP_COUNT, [&](int stepsize) -> long long
 		{
 			auto start = std::chrono::high_resolution_clock::now();
-			for (int i = 0; i < ARR_SIZE; i += stepsize)
+			for (std::size_t i = 0; i < N; i += static_cast<std::size_t>(stepsize))
 			{
 				arr[i].id *= 2;
 			}
@@ -255,14 +252,16 @@ std::vector<float> dae::CacheExerciseComponent::BenchmarkGameObject3D(int sample
 		});
 }
 
-std::vector<float> dae::CacheExerciseComponent::BenchmarkGameObject3DAlt(int samples)
+std::vector<float> dae::CacheExerciseComponent::BenchmarkGameObject3DAlt(int samples, int bufferPow2)
 {
-	std::vector<GameObject3DAlt> arr(ARR_SIZE);
+	const std::size_t N = BufferSizeFromPow2(bufferPow2);
+	std::vector<GameObject3DAlt> arr(N);
+	for (auto& e : arr) e.ID = 1;
 
 	return RunBenchmark(samples, STEP_COUNT, [&](int stepsize) -> long long
 		{
 			auto start = std::chrono::high_resolution_clock::now();
-			for (int i = 0; i < ARR_SIZE; i += stepsize)
+			for (std::size_t i = 0; i < N; i += static_cast<std::size_t>(stepsize))
 			{
 				arr[i].ID *= 2;
 			}
