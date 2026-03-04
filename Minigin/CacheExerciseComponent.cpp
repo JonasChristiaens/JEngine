@@ -7,6 +7,7 @@
 #include <chrono>
 #include <vector>
 #include <algorithm>
+#include <numeric>
 
 namespace
 {
@@ -61,14 +62,11 @@ namespace
 
 			// Remove top and bottom outliers
 			const int trimCount = (samples > 2) ? 1 : 0;
+			auto begin = timings.begin() + trimCount;
+			auto end   = timings.end()   - trimCount;
 
-			long long sum = 0;
-			int count = 0;
-			for (int i = trimCount; i < samples - trimCount; ++i)
-			{
-				sum += timings[i];
-				++count;
-			}
+			const auto count = std::distance(begin, end);
+			const auto sum   = std::accumulate(begin, end, 0LL);
 
 			results.push_back(count > 0 ? static_cast<float>(sum) / static_cast<float>(count) : 0.f);
 		}
@@ -115,6 +113,7 @@ void dae::CacheExerciseComponent::RenderExercise1() const
 		conf.values.xs = STEP_SIZES;
 		conf.values.ys = m_Ex1Results.data();
 		conf.values.count = STEP_COUNT;
+		conf.values.color = ImColor(255, 120, 0);
 		conf.scale.min = *std::min_element(m_Ex1Results.begin(), m_Ex1Results.end());
 		conf.scale.max = *std::max_element(m_Ex1Results.begin(), m_Ex1Results.end());
 		conf.tooltip.show = true;
@@ -154,6 +153,7 @@ void dae::CacheExerciseComponent::RenderExercise2() const
 		conf.values.xs = STEP_SIZES;
 		conf.values.ys = m_Ex2Results3D.data();
 		conf.values.count = STEP_COUNT;
+		conf.values.color = ImColor(0, 255, 0);
 		conf.scale.min = *std::min_element(m_Ex2Results3D.begin(), m_Ex2Results3D.end());
 		conf.scale.max = *std::max_element(m_Ex2Results3D.begin(), m_Ex2Results3D.end());
 		conf.tooltip.show = true;
@@ -174,6 +174,7 @@ void dae::CacheExerciseComponent::RenderExercise2() const
 		conf.values.xs = STEP_SIZES;
 		conf.values.ys = m_Ex2Results3DAlt.data();
 		conf.values.count = STEP_COUNT;
+		conf.values.color = ImColor(0, 200, 200);
 		conf.scale.min = *std::min_element(m_Ex2Results3DAlt.begin(), m_Ex2Results3DAlt.end());
 		conf.scale.max = *std::max_element(m_Ex2Results3DAlt.begin(), m_Ex2Results3DAlt.end());
 		conf.tooltip.show = true;
@@ -188,7 +189,7 @@ void dae::CacheExerciseComponent::RenderExercise2() const
 		ImGui::Text("Combined:");
 
 		const float* ysList[] = { m_Ex2Results3D.data(), m_Ex2Results3DAlt.data() };
-		ImU32 colors[] = { ImColor(0, 200, 0), ImColor(0, 200, 200) }; // Green, Teal
+		ImU32 colors[] = { ImColor(0, 255, 0), ImColor(0, 200, 200) }; // Green, Teal
 
 		const float combinedMin = std::min(
 			*std::min_element(m_Ex2Results3D.begin(), m_Ex2Results3D.end()),
