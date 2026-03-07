@@ -70,5 +70,6 @@ void dae::TransformComponent::UpdateWorldPosition()
 			}
 		}
 	}
+
 	m_positionIsDirty = false;
 }

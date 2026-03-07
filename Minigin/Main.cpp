@@ -55,11 +55,6 @@ static void load()
 	text->SetColor({ 255, 255, 255, 255 });
 	go->AddComponent<dae::FPSComponent>();
 	scene.Add(std::move(go));
-
-	// Cache Exercise ImGui windows
-	go = std::make_unique<dae::GameObject>();
-	go->AddComponent<dae::CacheExerciseComponent>();
-	scene.Add(std::move(go));
 }
 
 

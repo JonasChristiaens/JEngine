@@ -29,11 +29,13 @@ void dae::TextComponent::Update(float /*deltaTime*/)
 		{
 			throw std::runtime_error(std::string("Render text failed: ") + SDL_GetError());
 		}
+
 		auto texture = SDL_CreateTextureFromSurface(Renderer::GetInstance().GetSDLRenderer(), surf);
 		if (texture == nullptr)
 		{
 			throw std::runtime_error(std::string("Create text texture from surface failed: ") + SDL_GetError());
 		}
+
 		SDL_DestroySurface(surf);
 		auto textTexture = std::make_shared<Texture2D>(texture);
 		m_pRenderComponent->SetTexture(textTexture);
