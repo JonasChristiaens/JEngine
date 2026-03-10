@@ -34,6 +34,7 @@ add_executable(${TARGET_NAME} ${TARGET_PARAM}
   Minigin/CacheExerciseComponent.cpp
   Minigin/ControllerInput.cpp
   Minigin/MoveCommand.cpp
+  Minigin/SpriteAnimatorComponent.cpp
 )
 
 # enable c++20 features

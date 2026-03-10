@@ -16,6 +16,7 @@
 #include "FPSComponent.h"
 #include "InputManager.h"
 #include "MoveCommand.h"
+#include "SpriteAnimatorComponent.h"
 
 #include <windows.h>
 #include <Xinput.h>
@@ -70,6 +71,8 @@ static void load()
 	render->SetSpriteSheet(16, 16, 6, 2);
 	render->SetSprite(4, 0);
 	render->SetScale(2.0f);
+	auto animator = go->AddComponent<dae::SpriteAnimatorComponent>();
+	animator->SetAnimationSpeed(10.0f);
 	auto player1 = go.get();
 	scene.Add(std::move(go));
 
@@ -80,8 +83,10 @@ static void load()
 	render = go->AddComponent<dae::RenderComponent>();
 	render->SetTexture("Resources/BombermanSprites_General.png");
 	render->SetSpriteSheet(16, 16, 6, 2);
-	render->SetSprite(0, 0);
+	render->SetSprite(4, 0);
 	render->SetScale(2.0f);
+	animator = go->AddComponent<dae::SpriteAnimatorComponent>();
+	animator->SetAnimationSpeed(10.0f);
 	auto player2 = go.get();
 	scene.Add(std::move(go));
 
