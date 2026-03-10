@@ -14,7 +14,6 @@
 #include "RenderComponent.h"
 #include "TextComponent.h"
 #include "FPSComponent.h"
-#include "CacheExerciseComponent.h"
 
 #include <filesystem>
 namespace fs = std::filesystem;
@@ -55,6 +54,9 @@ static void load()
 	text->SetColor({ 255, 255, 255, 255 });
 	go->AddComponent<dae::FPSComponent>();
 	scene.Add(std::move(go));
+	
+	// Player Input
+
 }
 
 

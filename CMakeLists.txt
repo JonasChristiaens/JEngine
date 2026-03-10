@@ -32,6 +32,7 @@ add_executable(${TARGET_NAME} ${TARGET_PARAM}
   Minigin/FPSComponent.cpp
   Minigin/MoveComponent.cpp
   Minigin/CacheExerciseComponent.cpp
+  Minigin/ControllerInput.cpp
 )
 
 # enable c++20 features
@@ -181,6 +182,10 @@ target_link_libraries("${TARGET_NAME}" PUBLIC
   imgui_plot
   ${VLD_LIBRARIES}
 )
+
+if(WIN32)
+  target_link_libraries("${TARGET_NAME}" PUBLIC xinput)
+endif()
 
 
 if(MSVC)
