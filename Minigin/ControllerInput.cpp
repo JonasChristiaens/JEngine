@@ -66,19 +66,20 @@ class ControllerInput::ControllerInputImpl
 {
 public:
     ControllerInputImpl(unsigned int controllerIndex)
-        : m_controllerIndex(controllerIndex)
-        , m_gamepad(nullptr)
+        : m_gamepad(nullptr)
         , currentButtonState(0)
         , previousButtonState(0)
         , buttonsPressedThisFrame(0)
         , buttonsReleasedThisFrame(0)
     {
         // Open the gamepad
-        SDL_JoystickID* joysticks = SDL_GetJoysticks(nullptr);
-        if (joysticks && static_cast<int>(controllerIndex) < SDL_GetNumJoysticks())
+        int count = 0;
+        SDL_JoystickID* joysticks = SDL_GetJoysticks(&count);
+        if (joysticks && static_cast<int>(controllerIndex) < count)
         {
             m_gamepad = SDL_OpenGamepad(joysticks[controllerIndex]);
         }
+        SDL_free(joysticks);
     }
 
     ~ControllerInputImpl()
@@ -132,7 +133,6 @@ public:
     }
 
 private:
-    unsigned int m_controllerIndex;
     SDL_Gamepad* m_gamepad;
     unsigned short currentButtonState;
     unsigned short previousButtonState;
