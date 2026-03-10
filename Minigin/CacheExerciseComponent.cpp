@@ -50,7 +50,7 @@ namespace
 		for (int s = 0; s < stepCount; ++s)
 		{
 			const int stepsize = 1 << s;
-			std::vector<long long> timings(samples);
+			std::vector<uint64_t> timings(samples);
 
 			for (int i = 0; i < samples; ++i)
 			{
@@ -223,7 +223,7 @@ std::vector<float> dae::CacheExerciseComponent::BenchmarkIntegers(int samples, i
 	const std::size_t N = BufferSizeFromPow2(bufferPow2);
 	std::vector<int> arr(N, 1);
 
-	return RunBenchmark(samples, STEP_COUNT, [&](int stepsize) -> long long
+	return RunBenchmark(samples, STEP_COUNT, [&](int stepsize) -> uint64_t
 		{
 			auto start = std::chrono::high_resolution_clock::now();
 			for (std::size_t i = 0; i < N; i += static_cast<std::size_t>(stepsize))
@@ -241,7 +241,7 @@ std::vector<float> dae::CacheExerciseComponent::BenchmarkGameObject3D(int sample
 	std::vector<GameObject3D> arr(N);
 	for (auto& e : arr) e.id = 1;
 
-	return RunBenchmark(samples, STEP_COUNT, [&](int stepsize) -> long long
+	return RunBenchmark(samples, STEP_COUNT, [&](int stepsize) -> uint64_t
 		{
 			auto start = std::chrono::high_resolution_clock::now();
 			for (std::size_t i = 0; i < N; i += static_cast<std::size_t>(stepsize))
@@ -259,7 +259,7 @@ std::vector<float> dae::CacheExerciseComponent::BenchmarkGameObject3DAlt(int sam
 	std::vector<GameObject3DAlt> arr(N);
 	for (auto& e : arr) e.ID = 1;
 
-	return RunBenchmark(samples, STEP_COUNT, [&](int stepsize) -> long long
+	return RunBenchmark(samples, STEP_COUNT, [&](int stepsize) -> uint64_t
 		{
 			auto start = std::chrono::high_resolution_clock::now();
 			for (std::size_t i = 0; i < N; i += static_cast<std::size_t>(stepsize))

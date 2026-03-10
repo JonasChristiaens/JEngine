@@ -1,6 +1,6 @@
 #include "ControllerInput.h"
 
-ControllerInput::ControllerInput(unsigned int controllerIndex)
+ControllerInput::ControllerInput(DWORD controllerIndex)
     : m_controllerIndex(controllerIndex)
 {
     ZeroMemory(&currentState, sizeof(XINPUT_STATE));
@@ -9,13 +9,22 @@ ControllerInput::ControllerInput(unsigned int controllerIndex)
 
 void ControllerInput::Update()
 {
-    CopyMemory(&previousState, &currentState, sizeof(XINPUT_STATE));
-    ZeroMemory(&currentState, sizeof(XINPUT_STATE));
-    XInputGetState(m_controllerIndex, &currentState);
+    XINPUT_STATE state;
+    ZeroMemory(&state, sizeof(XINPUT_STATE));
 
-    auto buttonChanges = currentState.Gamepad.wButtons ^ previousState.Gamepad.wButtons;
-    buttonsPressedThisFrame = buttonChanges & currentState.Gamepad.wButtons;
-    buttonsReleasedThisFrame = buttonChanges & (~currentState.Gamepad.wButtons);
+    // Simply get the state of the controller from XInput.
+    DWORD dwResult = XInputGetState(m_controllerIndex, &state);
+
+    if (dwResult == ERROR_SUCCESS)
+    {
+        CopyMemory(&previousState, &currentState, sizeof(XINPUT_STATE));
+        ZeroMemory(&currentState, sizeof(XINPUT_STATE));
+        XInputGetState(m_controllerIndex, &currentState);
+
+        auto buttonChanges = currentState.Gamepad.wButtons ^ previousState.Gamepad.wButtons;
+        buttonsPressedThisFrame = buttonChanges & currentState.Gamepad.wButtons;
+        buttonsReleasedThisFrame = buttonChanges & (~currentState.Gamepad.wButtons);
+    }
 }
 
 bool ControllerInput::IsDownThisFrame(unsigned int button) const

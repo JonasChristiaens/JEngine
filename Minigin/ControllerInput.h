@@ -5,7 +5,7 @@
 class ControllerInput
 {
 public:
-    ControllerInput(unsigned int controllerIndex);
+    ControllerInput(DWORD controllerIndex);
 
     void Update();
 
@@ -14,7 +14,7 @@ public:
     bool IsPressed(unsigned int button) const;
 
 private:
-    unsigned int m_controllerIndex;
+    DWORD m_controllerIndex;
     XINPUT_STATE currentState{};
     XINPUT_STATE previousState{};
     WORD buttonsPressedThisFrame{};

@@ -57,9 +57,9 @@ void dae::Renderer::Render() const
 
 void dae::Renderer::Destroy()
 {
-	/*ImGui_ImplSDLRenderer3_Shutdown();
+	ImGui_ImplSDLRenderer3_Shutdown();
 	ImGui_ImplSDL3_Shutdown();
-	ImGui::DestroyContext();*/
+	ImGui::DestroyContext();
 
 	if (m_renderer != nullptr)
 	{
