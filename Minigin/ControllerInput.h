@@ -1,11 +1,16 @@
 #pragma once
-#include <windows.h>
-#include <Xinput.h>
+#include <memory>
 
 class ControllerInput
 {
 public:
-    ControllerInput(DWORD controllerIndex);
+    ControllerInput(unsigned int controllerIndex);
+    ~ControllerInput();
+
+    ControllerInput(const ControllerInput&) = delete;
+    ControllerInput& operator=(const ControllerInput&) = delete;
+    ControllerInput(ControllerInput&&) noexcept;
+    ControllerInput& operator=(ControllerInput&&) noexcept;
 
     void Update();
 
@@ -14,9 +19,6 @@ public:
     bool IsPressed(unsigned int button) const;
 
 private:
-    DWORD m_controllerIndex;
-    XINPUT_STATE currentState{};
-    XINPUT_STATE previousState{};
-    WORD buttonsPressedThisFrame{};
-    WORD buttonsReleasedThisFrame{};
+    class ControllerInputImpl;
+    std::unique_ptr<ControllerInputImpl> m_pImpl;
 };

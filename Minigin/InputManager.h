@@ -18,7 +18,7 @@ namespace dae
 
 	struct ControllerKey
 	{
-		DWORD controllerIndex;
+		unsigned int controllerIndex;
 		unsigned int button;
 		KeyState keyState;
 
@@ -50,18 +50,18 @@ namespace dae
 	public:
 		bool ProcessInput();
 
-		bool BindControllerInput(DWORD controllerIndex, unsigned int button, KeyState keyState, std::unique_ptr<Command> command);
+		bool BindControllerInput(unsigned int controllerIndex, unsigned int button, KeyState keyState, std::unique_ptr<Command> command);
 		void BindKeyboardInput(SDL_Keycode key, KeyState keyState, std::unique_ptr<Command> command);
 
-		void AddController(DWORD controllerIndex);
-		void RemoveController(DWORD controllerIndex);
-		bool HasController(DWORD controllerIndex) const;
+		void AddController(unsigned int controllerIndex);
+		void RemoveController(unsigned int controllerIndex);
+		bool HasController(unsigned int controllerIndex) const;
 
-		void UnBindControllerInput(DWORD controllerIndex, unsigned int button, KeyState keyState);
+		void UnBindControllerInput(unsigned int controllerIndex, unsigned int button, KeyState keyState);
 		void UnBindKeyboardInput(SDL_Keycode key, KeyState keyState);
 
 	private:
-		std::map<DWORD, std::unique_ptr<ControllerInput>> m_controllers;
+		std::map<unsigned int, std::unique_ptr<ControllerInput>> m_controllers;
 
 		std::map<ControllerKey, std::unique_ptr<Command>> m_controllerCommands;
 		std::map<KeyboardKey, std::unique_ptr<Command>> m_keyboardCommands;

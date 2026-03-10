@@ -17,9 +17,7 @@
 #include "InputManager.h"
 #include "MoveCommand.h"
 #include "SpriteAnimatorComponent.h"
-
-#include <windows.h>
-#include <Xinput.h>
+#include "ControllerButtons.h"
 
 #include <filesystem>
 namespace fs = std::filesystem;
@@ -90,6 +88,7 @@ static void load()
 	auto player2 = go.get();
 	scene.Add(std::move(go));
 
+
 	// Input binding
 	const float moveSpeed = 2.0f;
 	auto& input = dae::InputManager::GetInstance();
@@ -112,24 +111,24 @@ static void load()
 	input.BindKeyboardInput(SDLK_D, dae::KeyState::Pressed, std::move(moveRightP1));
 
 	// Player 2 - Controller DPad controls
-	const DWORD controllerIndex = 0;
+	const unsigned int controllerIndex = 0;
 	input.AddController(controllerIndex);
 
 	auto moveUpP2 = std::make_unique<MoveCommand>(glm::vec3(0, -1, 0), moveSpeed * 2);
 	moveUpP2->SetGameActor(player2);
-	input.BindControllerInput(controllerIndex, XINPUT_GAMEPAD_DPAD_UP, dae::KeyState::Pressed, std::move(moveUpP2));
+	input.BindControllerInput(controllerIndex, ControllerButton::DPadUp, dae::KeyState::Pressed, std::move(moveUpP2));
 
 	auto moveDownP2 = std::make_unique<MoveCommand>(glm::vec3(0, 1, 0), moveSpeed * 2);
 	moveDownP2->SetGameActor(player2);
-	input.BindControllerInput(controllerIndex, XINPUT_GAMEPAD_DPAD_DOWN, dae::KeyState::Pressed, std::move(moveDownP2));
+	input.BindControllerInput(controllerIndex, ControllerButton::DPadDown, dae::KeyState::Pressed, std::move(moveDownP2));
 
 	auto moveLeftP2 = std::make_unique<MoveCommand>(glm::vec3(-1, 0, 0), moveSpeed * 2);
 	moveLeftP2->SetGameActor(player2);
-	input.BindControllerInput(controllerIndex, XINPUT_GAMEPAD_DPAD_LEFT, dae::KeyState::Pressed, std::move(moveLeftP2));
+	input.BindControllerInput(controllerIndex, ControllerButton::DPadLeft, dae::KeyState::Pressed, std::move(moveLeftP2));
 
 	auto moveRightP2 = std::make_unique<MoveCommand>(glm::vec3(1, 0, 0), moveSpeed * 2);
 	moveRightP2->SetGameActor(player2);
-	input.BindControllerInput(controllerIndex, XINPUT_GAMEPAD_DPAD_RIGHT, dae::KeyState::Pressed, std::move(moveRightP2));
+	input.BindControllerInput(controllerIndex, ControllerButton::DPadRight, dae::KeyState::Pressed, std::move(moveRightP2));
 }
 
 

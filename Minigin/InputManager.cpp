@@ -83,7 +83,7 @@ bool dae::InputManager::ProcessInput()
 	return true;
 }
 
-bool dae::InputManager::BindControllerInput(DWORD controllerIndex, unsigned int button, KeyState keyState, std::unique_ptr<Command> command)
+bool dae::InputManager::BindControllerInput(unsigned int controllerIndex, unsigned int button, KeyState keyState, std::unique_ptr<Command> command)
 {
 	// If no controller present, return early
 	if (m_controllers.find(controllerIndex) == m_controllers.end())
@@ -100,7 +100,7 @@ void dae::InputManager::BindKeyboardInput(SDL_Keycode key, KeyState keyState, st
 	m_keyboardCommands.emplace(KeyboardKey{ key, keyState }, std::move(command));
 }
 
-void dae::InputManager::UnBindControllerInput(DWORD controllerIndex, unsigned int button, KeyState keyState)
+void dae::InputManager::UnBindControllerInput(unsigned int controllerIndex, unsigned int button, KeyState keyState)
 {
 	ControllerKey key{ controllerIndex, button, keyState };
 	m_controllerCommands.erase(key);
@@ -112,7 +112,7 @@ void dae::InputManager::UnBindKeyboardInput(SDL_Keycode key, KeyState keyState)
 	m_keyboardCommands.erase(keyboardKey);
 }
 
-void dae::InputManager::AddController(DWORD controllerIndex)
+void dae::InputManager::AddController(unsigned int controllerIndex)
 {
 	if (m_controllers.find(controllerIndex) == m_controllers.end())
 	{
@@ -120,12 +120,12 @@ void dae::InputManager::AddController(DWORD controllerIndex)
 	}
 }
 
-void dae::InputManager::RemoveController(DWORD controllerIndex)
+void dae::InputManager::RemoveController(unsigned int controllerIndex)
 {
 	m_controllers.erase(controllerIndex);
 }
 
-bool dae::InputManager::HasController(DWORD controllerIndex) const
+bool dae::InputManager::HasController(unsigned int controllerIndex) const
 {
 	return m_controllers.find(controllerIndex) != m_controllers.end();
 }
