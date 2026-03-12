@@ -2,6 +2,7 @@
 #include "GameObject.h"
 #include "TransformComponent.h"
 #include "SpriteAnimatorComponent.h"
+#include "GameTime.h"
 #include <glm/geometric.hpp>
 
 MoveCommand::MoveCommand(const glm::vec3& direction, float speed)
@@ -12,6 +13,8 @@ MoveCommand::MoveCommand(const glm::vec3& direction, float speed)
 
 void MoveCommand::Execute()
 {
+	float deltaTime = dae::GameTime::GetInstance().GetDeltaTime();
+
 	if (m_pGameActor == nullptr)
 		return;
 
@@ -29,6 +32,6 @@ void MoveCommand::Execute()
 		m_pAnimator->SetDirection(m_direction);
 	}
 
-	glm::vec3 movement = m_direction * m_speed;
+	glm::vec3 movement = m_direction * m_speed * deltaTime;
 	transform->SetLocalPosition(transform->GetLocalPosition() + movement);
 }

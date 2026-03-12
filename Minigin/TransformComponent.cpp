@@ -21,7 +21,7 @@ void dae::TransformComponent::SetLocalPosition(const glm::vec3& position)
 	SetPositionDirty();
 }
 
-void dae::TransformComponent::Update(float)
+void dae::TransformComponent::Update()
 {
 	UpdateWorldPosition();
 }

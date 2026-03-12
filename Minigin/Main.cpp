@@ -90,7 +90,7 @@ static void load()
 
 
 	// Input binding
-	const float moveSpeed = 2.0f;
+	const float moveSpeed = 150.0f;
 	auto& input = dae::InputManager::GetInstance();
 
 	// Player 1 - WASD keyboard controls

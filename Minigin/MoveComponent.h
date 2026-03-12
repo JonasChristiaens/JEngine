@@ -16,7 +16,7 @@ namespace dae
 		MoveComponent& operator=(const MoveComponent& other) = delete;
 		MoveComponent& operator=(MoveComponent&& other) = delete;
 
-		virtual void Update(float deltaTime) override;
+		virtual void Update() override;
 
 		void SetRadius(float radius) { m_radius = radius; }
 		void SetSpeed(float speed) { m_speed = speed; }

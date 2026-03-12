@@ -9,7 +9,7 @@ namespace dae
 	public:
 		explicit CacheExerciseComponent(GameObject* pOwner);
 
-		void Update(float) override {}
+		void Update() override {}
 		void Render() const override;
 
 	private:

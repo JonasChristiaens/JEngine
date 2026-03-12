@@ -20,7 +20,7 @@ namespace dae
 		SpriteAnimatorComponent(GameObject* pOwner);
 		virtual ~SpriteAnimatorComponent() = default;
 
-		void Update(float deltaTime) override;
+		void Update() override;
 		void Render() const override {}
 
 		void SetDirection(const glm::vec3& direction);

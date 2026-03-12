@@ -1,6 +1,7 @@
 #include "SpriteAnimatorComponent.h"
 #include "GameObject.h"
 #include "RenderComponent.h"
+#include "GameTime.h"
 #include <cmath>
 
 dae::SpriteAnimatorComponent::SpriteAnimatorComponent(GameObject* pOwner)
@@ -8,8 +9,10 @@ dae::SpriteAnimatorComponent::SpriteAnimatorComponent(GameObject* pOwner)
 {
 }
 
-void dae::SpriteAnimatorComponent::Update(float deltaTime)
+void dae::SpriteAnimatorComponent::Update()
 {
+	float deltaTime = dae::GameTime::GetInstance().GetDeltaTime();
+
 	if (m_pRenderComponent == nullptr)
 	{
 		m_pRenderComponent = GetOwner()->GetComponent<RenderComponent>();

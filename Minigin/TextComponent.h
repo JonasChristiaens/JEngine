@@ -16,7 +16,7 @@ namespace dae
 		TextComponent(GameObject* pOwner, const std::string& text, std::shared_ptr<Font> font);
 		virtual ~TextComponent() = default;
 
-		void Update(float /*deltaTime*/) override;
+		void Update() override;
 		void Render() const override;
 
 		void SetText(const std::string& text);

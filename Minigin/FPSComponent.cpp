@@ -1,6 +1,7 @@
 #include "FPSComponent.h"
 #include "GameObject.h"
 #include "TextComponent.h"
+#include "GameTime.h"
 #include <sstream>
 #include <iomanip>
 
@@ -11,8 +12,10 @@ dae::FPSComponent::FPSComponent(GameObject* pOwner)
 	m_textComponent = GetOwner()->GetComponent<TextComponent>();
 }
 
-void dae::FPSComponent::Update(float deltaTime)
+void dae::FPSComponent::Update()
 {
+	float deltaTime = dae::GameTime::GetInstance().GetDeltaTime();
+
 	// Accumulate time and frame count
 	m_timeSinceLastUpdate += deltaTime;
 	m_frameCount++;

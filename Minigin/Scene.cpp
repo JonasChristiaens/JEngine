@@ -15,7 +15,7 @@ void Scene::RemoveAll()
 	m_objects.clear();
 }
 
-void Scene::Update(float deltaTime)
+void Scene::Update()
 {
 	for(auto& object : m_objects)
 	{
@@ -23,7 +23,7 @@ void Scene::Update(float deltaTime)
 		// Children will be updated by their parents
 		if (object->GetParent() == nullptr)
 		{
-			object->Update(deltaTime);
+			object->Update();
 		}
 	}
 }

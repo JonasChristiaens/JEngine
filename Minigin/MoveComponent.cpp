@@ -1,6 +1,7 @@
 #include "MoveComponent.h"
 #include "GameObject.h"
 #include "TransformComponent.h"
+#include "GameTime.h"
 #include <cmath>
 #include <numbers>
 
@@ -12,8 +13,10 @@ dae::MoveComponent::MoveComponent(GameObject* pOwner, float radius, float speed)
 	m_pTransform = GetOwner()->GetComponent<TransformComponent>();
 }
 
-void dae::MoveComponent::Update(float deltaTime)
+void dae::MoveComponent::Update()
 {
+	float deltaTime = dae::GameTime::GetInstance().GetDeltaTime();
+
 	if (!m_pTransform)
 		return;
 

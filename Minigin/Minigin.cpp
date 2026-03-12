@@ -16,6 +16,7 @@
 #include "SceneManager.h"
 #include "Renderer.h"
 #include "ResourceManager.h"
+#include "GameTime.h"
 
 SDL_Window* g_window{};
 
@@ -107,8 +108,11 @@ void dae::Minigin::RunOneFrame()
 	const float deltaTime = std::chrono::duration<float>(currentTime - m_lastTime).count();
 	m_lastTime = currentTime;
 
+	// Update Time singleton with current frame's delta time
+	dae::GameTime::GetInstance().SetDeltaTime(deltaTime);
+
 	m_quit = !InputManager::GetInstance().ProcessInput();
-	SceneManager::GetInstance().Update(deltaTime);
+	SceneManager::GetInstance().Update();
 	Renderer::GetInstance().Render();
 
 	// Frame rate limiting (60 FPS = ~16.67ms per frame)

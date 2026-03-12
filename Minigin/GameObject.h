@@ -21,7 +21,7 @@ namespace dae
 		GameObject& operator=(GameObject&& other) = delete;
 
 		// Core functions
-		void Update(float deltaTime);
+		void Update();
 		void Render() const;
 
 		// Getters

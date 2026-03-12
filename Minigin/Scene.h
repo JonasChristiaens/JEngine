@@ -11,7 +11,7 @@ namespace dae
 		void Add(std::unique_ptr<GameObject> object);
 		void RemoveAll();
 
-		void Update(float deltaTime);
+		void Update();
 		void LateUpdate();
 		void Render() const;
 

@@ -3,6 +3,16 @@
 
 bool dae::InputManager::ProcessInput()
 {
+	// Process SDL events
+	SDL_Event e;
+	while (SDL_PollEvent(&e))
+	{
+		if (e.type == SDL_EVENT_QUIT)
+		{
+			return false;
+		}
+	}
+
 	// Update all controllers
 	for (auto& [index, controller] : m_controllers)
 	{
@@ -70,16 +80,6 @@ bool dae::InputManager::ProcessInput()
 		m_previousKeyboardState[keyboardKey.key] = isCurrentlyPressed;
 	}
 
-	SDL_Event e;
-	while (SDL_PollEvent(&e)) {
-		if (e.type == SDL_EVENT_QUIT) {
-			return false;
-		}
-		if (e.type == SDL_EVENT_KEY_DOWN) {
-
-		}
-		// etc...
-	}
 	return true;
 }
 

@@ -12,7 +12,7 @@ namespace dae
 		FPSComponent(GameObject* pOwner);
 		virtual ~FPSComponent() = default;
 
-		void Update(float deltaTime) override;
+		void Update() override;
 
 	private:
 		float m_fpsUpdateInterval{ 0.1f };

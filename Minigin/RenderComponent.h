@@ -15,7 +15,7 @@ namespace dae
 		RenderComponent(GameObject* pOwner);
 		virtual ~RenderComponent() = default;
 
-		void Update(float /*deltaTime*/) override {}
+		void Update() override {}
 		void Render() const override;
 
 		void SetTexture(const std::string& filename);

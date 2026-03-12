@@ -61,7 +61,7 @@ private:
     WORD buttonsReleasedThisFrame{};
 };
 #else
-// Implementation class for SDL (Emscripten and other platforms)
+// Implementation class for SDL
 class ControllerInput::ControllerInputImpl
 {
 public:
@@ -72,14 +72,23 @@ public:
         , buttonsPressedThisFrame(0)
         , buttonsReleasedThisFrame(0)
     {
-        // Open the gamepad
+        // Ensure gamepad subsystem is initialized
+        if (!SDL_WasInit(SDL_INIT_GAMEPAD))
+        {
+            SDL_InitSubSystem(SDL_INIT_GAMEPAD);
+        }
+
+        // Open the gamepad by index
         int count = 0;
         SDL_JoystickID* joysticks = SDL_GetJoysticks(&count);
-        if (joysticks && static_cast<int>(controllerIndex) < count)
+        if (joysticks && controllerIndex < static_cast<unsigned int>(count))
         {
             m_gamepad = SDL_OpenGamepad(joysticks[controllerIndex]);
         }
-        SDL_free(joysticks);
+        if (joysticks)
+        {
+            SDL_free(joysticks);
+        }
     }
 
     ~ControllerInputImpl()
@@ -87,6 +96,7 @@ public:
         if (m_gamepad)
         {
             SDL_CloseGamepad(m_gamepad);
+            m_gamepad = nullptr;
         }
     }
 
@@ -107,6 +117,8 @@ public:
         if (SDL_GetGamepadButton(m_gamepad, SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER)) currentButtonState |= 0x0200;
         if (SDL_GetGamepadButton(m_gamepad, SDL_GAMEPAD_BUTTON_BACK)) currentButtonState |= 0x0020;
         if (SDL_GetGamepadButton(m_gamepad, SDL_GAMEPAD_BUTTON_START)) currentButtonState |= 0x0010;
+        if (SDL_GetGamepadButton(m_gamepad, SDL_GAMEPAD_BUTTON_LEFT_STICK)) currentButtonState |= 0x0040;
+        if (SDL_GetGamepadButton(m_gamepad, SDL_GAMEPAD_BUTTON_RIGHT_STICK)) currentButtonState |= 0x0080;
         if (SDL_GetGamepadButton(m_gamepad, SDL_GAMEPAD_BUTTON_DPAD_UP)) currentButtonState |= 0x0001;
         if (SDL_GetGamepadButton(m_gamepad, SDL_GAMEPAD_BUTTON_DPAD_DOWN)) currentButtonState |= 0x0002;
         if (SDL_GetGamepadButton(m_gamepad, SDL_GAMEPAD_BUTTON_DPAD_LEFT)) currentButtonState |= 0x0004;
