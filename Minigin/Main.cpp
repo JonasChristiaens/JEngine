@@ -19,6 +19,8 @@
 #include "SpriteAnimatorComponent.h"
 #include "ControllerButtons.h"
 #include "PlayerAnimatorComponent.h"
+#include "HealthComponent.h"
+#include "ChangeHealthCommand.h"
 
 #include <filesystem>
 namespace fs = std::filesystem;
@@ -70,8 +72,9 @@ static void load()
 	render->SetSpriteSheet(16, 16, 6, 2);
 	render->SetSprite(4, 0);
 	render->SetScale(2.0f);
-	auto animator = go->AddComponent<dae::SpriteAnimatorComponent>();
+	go->AddComponent<dae::SpriteAnimatorComponent>();
     go->AddComponent<dae::PlayerAnimatorComponent>();
+	go->AddComponent<dae::HealthComponent>(3); // Set initial lives
 	auto player1 = go.get();
 	scene.Add(std::move(go));
 
@@ -84,8 +87,9 @@ static void load()
 	render->SetSpriteSheet(16, 16, 6, 2);
 	render->SetSprite(4, 0);
 	render->SetScale(2.0f);
-	animator = go->AddComponent<dae::SpriteAnimatorComponent>();
+	go->AddComponent<dae::SpriteAnimatorComponent>();
     go->AddComponent<dae::PlayerAnimatorComponent>();
+	go->AddComponent<dae::HealthComponent>(3); // Set initial lives
 	auto player2 = go.get();
 	scene.Add(std::move(go));
 
@@ -111,6 +115,11 @@ static void load()
 	moveRightP1->SetGameActor(player1);
 	input.BindKeyboardInput(SDLK_D, dae::KeyState::Pressed, std::move(moveRightP1));
 
+	auto damageP1 = std::make_unique<ChangeHealthCommand>(-1);
+	damageP1->SetGameActor(player1);
+	input.BindKeyboardInput(SDLK_C, dae::KeyState::Pressed, std::move(damageP1));
+
+
 	// Player 2 - Controller DPad controls
 	const unsigned int controllerIndex = 0;
 	input.AddController(controllerIndex);
@@ -130,6 +139,10 @@ static void load()
 	auto moveRightP2 = std::make_unique<MoveCommand>(glm::vec3(1, 0, 0), moveSpeed * 2);
 	moveRightP2->SetGameActor(player2);
 	input.BindControllerInput(controllerIndex, ControllerButton::DPadRight, dae::KeyState::Pressed, std::move(moveRightP2));
+
+	auto damageP2 = std::make_unique<ChangeHealthCommand>(-1);
+	damageP2->SetGameActor(player2);
+	input.BindControllerInput(controllerIndex, ControllerButton::X, dae::KeyState::Pressed, std::move(damageP2));
 }
 
 
