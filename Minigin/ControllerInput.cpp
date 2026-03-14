@@ -5,6 +5,7 @@
 #include <Xinput.h>
 #else
 #include <SDL3/SDL.h>
+#include <cstdint>
 #endif
 
 // Implementation class for XInput (Windows)
@@ -66,7 +67,8 @@ class ControllerInput::ControllerInputImpl
 {
 public:
     ControllerInputImpl(unsigned int controllerIndex)
-        : m_gamepad(nullptr)
+        : m_controllerIndex(controllerIndex)
+        , m_gamepad(nullptr)
         , currentButtonState(0)
         , previousButtonState(0)
         , buttonsPressedThisFrame(0)
@@ -78,17 +80,7 @@ public:
             SDL_InitSubSystem(SDL_INIT_GAMEPAD);
         }
 
-        // Open the gamepad by index
-        int count = 0;
-        SDL_JoystickID* joysticks = SDL_GetJoysticks(&count);
-        if (joysticks && controllerIndex < static_cast<unsigned int>(count))
-        {
-            m_gamepad = SDL_OpenGamepad(joysticks[controllerIndex]);
-        }
-        if (joysticks)
-        {
-            SDL_free(joysticks);
-        }
+        TryOpenGamepad();
     }
 
     ~ControllerInputImpl()
@@ -100,19 +92,39 @@ public:
         }
     }
 
+    void TryOpenGamepad()
+    {
+        if (m_gamepad) return;
+
+        // Open the gamepad by index
+        int count = 0;
+        SDL_JoystickID* joysticks = SDL_GetJoysticks(&count);
+        if (joysticks && m_controllerIndex < static_cast<unsigned int>(count))
+        {
+            m_gamepad = SDL_OpenGamepad(joysticks[m_controllerIndex]);
+        }
+        if (joysticks)
+        {
+            SDL_free(joysticks);
+        }
+    }
+
     void Update()
     {
         if (!m_gamepad)
-            return;
+        {
+            TryOpenGamepad();            
+            if (!m_gamepad) return;
+        }
 
         previousButtonState = currentButtonState;
         currentButtonState = 0;
 
         // Map SDL gamepad buttons to XInput-like button mask
-        if (SDL_GetGamepadButton(m_gamepad, SDL_GAMEPAD_BUTTON_SOUTH)) currentButtonState |= 0x1000; // A
-        if (SDL_GetGamepadButton(m_gamepad, SDL_GAMEPAD_BUTTON_EAST)) currentButtonState |= 0x2000;  // B
-        if (SDL_GetGamepadButton(m_gamepad, SDL_GAMEPAD_BUTTON_WEST)) currentButtonState |= 0x4000;  // X
-        if (SDL_GetGamepadButton(m_gamepad, SDL_GAMEPAD_BUTTON_NORTH)) currentButtonState |= 0x8000; // Y
+        if (SDL_GetGamepadButton(m_gamepad, SDL_GAMEPAD_BUTTON_SOUTH)) currentButtonState |= 0x1000;
+        if (SDL_GetGamepadButton(m_gamepad, SDL_GAMEPAD_BUTTON_EAST)) currentButtonState |= 0x2000;
+        if (SDL_GetGamepadButton(m_gamepad, SDL_GAMEPAD_BUTTON_WEST)) currentButtonState |= 0x4000;
+        if (SDL_GetGamepadButton(m_gamepad, SDL_GAMEPAD_BUTTON_NORTH)) currentButtonState |= 0x8000;
         if (SDL_GetGamepadButton(m_gamepad, SDL_GAMEPAD_BUTTON_LEFT_SHOULDER)) currentButtonState |= 0x0100;
         if (SDL_GetGamepadButton(m_gamepad, SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER)) currentButtonState |= 0x0200;
         if (SDL_GetGamepadButton(m_gamepad, SDL_GAMEPAD_BUTTON_BACK)) currentButtonState |= 0x0020;
@@ -145,11 +157,12 @@ public:
     }
 
 private:
+    unsigned int m_controllerIndex;
     SDL_Gamepad* m_gamepad;
-    unsigned short currentButtonState;
-    unsigned short previousButtonState;
-    unsigned short buttonsPressedThisFrame;
-    unsigned short buttonsReleasedThisFrame;
+    uint16_t currentButtonState;      
+    uint16_t previousButtonState;     
+    uint16_t buttonsPressedThisFrame; 
+    uint16_t buttonsReleasedThisFrame;
 };
 #endif
 
