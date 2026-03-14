@@ -18,6 +18,7 @@
 #include "MoveCommand.h"
 #include "SpriteAnimatorComponent.h"
 #include "ControllerButtons.h"
+#include "PlayerAnimatorComponent.h"
 
 #include <filesystem>
 namespace fs = std::filesystem;
@@ -70,7 +71,7 @@ static void load()
 	render->SetSprite(4, 0);
 	render->SetScale(2.0f);
 	auto animator = go->AddComponent<dae::SpriteAnimatorComponent>();
-	animator->SetAnimationSpeed(10.0f);
+    go->AddComponent<dae::PlayerAnimatorComponent>();
 	auto player1 = go.get();
 	scene.Add(std::move(go));
 
@@ -84,7 +85,7 @@ static void load()
 	render->SetSprite(4, 0);
 	render->SetScale(2.0f);
 	animator = go->AddComponent<dae::SpriteAnimatorComponent>();
-	animator->SetAnimationSpeed(10.0f);
+    go->AddComponent<dae::PlayerAnimatorComponent>();
 	auto player2 = go.get();
 	scene.Add(std::move(go));
 

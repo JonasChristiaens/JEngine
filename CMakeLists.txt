@@ -35,6 +35,7 @@ add_executable(${TARGET_NAME} ${TARGET_PARAM}
   Minigin/ControllerInput.cpp
   Minigin/MoveCommand.cpp
   Minigin/SpriteAnimatorComponent.cpp
+  Minigin/PlayerAnimatorComponent.cpp
 )
 
 # enable c++20 features

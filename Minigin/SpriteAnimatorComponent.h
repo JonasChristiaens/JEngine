@@ -1,18 +1,9 @@
 #pragma once
 #include "BaseComponent.h"
-#include <glm/glm.hpp>
 
 namespace dae
 {
 	class RenderComponent;
-
-	enum class Direction
-	{
-		Left,
-		Right,
-		Up,
-		Down
-	};
 
 	class SpriteAnimatorComponent final : public BaseComponent
 	{
@@ -23,18 +14,34 @@ namespace dae
 		void Update() override;
 		void Render() const override {}
 
-		void SetDirection(const glm::vec3& direction);
-		void SetAnimationSpeed(float framesPerSecond);
+		// Configures and starts a new animation
+		void SetAnimation(int startColumn, int startRow, int columns, int frameCount, float framesPerSecond, bool isLooping);
+		
+		void Play();
+		void Pause();
+		void Stop();
+
+		bool IsFinished() const { return m_isFinished; }
+		bool IsPlaying() const { return m_isPlaying; }
 
 	private:
 		void UpdateSprite();
 
 		RenderComponent* m_pRenderComponent{ nullptr };
-		Direction m_currentDirection{ Direction::Down };
+		
+		// Animation Settings
+		int m_startColumn{ 0 };
+		int m_startRow{ 0 };
+		int m_columns{ 1 }; 
+		int m_frameCount{ 1 };
+		
+		// State variables
 		int m_currentFrame{ 0 };
 		float m_animationTimer{ 0.0f };
 		float m_frameDuration{ 0.1f };
-		bool m_isMoving{ false };
-		glm::vec3 m_lastDirection{ 0.0f, 0.0f, 0.0f };
+		
+		bool m_isLooping{ true };
+		bool m_isPlaying{ false };
+		bool m_isFinished{ false };
 	};
 }

@@ -2,11 +2,6 @@
 #include "Command.h"
 #include <glm/glm.hpp>
 
-namespace dae
-{
-	class SpriteAnimatorComponent;
-}
-
 class MoveCommand final : public Command
 {
 public:
@@ -18,5 +13,4 @@ public:
 private:
 	glm::vec3 m_direction;
 	float m_speed;
-	dae::SpriteAnimatorComponent* m_pAnimator{ nullptr };
 };

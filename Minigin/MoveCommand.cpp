@@ -1,7 +1,6 @@
 #include "MoveCommand.h"
 #include "GameObject.h"
 #include "TransformComponent.h"
-#include "SpriteAnimatorComponent.h"
 #include "GameTime.h"
 #include <glm/geometric.hpp>
 
@@ -21,16 +20,6 @@ void MoveCommand::Execute()
 	auto transform = m_pGameActor->GetComponent<dae::TransformComponent>();
 	if (transform == nullptr)
 		return;
-
-	if (m_pAnimator == nullptr)
-	{
-		m_pAnimator = m_pGameActor->GetComponent<dae::SpriteAnimatorComponent>();
-	}
-
-	if (m_pAnimator != nullptr)
-	{
-		m_pAnimator->SetDirection(m_direction);
-	}
 
 	glm::vec3 movement = m_direction * m_speed * deltaTime;
 	transform->SetLocalPosition(transform->GetLocalPosition() + movement);

@@ -2,7 +2,6 @@
 #include "GameObject.h"
 #include "RenderComponent.h"
 #include "GameTime.h"
-#include <cmath>
 
 dae::SpriteAnimatorComponent::SpriteAnimatorComponent(GameObject* pOwner)
 	: BaseComponent(pOwner)
@@ -11,8 +10,7 @@ dae::SpriteAnimatorComponent::SpriteAnimatorComponent(GameObject* pOwner)
 
 void dae::SpriteAnimatorComponent::Update()
 {
-	float deltaTime = dae::GameTime::GetInstance().GetDeltaTime();
-
+	// Ensure we have a RenderComponent to communicate with
 	if (m_pRenderComponent == nullptr)
 	{
 		m_pRenderComponent = GetOwner()->GetComponent<RenderComponent>();
@@ -20,53 +18,81 @@ void dae::SpriteAnimatorComponent::Update()
 			return;
 	}
 
-	if (!m_isMoving)
-	{
-		m_animationTimer = 0.0f;
-		m_currentFrame = 1;
-		m_pRenderComponent->SetSprite(4, 0);
+	if (!m_isPlaying || m_isFinished)
 		return;
-	}
 
+	float deltaTime = dae::GameTime::GetInstance().GetDeltaTime();
 	m_animationTimer += deltaTime;
 
 	if (m_animationTimer >= m_frameDuration)
 	{
 		m_animationTimer -= m_frameDuration;
-		m_currentFrame = (m_currentFrame + 1) % 3;
+		m_currentFrame++;
+
+		if (m_currentFrame >= m_frameCount)
+		{
+			if (m_isLooping)
+			{
+				m_currentFrame = 0;
+			}
+			else
+			{
+				m_currentFrame = m_frameCount - 1; // Stay on the last frame
+				m_isFinished = true;
+				m_isPlaying = false;
+			}
+		}
+
 		UpdateSprite();
 	}
-
-	m_isMoving = false;
 }
 
-void dae::SpriteAnimatorComponent::SetDirection(const glm::vec3& direction)
+void dae::SpriteAnimatorComponent::SetAnimation(int startColumn, int startRow, int columns, int frameCount, float framesPerSecond, bool isLooping)
 {
-	if (std::abs(direction.x) < 0.01f && std::abs(direction.y) < 0.01f)
+	// Ensure we don't reset the current animation if it shouldn't change
+	if (m_startColumn == startColumn && m_startRow == startRow && m_isPlaying)
 		return;
 
-	m_isMoving = true;
-
-	if (std::abs(direction.x) > std::abs(direction.y))
-	{
-		if (direction.x > 0)
-			m_currentDirection = Direction::Right;
-		else
-			m_currentDirection = Direction::Left;
-	}
-	else
-	{
-		if (direction.y > 0)
-			m_currentDirection = Direction::Down;
-		else
-			m_currentDirection = Direction::Up;
-	}
-}
-
-void dae::SpriteAnimatorComponent::SetAnimationSpeed(float framesPerSecond)
-{
+	m_startColumn = startColumn;
+	m_startRow = startRow;
+	m_columns = columns > 0 ? columns : 1;
+	m_frameCount = frameCount > 0 ? frameCount : 1;
+	
 	if (framesPerSecond > 0.0f)
 		m_frameDuration = 1.0f / framesPerSecond;
+
+	m_isLooping = isLooping;
+	
+	// Reset runtime state
+	m_currentFrame = 0;
+	m_animationTimer = 0.0f;
+	m_isFinished = false;
+	m_isPlaying = true;
+
+	UpdateSprite();
+}
+
+void dae::SpriteAnimatorComponent::Play()
+{
+	if (m_isFinished)
+	{
+		m_currentFrame = 0;
+		m_isFinished = false;
+	}
+	m_isPlaying = true;
+}
+
+void dae::SpriteAnimatorComponent::Pause()
+{
+	m_isPlaying = false;
+}
+
+void dae::SpriteAnimatorComponent::Stop()
+{
+	m_isPlaying = false;
+	m_currentFrame = 0;
+	m_animationTimer = 0.0f;
+	UpdateSprite();
 }
 
 void dae::SpriteAnimatorComponent::UpdateSprite()
@@ -74,28 +100,12 @@ void dae::SpriteAnimatorComponent::UpdateSprite()
 	if (m_pRenderComponent == nullptr)
 		return;
 
-	int column = 0;
-	int row = 0;
+	// Calculate wrapping if sequences bleed over into following rows
+	int columnOffset = m_currentFrame % m_columns;
+	int rowOffset = m_currentFrame / m_columns;
 
-	switch (m_currentDirection)
-	{
-	case Direction::Left:
-		column = m_currentFrame;
-		row = 0;
-		break;
-	case Direction::Down:
-		column = 3 + m_currentFrame;
-		row = 0;
-		break;
-	case Direction::Right:
-		column = m_currentFrame;
-		row = 1;
-		break;
-	case Direction::Up:
-		column = 3 + m_currentFrame;
-		row = 1;
-		break;
-	}
+	int currentColumn = m_startColumn + columnOffset;
+	int currentRow = m_startRow + rowOffset;
 
-	m_pRenderComponent->SetSprite(column, row);
+	m_pRenderComponent->SetSprite(currentColumn, currentRow);
 }
