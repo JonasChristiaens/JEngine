@@ -1,9 +1,10 @@
 #pragma once
 #include "BaseComponent.h"
+#include "EventQueue/Subject.h"
 
 namespace dae
 {
-	class HealthComponent final : public BaseComponent
+	class HealthComponent final : public BaseComponent, public Subject
 	{
 	public:
 		HealthComponent(GameObject* pOwner, int lives = 3);

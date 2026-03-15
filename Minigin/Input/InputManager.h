@@ -2,7 +2,7 @@
 #include "Singleton.h"
 
 #include "ControllerInput.h"
-#include "Command.h"
+#include "Commands/Command.h"
 
 #include <memory>
 #include <unordered_map>

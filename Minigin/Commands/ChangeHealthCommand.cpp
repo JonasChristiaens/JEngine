@@ -1,4 +1,5 @@
 #include "ChangeHealthCommand.h"
+#include "Components/HealthComponent.h"
 
 ChangeHealthCommand::ChangeHealthCommand(int amount)
 	: m_amount(amount)

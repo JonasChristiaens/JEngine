@@ -1,11 +1,11 @@
-#include "MoveComponent.h"
+#include "RotateComponent.h"
 #include "GameObject.h"
 #include "TransformComponent.h"
 #include "GameTime.h"
 #include <cmath>
 #include <numbers>
 
-dae::MoveComponent::MoveComponent(GameObject* pOwner, float radius, float speed)
+dae::RotateComponent::RotateComponent(GameObject* pOwner, float radius, float speed)
 	: BaseComponent(pOwner)
 	, m_radius(radius)
 	, m_speed(speed)
@@ -13,7 +13,7 @@ dae::MoveComponent::MoveComponent(GameObject* pOwner, float radius, float speed)
 	m_pTransform = GetOwner()->GetComponent<TransformComponent>();
 }
 
-void dae::MoveComponent::Update()
+void dae::RotateComponent::Update()
 {
 	float deltaTime = dae::GameTime::GetInstance().GetDeltaTime();
 

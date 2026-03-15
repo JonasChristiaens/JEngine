@@ -10,17 +10,21 @@
 #include "ResourceManager.h"
 #include "Scene.h"
 #include "GameObject.h"
-#include "TransformComponent.h"
-#include "RenderComponent.h"
-#include "TextComponent.h"
-#include "FPSComponent.h"
-#include "InputManager.h"
-#include "MoveCommand.h"
-#include "SpriteAnimatorComponent.h"
-#include "ControllerButtons.h"
-#include "PlayerAnimatorComponent.h"
-#include "HealthComponent.h"
-#include "ChangeHealthCommand.h"
+#include "Input/InputManager.h"
+#include "Input/ControllerButtons.h"
+#include "Components/TransformComponent.h"
+#include "Components/RenderComponent.h"
+#include "Components/TextComponent.h"
+#include "Components/FPSComponent.h"
+#include "Components/SpriteAnimatorComponent.h"
+#include "Components/PlayerAnimatorComponent.h"
+#include "Components/HealthComponent.h"
+#include "Components/LivesDisplayComponent.h"
+#include "Components/ScoreComponent.h"
+#include "Components/ScoreDisplayComponent.h"
+#include "Commands/MoveCommand.h"
+#include "Commands/ChangeScoreCommand.h"
+#include "Commands/ChangeHealthCommand.h"
 
 #include <filesystem>
 namespace fs = std::filesystem;
@@ -62,6 +66,25 @@ static void load()
 	go->AddComponent<dae::FPSComponent>();
 	scene.Add(std::move(go));
 
+	// Instructions
+	auto infoFont = dae::ResourceManager::GetInstance().LoadFont("Lingua.otf", 18);
+
+	// Bomberman 1 Instructions
+	go = std::make_unique<dae::GameObject>();
+	transform = go->AddComponent<dae::TransformComponent>();
+	transform->SetLocalPosition(10, 100);
+	text = go->AddComponent<dae::TextComponent>("Use the D-Pad to move Bomberman 1, X to inflict damage, A and B to pick up points", infoFont);
+	text->SetColor({ 180, 180, 180, 255 });
+	scene.Add(std::move(go));
+
+	// Bomberman 2 Instructions
+	go = std::make_unique<dae::GameObject>();
+	transform = go->AddComponent<dae::TransformComponent>();
+	transform->SetLocalPosition(10, 120);
+	text = go->AddComponent<dae::TextComponent>("Use WASD to move Bomberman 2, C to inflict damage, Z and X to pick up points", infoFont);
+	text->SetColor({ 180, 180, 180, 255 });
+	scene.Add(std::move(go));
+
 
 	// Player 1 (WASD controls)
 	go = std::make_unique<dae::GameObject>();
@@ -74,7 +97,8 @@ static void load()
 	render->SetScale(2.0f);
 	go->AddComponent<dae::SpriteAnimatorComponent>();
     go->AddComponent<dae::PlayerAnimatorComponent>();
-	go->AddComponent<dae::HealthComponent>(3); // Set initial lives
+	go->AddComponent<dae::HealthComponent>(3);
+	go->AddComponent<dae::ScoreComponent>(0);
 	auto player1 = go.get();
 	scene.Add(std::move(go));
 
@@ -89,10 +113,52 @@ static void load()
 	render->SetScale(2.0f);
 	go->AddComponent<dae::SpriteAnimatorComponent>();
     go->AddComponent<dae::PlayerAnimatorComponent>();
-	go->AddComponent<dae::HealthComponent>(3); // Set initial lives
+	go->AddComponent<dae::HealthComponent>(3);
+	go->AddComponent<dae::ScoreComponent>(0);
 	auto player2 = go.get();
 	scene.Add(std::move(go));
 
+
+	// Information display
+	// Player 1 Lives
+	auto displayGo = std::make_unique<dae::GameObject>();
+	auto displayTransform = displayGo->AddComponent<dae::TransformComponent>();
+	displayTransform->SetLocalPosition(10, 160);
+	auto displayTxt = displayGo->AddComponent<dae::TextComponent>("", infoFont);
+	displayTxt->SetColor({ 180, 180, 180, 255 });
+	auto p1Health = player1->GetComponent<dae::HealthComponent>();
+	displayGo->AddComponent<dae::LivesDisplayComponent>(p1Health);
+	scene.Add(std::move(displayGo));
+	
+	// Player 1 Score
+	displayGo = std::make_unique<dae::GameObject>();
+	displayTransform = displayGo->AddComponent<dae::TransformComponent>();
+	displayTransform->SetLocalPosition(10, 180);
+	displayTxt = displayGo->AddComponent<dae::TextComponent>("", infoFont);
+	displayTxt->SetColor({ 180, 180, 180, 255 });
+	auto p1Score = player1->GetComponent<dae::ScoreComponent>();
+	displayGo->AddComponent<dae::ScoreDisplayComponent>(p1Score);
+	scene.Add(std::move(displayGo));
+
+	// Player 2 Lives
+	displayGo = std::make_unique<dae::GameObject>();
+	displayTransform = displayGo->AddComponent<dae::TransformComponent>();
+	displayTransform->SetLocalPosition(10, 200);
+	displayTxt = displayGo->AddComponent<dae::TextComponent>("", infoFont);
+	displayTxt->SetColor({ 180, 180, 180, 255 });
+	auto p2Health = player2->GetComponent<dae::HealthComponent>();
+	displayGo->AddComponent<dae::LivesDisplayComponent>(p2Health);
+	scene.Add(std::move(displayGo));
+	
+	// Player 2 Score
+	displayGo = std::make_unique<dae::GameObject>();
+	displayTransform = displayGo->AddComponent<dae::TransformComponent>();
+	displayTransform->SetLocalPosition(10, 220);
+	displayTxt = displayGo->AddComponent<dae::TextComponent>("", infoFont);
+	displayTxt->SetColor({ 180, 180, 180, 255 });
+	auto p2Score = player2->GetComponent<dae::ScoreComponent>();
+	displayGo->AddComponent<dae::ScoreDisplayComponent>(p2Score);
+	scene.Add(std::move(displayGo));
 
 	// Input binding
 	const float moveSpeed = 150.0f;
@@ -118,6 +184,14 @@ static void load()
 	auto damageP1 = std::make_unique<ChangeHealthCommand>(-1);
 	damageP1->SetGameActor(player1);
 	input.BindKeyboardInput(SDLK_C, dae::KeyState::Pressed, std::move(damageP1));
+	
+	auto addScoreP1_10 = std::make_unique<ChangeScoreCommand>(10);
+	addScoreP1_10->SetGameActor(player1);
+	input.BindKeyboardInput(SDLK_Z, dae::KeyState::Pressed, std::move(addScoreP1_10));
+	
+	auto addScoreP1_100 = std::make_unique<ChangeScoreCommand>(100);
+	addScoreP1_100->SetGameActor(player1);
+	input.BindKeyboardInput(SDLK_X, dae::KeyState::Pressed, std::move(addScoreP1_100));
 
 
 	// Player 2 - Controller DPad controls
@@ -143,6 +217,14 @@ static void load()
 	auto damageP2 = std::make_unique<ChangeHealthCommand>(-1);
 	damageP2->SetGameActor(player2);
 	input.BindControllerInput(controllerIndex, ControllerButton::X, dae::KeyState::Pressed, std::move(damageP2));
+	
+	auto addScoreP2_10 = std::make_unique<ChangeScoreCommand>(10);
+	addScoreP2_10->SetGameActor(player2);
+	input.BindControllerInput(controllerIndex, ControllerButton::A, dae::KeyState::Pressed, std::move(addScoreP2_10));
+	
+	auto addScoreP2_100 = std::make_unique<ChangeScoreCommand>(100);
+	addScoreP2_100->SetGameActor(player2);
+	input.BindControllerInput(controllerIndex, ControllerButton::B, dae::KeyState::Pressed, std::move(addScoreP2_100));
 }
 
 

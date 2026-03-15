@@ -5,16 +5,16 @@ namespace dae
 {
 	class TransformComponent;
 
-	class MoveComponent final : public BaseComponent
+	class RotateComponent final : public BaseComponent
 	{
 	public:
-		MoveComponent(GameObject* pOwner, float radius, float speed);
-		virtual ~MoveComponent() = default;
+		RotateComponent(GameObject* pOwner, float radius, float speed);
+		virtual ~RotateComponent() = default;
 
-		MoveComponent(const MoveComponent& other) = delete;
-		MoveComponent(MoveComponent&& other) = delete;
-		MoveComponent& operator=(const MoveComponent& other) = delete;
-		MoveComponent& operator=(MoveComponent&& other) = delete;
+		RotateComponent(const RotateComponent& other) = delete;
+		RotateComponent(RotateComponent&& other) = delete;
+		RotateComponent& operator=(const RotateComponent& other) = delete;
+		RotateComponent& operator=(RotateComponent&& other) = delete;
 
 		virtual void Update() override;
 

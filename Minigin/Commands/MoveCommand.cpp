@@ -1,6 +1,6 @@
 #include "MoveCommand.h"
 #include "GameObject.h"
-#include "TransformComponent.h"
+#include "Components/TransformComponent.h"
 #include "GameTime.h"
 #include <glm/geometric.hpp>
 

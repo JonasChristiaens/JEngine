@@ -18,7 +18,6 @@ endif()
 add_executable(${TARGET_NAME} ${TARGET_PARAM}
   Minigin/Font.cpp
   Minigin/GameObject.cpp
-  Minigin/InputManager.cpp
   Minigin/Main.cpp
   Minigin/Minigin.cpp
   Minigin/Renderer.cpp
@@ -26,18 +25,24 @@ add_executable(${TARGET_NAME} ${TARGET_PARAM}
   Minigin/Scene.cpp
   Minigin/SceneManager.cpp
   Minigin/Texture2D.cpp
-  Minigin/TransformComponent.cpp
-  Minigin/RenderComponent.cpp
-  Minigin/TextComponent.cpp
-  Minigin/FPSComponent.cpp
-  Minigin/MoveComponent.cpp
-  Minigin/CacheExerciseComponent.cpp
-  Minigin/ControllerInput.cpp
-  Minigin/MoveCommand.cpp
-  Minigin/SpriteAnimatorComponent.cpp
-  Minigin/PlayerAnimatorComponent.cpp
-  Minigin/HealthComponent.cpp
-  Minigin/ChangeHealthCommand.cpp
+  Minigin/Input/InputManager.cpp
+  Minigin/Input/ControllerInput.cpp
+  Minigin/EventQueue/Subject.cpp
+  Minigin/Components/TransformComponent.cpp
+  Minigin/Components/RenderComponent.cpp
+  Minigin/Components/TextComponent.cpp
+  Minigin/Components/RotateComponent.cpp
+  Minigin/Components/FPSComponent.cpp
+  Minigin/Components/CacheExerciseComponent.cpp
+  Minigin/Components/SpriteAnimatorComponent.cpp
+  Minigin/Components/PlayerAnimatorComponent.cpp
+  Minigin/Components/HealthComponent.cpp
+  Minigin/Components/LivesDisplayComponent.cpp
+  Minigin/Components/ScoreComponent.cpp
+  Minigin/Components/ScoreDisplayComponent.cpp
+  Minigin/Commands/ChangeHealthCommand.cpp
+  Minigin/Commands/MoveCommand.cpp
+  Minigin/Commands/ChangeScoreCommand.cpp
 )
 
 # enable c++20 features

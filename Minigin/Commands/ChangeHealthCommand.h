@@ -1,7 +1,6 @@
 #pragma once
 #include "Command.h"
 #include "GameObject.h"
-#include "HealthComponent.h"
 
 class ChangeHealthCommand final : public Command
 {
