@@ -40,9 +40,9 @@ add_executable(${TARGET_NAME} ${TARGET_PARAM}
   Minigin/Components/LivesDisplayComponent.cpp
   Minigin/Components/ScoreComponent.cpp
   Minigin/Components/ScoreDisplayComponent.cpp
-  Minigin/Commands/ChangeHealthCommand.cpp
+  Minigin/EventQueue/PlayerObserver.cpp
+  Minigin/Commands/EventCommand.cpp
   Minigin/Commands/MoveCommand.cpp
-  Minigin/Commands/ChangeScoreCommand.cpp
 )
 
 # enable c++20 features

@@ -4,8 +4,9 @@ namespace dae
 {
 	enum class Event
 	{
-		HealthChange,
-		ScoreChange,
+		PlayerDamaged,
+		PlayerScoreSmallChanged,
+		PlayerScoreLargeChanged
 	};
 
 	class GameObject;
@@ -14,7 +15,7 @@ namespace dae
 	{
 	public:
 		virtual ~Observer() = default;
-		virtual void Notify(Event e, GameObject* m_pGameActor) = 0;
+		virtual void Notify(Event e, GameObject* pSubjectActor) = 0;
 
 	protected:
 		GameObject* m_pGameActor = nullptr;

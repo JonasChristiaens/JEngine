@@ -19,7 +19,7 @@ dae::LivesDisplayComponent::LivesDisplayComponent(GameObject* pOwner, HealthComp
 
 void dae::LivesDisplayComponent::Notify(Event e, GameObject* pSubjectActor)
 {
-	if (e == Event::HealthChange && m_pHealthComponent && pSubjectActor == m_pHealthComponent->GetOwner())
+	if (e == Event::PlayerDamaged && m_pHealthComponent && pSubjectActor == m_pHealthComponent->GetOwner())
 	{
 		UpdateText();
 	}
@@ -29,6 +29,6 @@ void dae::LivesDisplayComponent::UpdateText()
 {
 	if (m_pTextComponent && m_pHealthComponent)
 	{
-		m_pTextComponent->SetText("# lives: " + std::to_string(m_pHealthComponent->GetLives()));
+		m_pTextComponent->SetText("# Lives: " + std::to_string(m_pHealthComponent->GetLives()));
 	}
 }

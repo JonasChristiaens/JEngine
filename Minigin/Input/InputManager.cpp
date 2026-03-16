@@ -76,8 +76,13 @@ bool dae::InputManager::ProcessInput()
 		{
 			command->Execute();
 		}
+	}
 
-		m_previousKeyboardState[keyboardKey.key] = isCurrentlyPressed;
+	// Update the previous keyboard state tracking after all commands have been evaluated
+	for (auto& [keyboardKey, command] : m_keyboardCommands)
+	{
+		SDL_Scancode scancode = SDL_GetScancodeFromKey(keyboardKey.key, nullptr);
+		m_previousKeyboardState[keyboardKey.key] = keyboardState[scancode];
 	}
 
 	return true;

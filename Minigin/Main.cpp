@@ -23,8 +23,8 @@
 #include "Components/ScoreComponent.h"
 #include "Components/ScoreDisplayComponent.h"
 #include "Commands/MoveCommand.h"
-#include "Commands/ChangeScoreCommand.h"
-#include "Commands/ChangeHealthCommand.h"
+#include "Commands/EventCommand.h"
+#include "EventQueue/PlayerObserver.h"
 
 #include <filesystem>
 namespace fs = std::filesystem;
@@ -54,7 +54,7 @@ static void load()
 	transform = go->AddComponent<dae::TransformComponent>();
 	transform->SetLocalPosition(292, 20);
 	auto text = go->AddComponent<dae::TextComponent>("Programming 4 Assignment", font);
-	text->SetColor({ 255, 255, 0, 255 });
+	text->SetColor({ 255, 255, 255, 255 });
 	scene.Add(std::move(go));
 
 	// FPS Counter
@@ -164,6 +164,8 @@ static void load()
 	const float moveSpeed = 150.0f;
 	auto& input = dae::InputManager::GetInstance();
 
+	static dae::PlayerObserver playerObserver;
+
 	// Player 1 - WASD keyboard controls
 	auto moveUpP1 = std::make_unique<MoveCommand>(glm::vec3(0, -1, 0), moveSpeed);
 	moveUpP1->SetGameActor(player1);
@@ -181,17 +183,20 @@ static void load()
 	moveRightP1->SetGameActor(player1);
 	input.BindKeyboardInput(SDLK_D, dae::KeyState::Pressed, std::move(moveRightP1));
 
-	auto damageP1 = std::make_unique<ChangeHealthCommand>(-1);
+	auto damageP1 = std::make_unique<EventCommand>(dae::Event::PlayerDamaged);
 	damageP1->SetGameActor(player1);
-	input.BindKeyboardInput(SDLK_C, dae::KeyState::Pressed, std::move(damageP1));
-	
-	auto addScoreP1_10 = std::make_unique<ChangeScoreCommand>(10);
+	damageP1->AddObserver(playerObserver);
+	input.BindKeyboardInput(SDLK_C, dae::KeyState::Down, std::move(damageP1));
+
+	auto addScoreP1_10 = std::make_unique<EventCommand>(dae::Event::PlayerScoreSmallChanged);
 	addScoreP1_10->SetGameActor(player1);
-	input.BindKeyboardInput(SDLK_Z, dae::KeyState::Pressed, std::move(addScoreP1_10));
-	
-	auto addScoreP1_100 = std::make_unique<ChangeScoreCommand>(100);
+	addScoreP1_10->AddObserver(playerObserver);
+	input.BindKeyboardInput(SDLK_Z, dae::KeyState::Down, std::move(addScoreP1_10));
+
+	auto addScoreP1_100 = std::make_unique<EventCommand>(dae::Event::PlayerScoreLargeChanged);
 	addScoreP1_100->SetGameActor(player1);
-	input.BindKeyboardInput(SDLK_X, dae::KeyState::Pressed, std::move(addScoreP1_100));
+	addScoreP1_100->AddObserver(playerObserver);
+	input.BindKeyboardInput(SDLK_X, dae::KeyState::Down, std::move(addScoreP1_100));
 
 
 	// Player 2 - Controller DPad controls
@@ -214,17 +219,20 @@ static void load()
 	moveRightP2->SetGameActor(player2);
 	input.BindControllerInput(controllerIndex, ControllerButton::DPadRight, dae::KeyState::Pressed, std::move(moveRightP2));
 
-	auto damageP2 = std::make_unique<ChangeHealthCommand>(-1);
+	auto damageP2 = std::make_unique<EventCommand>(dae::Event::PlayerDamaged);
 	damageP2->SetGameActor(player2);
-	input.BindControllerInput(controllerIndex, ControllerButton::X, dae::KeyState::Pressed, std::move(damageP2));
-	
-	auto addScoreP2_10 = std::make_unique<ChangeScoreCommand>(10);
+	damageP2->AddObserver(playerObserver);
+	input.BindControllerInput(controllerIndex, ControllerButton::X, dae::KeyState::Down, std::move(damageP2));
+
+	auto addScoreP2_10 = std::make_unique<EventCommand>(dae::Event::PlayerScoreSmallChanged);
 	addScoreP2_10->SetGameActor(player2);
-	input.BindControllerInput(controllerIndex, ControllerButton::A, dae::KeyState::Pressed, std::move(addScoreP2_10));
-	
-	auto addScoreP2_100 = std::make_unique<ChangeScoreCommand>(100);
+	addScoreP2_10->AddObserver(playerObserver);
+	input.BindControllerInput(controllerIndex, ControllerButton::A, dae::KeyState::Down, std::move(addScoreP2_10));
+
+	auto addScoreP2_100 = std::make_unique<EventCommand>(dae::Event::PlayerScoreLargeChanged);
 	addScoreP2_100->SetGameActor(player2);
-	input.BindControllerInput(controllerIndex, ControllerButton::B, dae::KeyState::Pressed, std::move(addScoreP2_100));
+	addScoreP2_100->AddObserver(playerObserver);
+	input.BindControllerInput(controllerIndex, ControllerButton::B, dae::KeyState::Down, std::move(addScoreP2_100));
 }
 
 

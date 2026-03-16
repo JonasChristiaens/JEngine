@@ -10,5 +10,5 @@ dae::HealthComponent::HealthComponent(GameObject* pOwner, int lives)
 void dae::HealthComponent::ChangeHealth(int amount)
 {
 	m_lives += amount;
-	NotifyObserver(Event::HealthChange, GetOwner());
+	NotifyObserver(Event::PlayerDamaged, GetOwner());
 }

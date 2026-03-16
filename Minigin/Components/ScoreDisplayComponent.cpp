@@ -19,7 +19,9 @@ dae::ScoreDisplayComponent::ScoreDisplayComponent(GameObject* pOwner, ScoreCompo
 
 void dae::ScoreDisplayComponent::Notify(Event e, GameObject* pSubjectActor)
 {
-	if (e == Event::ScoreChange && m_pScoreComponent && pSubjectActor == m_pScoreComponent->GetOwner())
+	if ((e == Event::PlayerScoreSmallChanged || e == Event::PlayerScoreLargeChanged) 
+		&& m_pScoreComponent 
+		&& pSubjectActor == m_pScoreComponent->GetOwner())
 	{
 		UpdateText();
 	}
@@ -29,6 +31,6 @@ void dae::ScoreDisplayComponent::UpdateText()
 {
 	if (m_pTextComponent && m_pScoreComponent)
 	{
-		m_pTextComponent->SetText("Score: " + std::to_string(m_pScoreComponent->GetScore()));
+		m_pTextComponent->SetText("# Score: " + std::to_string(m_pScoreComponent->GetScore()));
 	}
 }

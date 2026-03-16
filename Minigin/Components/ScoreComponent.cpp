@@ -10,5 +10,13 @@ dae::ScoreComponent::ScoreComponent(GameObject* pOwner, int startScore)
 void dae::ScoreComponent::ChangeScore(int amount)
 {
 	m_score += amount;
-	NotifyObserver(Event::ScoreChange, GetOwner());
+	
+	if (amount == 100)
+	{
+		NotifyObserver(Event::PlayerScoreLargeChanged, GetOwner());
+	}
+	else if (amount == 10)
+	{
+		NotifyObserver(Event::PlayerScoreSmallChanged, GetOwner());
+	}
 }
