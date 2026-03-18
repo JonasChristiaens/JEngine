@@ -1,6 +1,8 @@
 #pragma once
 #include "EventQueue/Observer.h"
 
+#if USE_STEAMWORKS
+
 namespace dae
 {
 	class CSteamAchievements;
@@ -17,3 +19,5 @@ namespace dae
 		CSteamAchievements* m_pSteamAchievements;
 	};
 }
+
+#endif // USE_STEAMWORKS

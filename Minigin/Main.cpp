@@ -32,16 +32,16 @@
 #include "Commands/MoveCommand.h"
 #include "Commands/EventCommand.h"
 #include "EventQueue/PlayerObserver.h"
-#include "Achievements/AchievementObserver.h"
 
 
 #include <filesystem>
 namespace fs = std::filesystem;
 
-
-#include "Achievements/CSteamAchievements.h"
-#include "steam_api.h"
 #include <iostream>
+
+#if USE_STEAMWORKS
+#include "Achievements/CSteamAchievements.h"
+#include "Achievements/AchievementObserver.h"
 
 // Defining our achievements
 enum EAchievements
@@ -63,6 +63,7 @@ dae::Achievement_t g_Achievements[] =
 
 // Global access to Achievements object
 static dae::CSteamAchievements* g_SteamAchievements = NULL;
+#endif // USE_STEAMWORKS
 
 static void load()
 {
@@ -122,7 +123,10 @@ static void load()
 
 	// Observers
 	static dae::PlayerObserver playerObserver;
+
+#if USE_STEAMWORKS
 	static dae::AchievementObserver achievementObserver(g_SteamAchievements);
+#endif
 
 	// Player 1 (WASD controls)
 	go = std::make_unique<dae::GameObject>();
@@ -175,7 +179,9 @@ static void load()
 	displayTxt = displayGo->AddComponent<dae::TextComponent>("", infoFont);
 	displayTxt->SetColor({ 180, 180, 180, 255 });
 	auto p1Score = player1->GetComponent<dae::ScoreComponent>();
+#if USE_STEAMWORKS
 	p1Score->AddObserver(achievementObserver);
+#endif
 	displayGo->AddComponent<dae::ScoreDisplayComponent>(p1Score);
 	scene.Add(std::move(displayGo));
 
@@ -196,7 +202,9 @@ static void load()
 	displayTxt = displayGo->AddComponent<dae::TextComponent>("", infoFont);
 	displayTxt->SetColor({ 180, 180, 180, 255 });
 	auto p2Score = player2->GetComponent<dae::ScoreComponent>();
+#if USE_STEAMWORKS
 	p2Score->AddObserver(achievementObserver);
+#endif
 	displayGo->AddComponent<dae::ScoreDisplayComponent>(p2Score);
 	scene.Add(std::move(displayGo));
 
@@ -283,6 +291,7 @@ int main(int, char*[]) {
 		data_location = "../Data/";
 #endif
 
+#if USE_STEAMWORKS
 	if (!SteamAPI_Init())
 	{
 		std::cerr << "Fatal Error - Steam must be running to play this game (SteamAPI_Init() failed)." << std::endl;
@@ -292,14 +301,17 @@ int main(int, char*[]) {
 		std::cout << "Successfully initialized steam." << std::endl;
 
 	g_SteamAchievements = new dae::CSteamAchievements(g_Achievements, 4);
+#endif
 
 	dae::Minigin engine(data_location);
 	engine.Run(load);
 
+#if USE_STEAMWORKS
 	SteamAPI_Shutdown();
 	// Delete the SteamAchievements object
 	if (g_SteamAchievements)
 		delete g_SteamAchievements;
+#endif
 
 	return 0;
 }

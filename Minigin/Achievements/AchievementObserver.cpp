@@ -1,3 +1,5 @@
+#if USE_STEAMWORKS
+
 #include "AchievementObserver.h"
 #include "CSteamAchievements.h"
 
@@ -19,3 +21,5 @@ namespace dae
 		}
 	}
 }
+
+#endif // USE_STEAMWORKS

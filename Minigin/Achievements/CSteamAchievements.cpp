@@ -1,3 +1,5 @@
+#if USE_STEAMWORKS
+
 #include "CSteamAchievements.h"
 #include <iostream>
 
@@ -67,3 +69,5 @@ void dae::CSteamAchievements::OnAchievementStored(UserAchievementStored_t* pCall
 		std::cout << "Stored Achievement for Steam\n" << std::endl;
 	}
 }
+
+#endif 

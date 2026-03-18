@@ -129,12 +129,12 @@ if (WIN32)
 endif()
 
 # Add steam if available
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/steam")
-find_package(Steamworks QUIET)
+# list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/steam")
+# find_package(Steamworks QUIET)
 
 # Point to the SteamSDK folder
-set(STEAMWORKS_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../SteamSDK")
-find_package(Steamworks QUIET)
+# set(STEAMWORKS_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../SteamSDK")
+# find_package(Steamworks QUIET)
 
 # Add Dear ImGui
 FetchContent_Declare(

@@ -1,4 +1,7 @@
 #pragma once
+
+#if USE_STEAMWORKS
+
 #include <steam_api.h>
 
 #define _ACH_ID( id, name ) { id, #id, name, "", 0, 0 }
@@ -36,3 +39,5 @@ namespace dae
 			UserAchievementStored_t, m_CallbackAchievementStored);
 	};
 }
+
+#endif // USE_STEAMWORKS
