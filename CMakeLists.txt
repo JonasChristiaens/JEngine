@@ -43,6 +43,8 @@ add_executable(${TARGET_NAME} ${TARGET_PARAM}
   Minigin/EventQueue/PlayerObserver.cpp
   Minigin/Commands/EventCommand.cpp
   Minigin/Commands/MoveCommand.cpp
+  Minigin/Achievements/CSteamAchievements.cpp
+  Minigin/Achievements/AchievementObserver.cpp
 )
 
 # enable c++20 features
@@ -128,6 +130,10 @@ endif()
 
 # Add steam if available
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/steam")
+find_package(Steamworks QUIET)
+
+# Point to the SteamSDK folder
+set(STEAMWORKS_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../SteamSDK")
 find_package(Steamworks QUIET)
 
 # Add Dear ImGui

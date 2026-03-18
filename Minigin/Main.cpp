@@ -5,6 +5,13 @@
 #include <vld.h>
 #endif
 
+#if USE_STEAMWORKS
+#pragma warning (push)
+#pragma warning (disable:4996)
+#include <steam_api.h>
+#pragma warning (pop)
+#endif
+
 #include "Minigin.h"
 #include "SceneManager.h"
 #include "ResourceManager.h"
@@ -25,9 +32,37 @@
 #include "Commands/MoveCommand.h"
 #include "Commands/EventCommand.h"
 #include "EventQueue/PlayerObserver.h"
+#include "Achievements/AchievementObserver.h"
+
 
 #include <filesystem>
 namespace fs = std::filesystem;
+
+
+#include "Achievements/CSteamAchievements.h"
+#include "steam_api.h"
+#include <iostream>
+
+// Defining our achievements
+enum EAchievements
+{
+	ACH_WIN_ONE_GAME = 0,
+	ACH_WIN_100_GAMES = 1,
+	ACH_TRAVEL_FAR_ACCUM = 2,
+	ACH_TRAVEL_FAR_SINGLE = 3,
+};
+
+// Achievement array which will hold data about the achievements and their state
+dae::Achievement_t g_Achievements[] =
+{
+	_ACH_ID(ACH_WIN_ONE_GAME, "Winner"),
+	_ACH_ID(ACH_WIN_100_GAMES, "Champion"),
+	_ACH_ID(ACH_TRAVEL_FAR_ACCUM, "Interstellar"),
+	_ACH_ID(ACH_TRAVEL_FAR_SINGLE, "Orbiter"),
+};
+
+// Global access to Achievements object
+static dae::CSteamAchievements* g_SteamAchievements = NULL;
 
 static void load()
 {
@@ -85,6 +120,9 @@ static void load()
 	text->SetColor({ 180, 180, 180, 255 });
 	scene.Add(std::move(go));
 
+	// Observers
+	static dae::PlayerObserver playerObserver;
+	static dae::AchievementObserver achievementObserver(g_SteamAchievements);
 
 	// Player 1 (WASD controls)
 	go = std::make_unique<dae::GameObject>();
@@ -137,6 +175,7 @@ static void load()
 	displayTxt = displayGo->AddComponent<dae::TextComponent>("", infoFont);
 	displayTxt->SetColor({ 180, 180, 180, 255 });
 	auto p1Score = player1->GetComponent<dae::ScoreComponent>();
+	p1Score->AddObserver(achievementObserver);
 	displayGo->AddComponent<dae::ScoreDisplayComponent>(p1Score);
 	scene.Add(std::move(displayGo));
 
@@ -157,14 +196,13 @@ static void load()
 	displayTxt = displayGo->AddComponent<dae::TextComponent>("", infoFont);
 	displayTxt->SetColor({ 180, 180, 180, 255 });
 	auto p2Score = player2->GetComponent<dae::ScoreComponent>();
+	p2Score->AddObserver(achievementObserver);
 	displayGo->AddComponent<dae::ScoreDisplayComponent>(p2Score);
 	scene.Add(std::move(displayGo));
 
 	// Input binding
 	const float moveSpeed = 150.0f;
 	auto& input = dae::InputManager::GetInstance();
-
-	static dae::PlayerObserver playerObserver;
 
 	// Player 1 - WASD keyboard controls
 	auto moveUpP1 = std::make_unique<MoveCommand>(glm::vec3(0, -1, 0), moveSpeed);
@@ -241,10 +279,27 @@ int main(int, char*[]) {
 	fs::path data_location = "";
 #else
 	fs::path data_location = "./Data/";
-	if(!fs::exists(data_location))
+	if (!fs::exists(data_location))
 		data_location = "../Data/";
 #endif
+
+	if (!SteamAPI_Init())
+	{
+		std::cerr << "Fatal Error - Steam must be running to play this game (SteamAPI_Init() failed)." << std::endl;
+		return 1;
+	}
+	else
+		std::cout << "Successfully initialized steam." << std::endl;
+
+	g_SteamAchievements = new dae::CSteamAchievements(g_Achievements, 4);
+
 	dae::Minigin engine(data_location);
 	engine.Run(load);
+
+	SteamAPI_Shutdown();
+	// Delete the SteamAchievements object
+	if (g_SteamAchievements)
+		delete g_SteamAchievements;
+
 	return 0;
 }

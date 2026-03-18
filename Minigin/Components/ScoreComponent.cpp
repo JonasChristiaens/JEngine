@@ -19,4 +19,10 @@ void dae::ScoreComponent::ChangeScore(int amount)
 	{
 		NotifyObserver(Event::PlayerScoreSmallChanged, GetOwner());
 	}
+
+	// Trigger the win event when reaching 500 points
+	if (m_score >= 500)
+	{
+		NotifyObserver(Event::PlayerWonGame, GetOwner());
+	}
 }

@@ -6,7 +6,8 @@ namespace dae
 	{
 		PlayerDamaged,
 		PlayerScoreSmallChanged,
-		PlayerScoreLargeChanged
+		PlayerScoreLargeChanged,
+		PlayerWonGame
 	};
 
 	class GameObject;
