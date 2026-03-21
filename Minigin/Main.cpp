@@ -26,7 +26,9 @@
 #include "Commands/MoveCommand.h"
 #include "Commands/ChangeHealthCommand.h"
 #include "Commands/ChangeScoreCommand.h"
-
+#if USE_STEAMWORKS
+#include "Commands/ResetAchievementsCommand.h"
+#endif
 
 #include <filesystem>
 namespace fs = std::filesystem;
@@ -223,6 +225,14 @@ static void load()
 	text->SetColor({ 180, 180, 180, 255 });
 	scene.Add(std::move(go));
 
+#if USE_STEAMWORKS
+	go = std::make_unique<dae::GameObject>();
+	transform = go->AddComponent<dae::TransformComponent>();
+	transform->SetLocalPosition(10, 260);
+	text = go->AddComponent<dae::TextComponent>("Press F1 to reset Steam Achievements", infoFont);
+	text->SetColor({ 180, 180, 180, 255 });
+	scene.Add(std::move(go));
+#endif
 
 	// Bomberman 1 Lives Display
 	go = std::make_unique<dae::GameObject>();
@@ -353,6 +363,12 @@ static void load()
 	auto score100P2 = std::make_unique<ChangeScoreCommand>(100);
 	score100P2->SetGameActor(player2);
 	input.BindControllerInput(controllerIndex, ControllerButton::B, dae::KeyState::Down, std::move(score100P2));
+
+#if USE_STEAMWORKS
+	// Utility - Reset Achievements
+	auto resetAchievements = std::make_unique<ResetAchievementsCommand>();
+	input.BindKeyboardInput(SDLK_F1, dae::KeyState::Down, std::move(resetAchievements));
+#endif
 }
 
 

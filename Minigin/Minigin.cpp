@@ -16,6 +16,8 @@
 #include "Renderer.h"
 #include "ResourceManager.h"
 #include "GameTime.h"
+#include "EventQueue/EventManager.h"
+#include "EventQueue/IObserver.h"
 
 #if USE_STEAMWORKS
 #pragma warning (push)
@@ -27,6 +29,7 @@
 
 #if USE_STEAMWORKS
 #include "Achievements/CSteamAchievements.h"
+#include "Achievements/AchievementObserver.h"
 
 // Defining our achievements
 enum EAchievements
@@ -48,6 +51,9 @@ dae::Achievement_t g_Achievements[] =
 
 // Global access to Achievements object
 static dae::CSteamAchievements* g_SteamAchievements = NULL;
+
+static dae::AchievementObserver* g_AchievementObserver = nullptr;
+
 #endif // USE_STEAMWORKS
 
 SDL_Window* g_window{};
@@ -109,6 +115,8 @@ dae::Minigin::Minigin(const std::filesystem::path& dataPath)
 	{
 		// Create the SteamAchievements object if Steam was successfully initialized
 		g_SteamAchievements = new CSteamAchievements(g_Achievements, 4);
+		g_AchievementObserver = new dae::AchievementObserver(g_SteamAchievements);
+		dae::EventManager::GetInstance().AddObserver(*g_AchievementObserver);
 	}
 #endif
 
@@ -137,6 +145,14 @@ dae::Minigin::~Minigin()
 	SDL_Quit();
 
 #if USE_STEAMWORKS
+	if (g_SteamAchievements)
+	{
+		dae::EventManager::GetInstance().RemoveObserver(*g_AchievementObserver);
+		delete g_AchievementObserver;
+		g_AchievementObserver = nullptr;
+		delete g_SteamAchievements;
+		g_SteamAchievements = nullptr;
+	}
 	SteamAPI_Shutdown();
 #endif
 }

@@ -1,4 +1,6 @@
 #pragma once
+
+#if USE_STEAMWORKS
 #include "steam_api.h"
 #define _ACH_ID( id, name ) { id, #id, name, "", 0, 0 }
 
@@ -28,6 +30,7 @@ namespace dae
 
 		bool Initialize();
 		bool SetAchievement(const char* ID);
+		bool ClearAchievement(const char* ID);
 
 		STEAM_CALLBACK(CSteamAchievements, OnUserStatsStored, UserStatsStored_t,
 			m_CallbackUserStatsStored);
@@ -36,3 +39,4 @@ namespace dae
 
 	};
 }
+#endif // USE_STEAMWORKS

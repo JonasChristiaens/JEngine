@@ -1,4 +1,6 @@
 #include "CSteamAchievements.h"
+
+#if USE_STEAMWORKS
 #include <iostream>
 
 dae::CSteamAchievements::CSteamAchievements(Achievement_t* Achievements, int NumAchievements):
@@ -41,6 +43,16 @@ bool dae::CSteamAchievements::SetAchievement(const char* ID)
 	return false;
 }
 
+bool dae::CSteamAchievements::ClearAchievement(const char* ID)
+{
+	if (m_bInitialized)
+	{
+		SteamUserStats()->ClearAchievement(ID);
+		return SteamUserStats()->StoreStats();
+	}
+	return false;
+}
+
 void dae::CSteamAchievements::OnUserStatsStored(UserStatsStored_t* pCallback)
 {
 	// we may get callbacks for other games' stats arriving, ignore them
@@ -67,3 +79,4 @@ void dae::CSteamAchievements::OnAchievementStored(UserAchievementStored_t* pCall
 		std::cout << "Stored Achievement for Steam\n" << std::endl;
 	}
 }
+#endif // USE_STEAMWORKS

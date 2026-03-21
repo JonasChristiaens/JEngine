@@ -41,8 +41,9 @@ add_executable(${TARGET_NAME} ${TARGET_PARAM}
   Minigin/Commands/MoveCommand.cpp
   Minigin/Commands/ChangeHealthCommand.cpp
   Minigin/Commands/ChangeScoreCommand.cpp
+  Minigin/Commands/ResetAchievementsCommand.cpp
   Minigin/Achievements/CSteamAchievements.cpp
-  
+  Minigin/Achievements/AchievementObserver.cpp
 )
 
 # Enable C++20 features
