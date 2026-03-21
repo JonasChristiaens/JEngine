@@ -63,26 +63,48 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(glm)
 
 # ----- SDL3 -----
-FetchContent_Declare(
-    SDL3
-    URL https://www.libsdl.org/release/SDL3-devel-3.4.0-VC.zip
-)
+if(EMSCRIPTEN)
+  FetchContent_Declare(
+      SDL3
+      GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
+      GIT_TAG release-3.4.0
+      GIT_SHALLOW TRUE
+  )
+else()
+  FetchContent_Declare(
+      SDL3
+      URL https://www.libsdl.org/release/SDL3-devel-3.4.0-VC.zip
+  )
+endif()
 
 FetchContent_MakeAvailable(SDL3)
 
-list(PREPEND CMAKE_PREFIX_PATH "${sdl3_SOURCE_DIR}")
-find_package(SDL3 CONFIG REQUIRED)
+if(NOT EMSCRIPTEN)
+  list(PREPEND CMAKE_PREFIX_PATH "${sdl3_SOURCE_DIR}")
+  find_package(SDL3 CONFIG REQUIRED)
+endif()
 
 # ----- SDL3_ttf -----
-FetchContent_Declare(
-    SDL3_ttf
-    URL https://www.libsdl.org/projects/SDL_ttf/release/SDL3_ttf-devel-3.2.2-VC.zip
-)
+if(EMSCRIPTEN)
+  FetchContent_Declare(
+      SDL3_ttf
+      GIT_REPOSITORY https://github.com/libsdl-org/SDL_ttf.git
+      GIT_TAG release-3.2.2
+      GIT_SHALLOW TRUE
+  )
+else()
+  FetchContent_Declare(
+      SDL3_ttf
+      URL https://www.libsdl.org/projects/SDL_ttf/release/SDL3_ttf-devel-3.2.2-VC.zip
+  )
+endif()
 
 FetchContent_MakeAvailable(SDL3_ttf)
 
-list(PREPEND CMAKE_PREFIX_PATH "${sdl3_ttf_SOURCE_DIR}")
-find_package(SDL3_ttf CONFIG REQUIRED)
+if(NOT EMSCRIPTEN)
+  list(PREPEND CMAKE_PREFIX_PATH "${sdl3_ttf_SOURCE_DIR}")
+  find_package(SDL3_ttf CONFIG REQUIRED)
+endif()
 
 # ----- ImGui -----
 FetchContent_Declare(
