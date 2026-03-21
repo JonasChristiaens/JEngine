@@ -9,7 +9,6 @@
 #endif
 
 #include <SDL3/SDL.h>
-//#include <SDL3_image/SDL_image.h>
 #include <SDL3_ttf/SDL_ttf.h>
 #include "Minigin.h"
 #include "Input/InputManager.h"
@@ -24,6 +23,32 @@
 #include <steam_api.h>
 #pragma warning (pop)
 #endif
+
+
+#if USE_STEAMWORKS
+#include "Achievements/CSteamAchievements.h"
+
+// Defining our achievements
+enum EAchievements
+{
+	ACH_WIN_ONE_GAME = 0,
+	ACH_WIN_100_GAMES = 1,
+	ACH_TRAVEL_FAR_ACCUM = 2,
+	ACH_TRAVEL_FAR_SINGLE = 3,
+};
+
+// Achievement array which will hold data about the achievements and their state
+dae::Achievement_t g_Achievements[] =
+{
+	_ACH_ID(ACH_WIN_ONE_GAME, "Winner"),
+	_ACH_ID(ACH_WIN_100_GAMES, "Champion"),
+	_ACH_ID(ACH_TRAVEL_FAR_ACCUM, "Interstellar"),
+	_ACH_ID(ACH_TRAVEL_FAR_SINGLE, "Orbiter"),
+};
+
+// Global access to Achievements object
+static dae::CSteamAchievements* g_SteamAchievements = NULL;
+#endif // USE_STEAMWORKS
 
 SDL_Window* g_window{};
 
@@ -74,9 +99,16 @@ dae::Minigin::Minigin(const std::filesystem::path& dataPath)
 	}
 
 #if USE_STEAMWORKS
-	if (!SteamAPI_Init())
+	// Initialize Steam
+	bool bRet = SteamAPI_Init();
+	if (!bRet)
 	{
-		throw std::runtime_error("Fatal Error - Steam must be running to play this game (SteamAPI_Init() failed).");
+		SDL_Log("Warning: Steam must be running to play this game (SteamAPI_Init() failed).");
+	}
+	else
+	{
+		// Create the SteamAchievements object if Steam was successfully initialized
+		g_SteamAchievements = new CSteamAchievements(g_Achievements, 4);
 	}
 #endif
 
@@ -135,7 +167,7 @@ void dae::Minigin::RunOneFrame()
 
 #if USE_STEAMWORKS
 	SteamAPI_RunCallbacks();
-#endif
+#endif 
 
 	SceneManager::GetInstance().Update();
 	Renderer::GetInstance().Render();

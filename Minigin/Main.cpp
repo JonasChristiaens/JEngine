@@ -5,13 +5,6 @@
 #include <vld.h>
 #endif
 
-#if USE_STEAMWORKS
-#pragma warning (push)
-#pragma warning (disable:4996)
-#include <steam_api.h>
-#pragma warning (pop)
-#endif
-
 #include "Minigin.h"
 #include "SceneManager.h"
 #include "ResourceManager.h"
@@ -37,34 +30,6 @@
 
 #include <filesystem>
 namespace fs = std::filesystem;
-
-#include <iostream>
-
-#if USE_STEAMWORKS
-#include "Achievements/CSteamAchievements.h"
-#include "Achievements/AchievementObserver.h"
-
-// Defining our achievements
-enum EAchievements
-{
-	ACH_WIN_ONE_GAME = 0,
-	ACH_WIN_100_GAMES = 1,
-	ACH_TRAVEL_FAR_ACCUM = 2,
-	ACH_TRAVEL_FAR_SINGLE = 3,
-};
-
-// Achievement array which will hold data about the achievements and their state
-dae::Achievement_t g_Achievements[] =
-{
-	_ACH_ID(ACH_WIN_ONE_GAME, "Winner"),
-	_ACH_ID(ACH_WIN_100_GAMES, "Champion"),
-	_ACH_ID(ACH_TRAVEL_FAR_ACCUM, "Interstellar"),
-	_ACH_ID(ACH_TRAVEL_FAR_SINGLE, "Orbiter"),
-};
-
-// Global access to Achievements object
-static dae::CSteamAchievements* g_SteamAchievements = NULL;
-#endif // USE_STEAMWORKS
 
 static void load()
 {
@@ -400,27 +365,7 @@ int main(int, char*[]) {
 		data_location = "../Data/";
 #endif
 
-#if USE_STEAMWORKS
-	if (!SteamAPI_Init())
-	{
-		std::cerr << "Fatal Error - Steam must be running to play this game (SteamAPI_Init() failed)." << std::endl;
-		return 1;
-	}
-	else
-		std::cout << "Successfully initialized steam." << std::endl;
-
-	g_SteamAchievements = new dae::CSteamAchievements(g_Achievements, 4);
-#endif
-
 	dae::Minigin engine(data_location);
 	engine.Run(load);
-
-#if USE_STEAMWORKS
-	SteamAPI_Shutdown();
-	// Delete the SteamAchievements object
-	if (g_SteamAchievements)
-		delete g_SteamAchievements;
-#endif
-
 	return 0;
 }

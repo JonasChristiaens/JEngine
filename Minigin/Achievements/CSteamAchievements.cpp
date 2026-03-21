@@ -1,9 +1,7 @@
-#if USE_STEAMWORKS
-
 #include "CSteamAchievements.h"
 #include <iostream>
 
-dae::CSteamAchievements::CSteamAchievements(Achievement_t* Achievements, int NumAchievements) :
+dae::CSteamAchievements::CSteamAchievements(Achievement_t* Achievements, int NumAchievements):
 	m_iAppID(0),
 	m_bInitialized(false),
 	m_CallbackUserStatsStored(this, &CSteamAchievements::OnUserStatsStored),
@@ -55,7 +53,7 @@ void dae::CSteamAchievements::OnUserStatsStored(UserStatsStored_t* pCallback)
 		else
 		{
 			char buffer[128];
-			_snprintf(buffer, 128, "StatsStored - failed, %d\n", pCallback->m_eResult);
+			_snprintf_s(buffer, 128, "StatsStored - failed, %d\n", pCallback->m_eResult);
 			std::cout << buffer << std::endl;
 		}
 	}
@@ -69,5 +67,3 @@ void dae::CSteamAchievements::OnAchievementStored(UserAchievementStored_t* pCall
 		std::cout << "Stored Achievement for Steam\n" << std::endl;
 	}
 }
-
-#endif 
