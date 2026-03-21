@@ -26,12 +26,11 @@
 #include "Components/SpriteAnimatorComponent.h"
 #include "Components/PlayerAnimatorComponent.h"
 #include "Components/HealthComponent.h"
-#include "Components/LivesDisplayComponent.h"
 #include "Components/ScoreComponent.h"
-#include "Components/ScoreDisplayComponent.h"
+#include "Components/DisplayComponent.h"
 #include "Commands/MoveCommand.h"
-#include "Commands/EventCommand.h"
-#include "EventQueue/PlayerObserver.h"
+#include "Commands/ChangeHealthCommand.h"
+#include "Commands/ChangeScoreCommand.h"
 
 
 #include <filesystem>
@@ -67,6 +66,9 @@ static dae::CSteamAchievements* g_SteamAchievements = NULL;
 
 static void load()
 {
+	// ============
+	// Window Setup
+	// ============
 	auto& scene = dae::SceneManager::GetInstance().CreateScene();
 
 	// Background
@@ -102,6 +104,46 @@ static void load()
 	go->AddComponent<dae::FPSComponent>();
 	scene.Add(std::move(go));
 
+
+	// ============
+	// Player Setup
+	// ============
+	// Player 1 (WASD controls)
+	go = std::make_unique<dae::GameObject>();
+	transform = go->AddComponent<dae::TransformComponent>();
+	transform->SetLocalPosition(100, 300);
+	render = go->AddComponent<dae::RenderComponent>();
+	render->SetTexture("Resources/BombermanSprites_General.png");
+	render->SetSpriteSheet(16, 16, 6, 2);
+	render->SetSprite(4, 0);
+	render->SetScale(2.0f);
+	go->AddComponent<dae::SpriteAnimatorComponent>();
+	go->AddComponent<dae::PlayerAnimatorComponent>();
+	go->AddComponent<dae::HealthComponent>(3);
+	go->AddComponent<dae::ScoreComponent>(0);
+	auto player1 = go.get();
+	scene.Add(std::move(go));
+
+	// Player 2 (DPad controls)
+	go = std::make_unique<dae::GameObject>();
+	transform = go->AddComponent<dae::TransformComponent>();
+	transform->SetLocalPosition(200, 300);
+	render = go->AddComponent<dae::RenderComponent>();
+	render->SetTexture("Resources/BombermanSprites_General.png");
+	render->SetSpriteSheet(16, 16, 6, 2);
+	render->SetSprite(4, 0);
+	render->SetScale(2.0f);
+	go->AddComponent<dae::SpriteAnimatorComponent>();
+	go->AddComponent<dae::PlayerAnimatorComponent>();
+	go->AddComponent<dae::HealthComponent>(3);
+	go->AddComponent<dae::ScoreComponent>(0);
+	auto player2 = go.get();
+	scene.Add(std::move(go));
+	
+
+	// ==========================
+	// Player Information Display
+	// ==========================
 	// Instructions
 	auto infoFont = dae::ResourceManager::GetInstance().LoadFont("Lingua.otf", 18);
 
@@ -121,93 +163,71 @@ static void load()
 	text->SetColor({ 180, 180, 180, 255 });
 	scene.Add(std::move(go));
 
-	// Observers
-	static dae::PlayerObserver playerObserver;
 
-#if USE_STEAMWORKS
-	static dae::AchievementObserver achievementObserver(g_SteamAchievements);
-#endif
-
-	// Player 1 (WASD controls)
+	// Bomberman 1 Lives Display
 	go = std::make_unique<dae::GameObject>();
 	transform = go->AddComponent<dae::TransformComponent>();
-	transform->SetLocalPosition(100, 300);
-	render = go->AddComponent<dae::RenderComponent>();
-	render->SetTexture("Resources/BombermanSprites_General.png");
-	render->SetSpriteSheet(16, 16, 6, 2);
-	render->SetSprite(4, 0);
-	render->SetScale(2.0f);
-	go->AddComponent<dae::SpriteAnimatorComponent>();
-    go->AddComponent<dae::PlayerAnimatorComponent>();
-	go->AddComponent<dae::HealthComponent>(3);
-	go->AddComponent<dae::ScoreComponent>(0);
-	auto player1 = go.get();
+	transform->SetLocalPosition(10, 160);
+	text = go->AddComponent<dae::TextComponent>("# lives: 3", infoFont);
+	text->SetColor({ 180, 180, 180, 255 });
+	auto livesDisplayP1 = go->AddComponent<dae::DisplayComponent<dae::HealthComponent>>(
+		text,
+		dae::make_sdbm_hash("HealthChanged"),
+		"# lives: ",
+		[](const dae::HealthComponent* c) { return std::to_string(c->GetHealth()); }
+	);
+	player1->GetComponent<dae::HealthComponent>()->AddObserver(*livesDisplayP1);
 	scene.Add(std::move(go));
 
-	// Player 2 (DPad controls)
+	// Bomberman 1 Score Display
 	go = std::make_unique<dae::GameObject>();
 	transform = go->AddComponent<dae::TransformComponent>();
-	transform->SetLocalPosition(200, 300);
-	render = go->AddComponent<dae::RenderComponent>();
-	render->SetTexture("Resources/BombermanSprites_General.png");
-	render->SetSpriteSheet(16, 16, 6, 2);
-	render->SetSprite(4, 0);
-	render->SetScale(2.0f);
-	go->AddComponent<dae::SpriteAnimatorComponent>();
-    go->AddComponent<dae::PlayerAnimatorComponent>();
-	go->AddComponent<dae::HealthComponent>(3);
-	go->AddComponent<dae::ScoreComponent>(0);
-	auto player2 = go.get();
+	transform->SetLocalPosition(10, 180);
+	text = go->AddComponent<dae::TextComponent>("Score: 0", infoFont);
+	text->SetColor({ 180, 180, 180, 255 });
+	auto scoreDisplayP1 = go->AddComponent<dae::DisplayComponent<dae::ScoreComponent>>(
+		text,
+		dae::make_sdbm_hash("ScoreChanged"),
+		"Score: ",
+		[](const dae::ScoreComponent* c) { return std::to_string(c->GetScore()); }
+	);
+	player1->GetComponent<dae::ScoreComponent>()->AddObserver(*scoreDisplayP1);
+	scene.Add(std::move(go));
+
+	// Bomberman 2 Lives Display
+	go = std::make_unique<dae::GameObject>();
+	transform = go->AddComponent<dae::TransformComponent>();
+	transform->SetLocalPosition(10, 200);
+	text = go->AddComponent<dae::TextComponent>("# lives: 3", infoFont);
+	text->SetColor({ 180, 180, 180, 255 });
+	auto livesDisplayP2 = go->AddComponent<dae::DisplayComponent<dae::HealthComponent>>(
+		text,
+		dae::make_sdbm_hash("HealthChanged"),
+		"# lives: ",
+		[](const dae::HealthComponent* c) { return std::to_string(c->GetHealth()); }
+	);
+	player2->GetComponent<dae::HealthComponent>()->AddObserver(*livesDisplayP2);
+	scene.Add(std::move(go));
+
+	// Bomberman 2 Score Display
+	go = std::make_unique<dae::GameObject>();
+	transform = go->AddComponent<dae::TransformComponent>();
+	transform->SetLocalPosition(10, 220);
+	text = go->AddComponent<dae::TextComponent>("Score: 0", infoFont);
+	text->SetColor({ 180, 180, 180, 255 });
+	auto scoreDisplayP2 = go->AddComponent<dae::DisplayComponent<dae::ScoreComponent>>(
+		text,
+		dae::make_sdbm_hash("ScoreChanged"),
+		"Score: ",
+		[](const dae::ScoreComponent* c) { return std::to_string(c->GetScore()); }
+	);
+	player2->GetComponent<dae::ScoreComponent>()->AddObserver(*scoreDisplayP2);
 	scene.Add(std::move(go));
 
 
-	// Information display
-	// Player 1 Lives
-	auto displayGo = std::make_unique<dae::GameObject>();
-	auto displayTransform = displayGo->AddComponent<dae::TransformComponent>();
-	displayTransform->SetLocalPosition(10, 160);
-	auto displayTxt = displayGo->AddComponent<dae::TextComponent>("", infoFont);
-	displayTxt->SetColor({ 180, 180, 180, 255 });
-	auto p1Health = player1->GetComponent<dae::HealthComponent>();
-	displayGo->AddComponent<dae::LivesDisplayComponent>(p1Health);
-	scene.Add(std::move(displayGo));
-	
-	// Player 1 Score
-	displayGo = std::make_unique<dae::GameObject>();
-	displayTransform = displayGo->AddComponent<dae::TransformComponent>();
-	displayTransform->SetLocalPosition(10, 180);
-	displayTxt = displayGo->AddComponent<dae::TextComponent>("", infoFont);
-	displayTxt->SetColor({ 180, 180, 180, 255 });
-	auto p1Score = player1->GetComponent<dae::ScoreComponent>();
-#if USE_STEAMWORKS
-	p1Score->AddObserver(achievementObserver);
-#endif
-	displayGo->AddComponent<dae::ScoreDisplayComponent>(p1Score);
-	scene.Add(std::move(displayGo));
-
-	// Player 2 Lives
-	displayGo = std::make_unique<dae::GameObject>();
-	displayTransform = displayGo->AddComponent<dae::TransformComponent>();
-	displayTransform->SetLocalPosition(10, 200);
-	displayTxt = displayGo->AddComponent<dae::TextComponent>("", infoFont);
-	displayTxt->SetColor({ 180, 180, 180, 255 });
-	auto p2Health = player2->GetComponent<dae::HealthComponent>();
-	displayGo->AddComponent<dae::LivesDisplayComponent>(p2Health);
-	scene.Add(std::move(displayGo));
-	
-	// Player 2 Score
-	displayGo = std::make_unique<dae::GameObject>();
-	displayTransform = displayGo->AddComponent<dae::TransformComponent>();
-	displayTransform->SetLocalPosition(10, 220);
-	displayTxt = displayGo->AddComponent<dae::TextComponent>("", infoFont);
-	displayTxt->SetColor({ 180, 180, 180, 255 });
-	auto p2Score = player2->GetComponent<dae::ScoreComponent>();
-#if USE_STEAMWORKS
-	p2Score->AddObserver(achievementObserver);
-#endif
-	displayGo->AddComponent<dae::ScoreDisplayComponent>(p2Score);
-	scene.Add(std::move(displayGo));
-
+	// =======================
+	// Input Commands bindings
+	// =======================
 	// Input binding
 	const float moveSpeed = 150.0f;
 	auto& input = dae::InputManager::GetInstance();
@@ -229,20 +249,17 @@ static void load()
 	moveRightP1->SetGameActor(player1);
 	input.BindKeyboardInput(SDLK_D, dae::KeyState::Pressed, std::move(moveRightP1));
 
-	auto damageP1 = std::make_unique<EventCommand>(dae::Event::PlayerDamaged);
+	auto damageP1 = std::make_unique<ChangeHealthCommand>(-1);
 	damageP1->SetGameActor(player1);
-	damageP1->AddObserver(playerObserver);
 	input.BindKeyboardInput(SDLK_C, dae::KeyState::Down, std::move(damageP1));
 
-	auto addScoreP1_10 = std::make_unique<EventCommand>(dae::Event::PlayerScoreSmallChanged);
-	addScoreP1_10->SetGameActor(player1);
-	addScoreP1_10->AddObserver(playerObserver);
-	input.BindKeyboardInput(SDLK_Z, dae::KeyState::Down, std::move(addScoreP1_10));
+	auto score10P1 = std::make_unique<ChangeScoreCommand>(10);
+	score10P1->SetGameActor(player1);
+	input.BindKeyboardInput(SDLK_Z, dae::KeyState::Down, std::move(score10P1));
 
-	auto addScoreP1_100 = std::make_unique<EventCommand>(dae::Event::PlayerScoreLargeChanged);
-	addScoreP1_100->SetGameActor(player1);
-	addScoreP1_100->AddObserver(playerObserver);
-	input.BindKeyboardInput(SDLK_X, dae::KeyState::Down, std::move(addScoreP1_100));
+	auto score100P1 = std::make_unique<ChangeScoreCommand>(100);
+	score100P1->SetGameActor(player1);
+	input.BindKeyboardInput(SDLK_X, dae::KeyState::Down, std::move(score100P1));
 
 
 	// Player 2 - Controller DPad controls
@@ -265,20 +282,17 @@ static void load()
 	moveRightP2->SetGameActor(player2);
 	input.BindControllerInput(controllerIndex, ControllerButton::DPadRight, dae::KeyState::Pressed, std::move(moveRightP2));
 
-	auto damageP2 = std::make_unique<EventCommand>(dae::Event::PlayerDamaged);
+	auto damageP2 = std::make_unique<ChangeHealthCommand>(-1);
 	damageP2->SetGameActor(player2);
-	damageP2->AddObserver(playerObserver);
 	input.BindControllerInput(controllerIndex, ControllerButton::X, dae::KeyState::Down, std::move(damageP2));
 
-	auto addScoreP2_10 = std::make_unique<EventCommand>(dae::Event::PlayerScoreSmallChanged);
-	addScoreP2_10->SetGameActor(player2);
-	addScoreP2_10->AddObserver(playerObserver);
-	input.BindControllerInput(controllerIndex, ControllerButton::A, dae::KeyState::Down, std::move(addScoreP2_10));
+	auto score10P2 = std::make_unique<ChangeScoreCommand>(10);
+	score10P2->SetGameActor(player2);
+	input.BindControllerInput(controllerIndex, ControllerButton::A, dae::KeyState::Down, std::move(score10P2));
 
-	auto addScoreP2_100 = std::make_unique<EventCommand>(dae::Event::PlayerScoreLargeChanged);
-	addScoreP2_100->SetGameActor(player2);
-	addScoreP2_100->AddObserver(playerObserver);
-	input.BindControllerInput(controllerIndex, ControllerButton::B, dae::KeyState::Down, std::move(addScoreP2_100));
+	auto score100P2 = std::make_unique<ChangeScoreCommand>(100);
+	score100P2->SetGameActor(player2);
+	input.BindControllerInput(controllerIndex, ControllerButton::B, dae::KeyState::Down, std::move(score100P2));
 }
 
 

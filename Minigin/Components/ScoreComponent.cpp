@@ -1,28 +1,13 @@
 #include "ScoreComponent.h"
-#include "GameObject.h"
 
-dae::ScoreComponent::ScoreComponent(GameObject* pOwner, int startScore)
+dae::ScoreComponent::ScoreComponent(GameObject* pOwner, int health)
 	: BaseComponent(pOwner)
-	, m_score(startScore)
+	, m_CurrentScore(health)
 {
 }
 
-void dae::ScoreComponent::ChangeScore(int amount)
+void dae::ScoreComponent::ChangeCurrentScore(int amount)
 {
-	m_score += amount;
-	
-	if (amount == 100)
-	{
-		NotifyObserver(Event::PlayerScoreLargeChanged, GetOwner());
-	}
-	else if (amount == 10)
-	{
-		NotifyObserver(Event::PlayerScoreSmallChanged, GetOwner());
-	}
-
-	// Trigger the win event when reaching 500 points
-	if (m_score >= 500)
-	{
-		NotifyObserver(Event::PlayerWonGame, GetOwner());
-	}
+	m_CurrentScore += amount;
+	NotifyObservers(Event(make_sdbm_hash("ScoreChanged")), GetOwner());
 }

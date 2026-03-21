@@ -1,14 +1,13 @@
 #include "HealthComponent.h"
-#include "GameObject.h"
 
-dae::HealthComponent::HealthComponent(GameObject* pOwner, int lives)
+dae::HealthComponent::HealthComponent(GameObject* pOwner, int health)
 	: BaseComponent(pOwner)
-	, m_lives(lives)
+	, m_CurrentHealth(health)
 {
 }
 
-void dae::HealthComponent::ChangeHealth(int amount)
+void dae::HealthComponent::ChangeCurrentHealth(int amount)
 {
-	m_lives += amount;
-	NotifyObserver(Event::PlayerDamaged, GetOwner());
+	m_CurrentHealth += amount;
+	NotifyObservers(Event(make_sdbm_hash("HealthChanged")), GetOwner());
 }

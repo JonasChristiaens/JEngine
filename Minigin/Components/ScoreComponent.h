@@ -1,13 +1,13 @@
 #pragma once
 #include "BaseComponent.h"
-#include "EventQueue/Subject.h"
+#include "../EventQueue/ISubject.h"
 
 namespace dae
 {
-	class ScoreComponent final : public BaseComponent, public Subject
+	class ScoreComponent final : public BaseComponent, public ISubject
 	{
 	public:
-		ScoreComponent(GameObject* pOwner, int startScore = 0);
+		ScoreComponent(GameObject* pOwner, int score = 0);
 		virtual ~ScoreComponent() = default;
 
 		ScoreComponent(const ScoreComponent& other) = delete;
@@ -15,12 +15,12 @@ namespace dae
 		ScoreComponent& operator=(const ScoreComponent& other) = delete;
 		ScoreComponent& operator=(ScoreComponent&& other) = delete;
 
-		void Update() override {}
+		virtual void Update() override {};
+		void ChangeCurrentScore(int amount);
 
-		void ChangeScore(int amount);
-		int GetScore() const { return m_score; }
+		int GetScore() const { return m_CurrentScore; }
 
 	private:
-		int m_score;
+		int m_CurrentScore;
 	};
 }

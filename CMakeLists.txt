@@ -27,7 +27,6 @@ add_executable(${TARGET_NAME} ${TARGET_PARAM}
   Minigin/Texture2D.cpp
   Minigin/Input/InputManager.cpp
   Minigin/Input/ControllerInput.cpp
-  Minigin/EventQueue/Subject.cpp
   Minigin/Components/TransformComponent.cpp
   Minigin/Components/RenderComponent.cpp
   Minigin/Components/TextComponent.cpp
@@ -37,12 +36,10 @@ add_executable(${TARGET_NAME} ${TARGET_PARAM}
   Minigin/Components/SpriteAnimatorComponent.cpp
   Minigin/Components/PlayerAnimatorComponent.cpp
   Minigin/Components/HealthComponent.cpp
-  Minigin/Components/LivesDisplayComponent.cpp
   Minigin/Components/ScoreComponent.cpp
-  Minigin/Components/ScoreDisplayComponent.cpp
-  Minigin/EventQueue/PlayerObserver.cpp
-  Minigin/Commands/EventCommand.cpp
   Minigin/Commands/MoveCommand.cpp
+  Minigin/Commands/ChangeHealthCommand.cpp
+  Minigin/Commands/ChangeScoreCommand.cpp
   Minigin/Achievements/CSteamAchievements.cpp
   Minigin/Achievements/AchievementObserver.cpp
 )

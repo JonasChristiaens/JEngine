@@ -1,13 +1,13 @@
 #pragma once
 #include "BaseComponent.h"
-#include "EventQueue/Subject.h"
+#include "../EventQueue/ISubject.h"
 
 namespace dae
 {
-	class HealthComponent final : public BaseComponent, public Subject
+	class HealthComponent final : public BaseComponent, public ISubject
 	{
 	public:
-		HealthComponent(GameObject* pOwner, int lives = 3);
+		HealthComponent(GameObject* pOwner, int health = 1);
 		virtual ~HealthComponent() = default;
 
 		HealthComponent(const HealthComponent& other) = delete;
@@ -15,12 +15,12 @@ namespace dae
 		HealthComponent& operator=(const HealthComponent& other) = delete;
 		HealthComponent& operator=(HealthComponent&& other) = delete;
 
-		void Update() override {}
+		virtual void Update() override {};
+		void ChangeCurrentHealth(int amount);
 
-		void ChangeHealth(int amount);
-		int GetLives() const { return m_lives; }
-
+		int GetHealth() const { return m_CurrentHealth; }
+			
 	private:
-		int m_lives;
+		int m_CurrentHealth;
 	};
 }
