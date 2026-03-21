@@ -1,4 +1,5 @@
 #include "ChangeHealthCommand.h"
+#include "../EventQueue/EventManager.h"
 #include "../GameObject.h"
 
 ChangeHealthCommand::ChangeHealthCommand(int deltaHealth)
@@ -10,10 +11,9 @@ void ChangeHealthCommand::Execute()
 {
 	if (m_pGameActor != nullptr)
 	{
-		auto healthComp = m_pGameActor->GetComponent<dae::HealthComponent>();
-		if (healthComp != nullptr)
-		{
-			healthComp->ChangeCurrentHealth(m_deltaHealth);
-		}
+		dae::Event healthEvent(dae::make_sdbm_hash("ChangeHealthEvent"));
+		healthEvent.nbArgs = 1;
+		healthEvent.args[0].i = m_deltaHealth;
+		dae::EventManager::GetInstance().BroadcastEvent(healthEvent, m_pGameActor);
 	}
 }

@@ -26,7 +26,13 @@ namespace dae
 		return sdbm_hash<N - 1>::calculate(text);
 	}
 
-	struct EventArg {};
+	struct EventArg {
+		union {
+			int i;
+			float f;
+			void* p;
+		};
+	};
 
 	using EventId = unsigned int;
 

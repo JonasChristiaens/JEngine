@@ -1,13 +1,35 @@
 #include "HealthComponent.h"
+#include "../EventQueue/EventManager.h"
+#include "../GameObject.h"
 
 dae::HealthComponent::HealthComponent(GameObject* pOwner, int health)
 	: BaseComponent(pOwner)
 	, m_CurrentHealth(health)
 {
+	EventManager::GetInstance().AddObserver(*this);
+}
+
+dae::HealthComponent::~HealthComponent()
+{
+	EventManager::GetInstance().RemoveObserver(*this);
 }
 
 void dae::HealthComponent::ChangeCurrentHealth(int amount)
 {
 	m_CurrentHealth += amount;
 	NotifyObservers(Event(make_sdbm_hash("HealthChanged")), GetOwner());
+}
+
+void dae::HealthComponent::Notify(const GameObject& pGameActor, Event event)
+{
+	if (&pGameActor == GetOwner())
+	{
+		if (event.id == make_sdbm_hash("ChangeHealthEvent"))
+		{
+			if (event.nbArgs > 0)
+			{
+				ChangeCurrentHealth(event.args[0].i);
+			}
+		}
+	}
 }

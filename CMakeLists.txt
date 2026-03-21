@@ -37,6 +37,8 @@ add_executable(${TARGET_NAME} ${TARGET_PARAM}
   Minigin/Components/PlayerAnimatorComponent.cpp
   Minigin/Components/HealthComponent.cpp
   Minigin/Components/ScoreComponent.cpp
+  Minigin/Components/CollisionComponent.cpp
+  Minigin/Components/PickupComponent.cpp
   Minigin/Commands/MoveCommand.cpp
   Minigin/Commands/ChangeHealthCommand.cpp
   Minigin/Commands/ChangeScoreCommand.cpp
@@ -127,10 +129,6 @@ endif()
 
 # Add steam if available
 # list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/steam")
-# find_package(Steamworks QUIET)
-
-# Point to the SteamSDK folder
-# set(STEAMWORKS_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../SteamSDK")
 # find_package(Steamworks QUIET)
 
 # Add Dear ImGui

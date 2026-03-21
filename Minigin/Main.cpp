@@ -28,6 +28,8 @@
 #include "Components/HealthComponent.h"
 #include "Components/ScoreComponent.h"
 #include "Components/DisplayComponent.h"
+#include "Components/CollisionComponent.h"
+#include "Components/PickupComponent.h"
 #include "Commands/MoveCommand.h"
 #include "Commands/ChangeHealthCommand.h"
 #include "Commands/ChangeScoreCommand.h"
@@ -121,6 +123,7 @@ static void load()
 	go->AddComponent<dae::PlayerAnimatorComponent>();
 	go->AddComponent<dae::HealthComponent>(3);
 	go->AddComponent<dae::ScoreComponent>(0);
+	go->AddComponent<dae::CollisionComponent>(32.0f, 32.0f);
 	auto player1 = go.get();
 	scene.Add(std::move(go));
 
@@ -137,9 +140,101 @@ static void load()
 	go->AddComponent<dae::PlayerAnimatorComponent>();
 	go->AddComponent<dae::HealthComponent>(3);
 	go->AddComponent<dae::ScoreComponent>(0);
+	go->AddComponent<dae::CollisionComponent>(32.0f, 32.0f);
 	auto player2 = go.get();
 	scene.Add(std::move(go));
 	
+
+	// ==========================
+	// Pickup Setup
+	// ==========================
+	// Pickup worth 10
+	go = std::make_unique<dae::GameObject>();
+	transform = go->AddComponent<dae::TransformComponent>();
+	transform->SetLocalPosition(300, 300);
+	render = go->AddComponent<dae::RenderComponent>();
+	render->SetTexture("Resources/BombermanSprites_General.png");
+	render->SetScale(2.0f);
+	render->SetSourceRectangle(0, 224, 16, 16);
+	auto pickupCollider = go->AddComponent<dae::CollisionComponent>(32.0f, 32.0f);
+	auto pickupComp = go->AddComponent<dae::PickupComponent>(10);
+	pickupCollider->SetOnCollisionCallback([pickupComp](dae::GameObject* other) {
+		pickupComp->OnCollision(other);
+	});
+	scene.Add(std::move(go));
+
+	// Pickups worth 100
+	go = std::make_unique<dae::GameObject>();
+	transform = go->AddComponent<dae::TransformComponent>();
+	transform->SetLocalPosition(350, 300);
+	render = go->AddComponent<dae::RenderComponent>();
+	render->SetTexture("Resources/BombermanSprites_General.png");
+	render->SetScale(2.0f);
+	render->SetSourceRectangle(0, 224, 16, 16);
+	pickupCollider = go->AddComponent<dae::CollisionComponent>(32.0f, 32.0f);
+	pickupComp = go->AddComponent<dae::PickupComponent>(100);
+	pickupCollider->SetOnCollisionCallback([pickupComp](dae::GameObject* other) {
+		pickupComp->OnCollision(other);
+		});
+	scene.Add(std::move(go));
+
+	go = std::make_unique<dae::GameObject>();
+	transform = go->AddComponent<dae::TransformComponent>();
+	transform->SetLocalPosition(400, 300);
+	render = go->AddComponent<dae::RenderComponent>();
+	render->SetTexture("Resources/BombermanSprites_General.png");
+	render->SetScale(2.0f);
+	render->SetSourceRectangle(0, 224, 16, 16);
+	pickupCollider = go->AddComponent<dae::CollisionComponent>(32.0f, 32.0f);
+	pickupComp = go->AddComponent<dae::PickupComponent>(100);
+	pickupCollider->SetOnCollisionCallback([pickupComp](dae::GameObject* other) {
+		pickupComp->OnCollision(other);
+		});
+	scene.Add(std::move(go));
+
+	go = std::make_unique<dae::GameObject>();
+	transform = go->AddComponent<dae::TransformComponent>();
+	transform->SetLocalPosition(450, 300);
+	render = go->AddComponent<dae::RenderComponent>();
+	render->SetTexture("Resources/BombermanSprites_General.png");
+	render->SetScale(2.0f);
+	render->SetSourceRectangle(0, 224, 16, 16);
+	pickupCollider = go->AddComponent<dae::CollisionComponent>(32.0f, 32.0f);
+	pickupComp = go->AddComponent<dae::PickupComponent>(100);
+	pickupCollider->SetOnCollisionCallback([pickupComp](dae::GameObject* other) {
+		pickupComp->OnCollision(other);
+		});
+	scene.Add(std::move(go));
+
+	go = std::make_unique<dae::GameObject>();
+	transform = go->AddComponent<dae::TransformComponent>();
+	transform->SetLocalPosition(500, 300);
+	render = go->AddComponent<dae::RenderComponent>();
+	render->SetTexture("Resources/BombermanSprites_General.png");
+	render->SetScale(2.0f);
+	render->SetSourceRectangle(0, 224, 16, 16);
+	pickupCollider = go->AddComponent<dae::CollisionComponent>(32.0f, 32.0f);
+	pickupComp = go->AddComponent<dae::PickupComponent>(100);
+	pickupCollider->SetOnCollisionCallback([pickupComp](dae::GameObject* other) {
+		pickupComp->OnCollision(other);
+		});
+	scene.Add(std::move(go));
+
+	go = std::make_unique<dae::GameObject>();
+	transform = go->AddComponent<dae::TransformComponent>();
+	transform->SetLocalPosition(550, 300);
+	render = go->AddComponent<dae::RenderComponent>();
+	render->SetTexture("Resources/BombermanSprites_General.png");
+	render->SetScale(2.0f);
+	render->SetSourceRectangle(0, 224, 16, 16);
+	pickupCollider = go->AddComponent<dae::CollisionComponent>(32.0f, 32.0f);
+	pickupComp = go->AddComponent<dae::PickupComponent>(100);
+	pickupCollider->SetOnCollisionCallback([pickupComp](dae::GameObject* other) {
+		pickupComp->OnCollision(other);
+		});
+	scene.Add(std::move(go));
+
+
 
 	// ==========================
 	// Player Information Display
