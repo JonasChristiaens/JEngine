@@ -2,9 +2,6 @@ cmake_minimum_required(VERSION 3.26)
 set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 project(Minigin LANGUAGES C CXX)
 
-# -----------------
-# Target selection
-# -----------------
 if(EMSCRIPTEN)
   message(STATUS "Using Emscripten")
   set(TARGET_NAME minigin_web)
@@ -14,10 +11,7 @@ else()
   set(TARGET_PARAM WIN32)
 endif()
 
-# -----------------
-# Sources
-# -----------------
-set(MINIGIN_SOURCES
+add_executable(${TARGET_NAME} ${TARGET_PARAM}
   Minigin/Font.cpp
   Minigin/GameObject.cpp
   Minigin/Main.cpp
@@ -44,23 +38,10 @@ set(MINIGIN_SOURCES
   Minigin/Commands/MoveCommand.cpp
   Minigin/Commands/ChangeHealthCommand.cpp
   Minigin/Commands/ChangeScoreCommand.cpp
-  Minigin/Commands/ResetAchievementsCommand.cpp
 )
 
-# Steam files (desktop only)
-if(NOT EMSCRIPTEN)
-  list(APPEND MINIGIN_SOURCES
-    Minigin/Achievements/CSteamAchievements.cpp
-    Minigin/Achievements/AchievementObserver.cpp
-  )
-endif()
-
-add_executable(${TARGET_NAME} ${TARGET_PARAM} ${MINIGIN_SOURCES})
 target_compile_features(${TARGET_NAME} PUBLIC cxx_std_20)
 
-# -----------------
-# Dependencies
-# -----------------
 include(FetchContent)
 
 # GLM
@@ -95,7 +76,6 @@ if(EMSCRIPTEN)
     GIT_TAG release-3.2.2
     GIT_SHALLOW TRUE
   )
-
   list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/emscripten")
   set(SDL3TTF_USE_SYSTEM_FREETYPE ON CACHE BOOL "" FORCE)
   set(SDL3TTF_VENDORED OFF CACHE BOOL "" FORCE)
@@ -142,24 +122,11 @@ FetchContent_Declare(imgui_plot
 FetchContent_MakeAvailable(imgui_plot)
 target_link_libraries(imgui_plot PUBLIC imgui)
 
-# Optional VLD (desktop)
+# Optional VLD
 if(WIN32)
   find_package(VLD CONFIG QUIET)
 endif()
 
-# Steamworks (desktop only)
-if(NOT EMSCRIPTEN)
-  list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/steam")
-  find_package(Steamworks QUIET)
-  if(Steamworks_FOUND)
-    target_compile_definitions(${TARGET_NAME} PUBLIC USE_STEAMWORKS=1)
-    target_link_libraries(${TARGET_NAME} PUBLIC Steamworks::Steamworks)
-  endif()
-endif()
-
-# -----------------
-# Target setup
-# -----------------
 target_include_directories(${TARGET_NAME} PUBLIC
   ${CMAKE_SOURCE_DIR}/Minigin
   ${imgui_SOURCE_DIR}
@@ -185,7 +152,7 @@ if(WIN32)
   target_link_libraries(${TARGET_NAME} PUBLIC xinput)
 endif()
 
-# Emscripten font deps for SDL3_ttf
+# Emscripten SDL_ttf deps
 if(EMSCRIPTEN)
   target_link_options(${TARGET_NAME} PRIVATE
     "SHELL:-sUSE_FREETYPE=1"
@@ -193,14 +160,12 @@ if(EMSCRIPTEN)
   )
 endif()
 
-# Copy Data folder
 add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
   COMMAND "${CMAKE_COMMAND}" -E copy_directory
   "${CMAKE_CURRENT_SOURCE_DIR}/Data"
   "$<TARGET_FILE_DIR:${TARGET_NAME}>/Data"
 )
 
-# Copy runtime DLLs (desktop)
 if(WIN32)
   add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
@@ -208,21 +173,8 @@ if(WIN32)
     "$<TARGET_FILE:SDL3_ttf::SDL3_ttf>"
     "$<TARGET_FILE_DIR:${TARGET_NAME}>"
   )
-
-  if(Steamworks_FOUND AND Steamworks_RUNTIME_DLL)
-    add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E copy_if_different
-      "${Steamworks_RUNTIME_DLL}"
-      "$<TARGET_FILE_DIR:${TARGET_NAME}>"
-    )
-    file(GENERATE
-      OUTPUT "$<TARGET_FILE_DIR:${TARGET_NAME}>/steam_appid.txt"
-      CONTENT "480"
-    )
-  endif()
 endif()
 
-# Warnings
 if(MSVC)
   target_compile_options(${TARGET_NAME} PRIVATE /W4 /WX)
 else()

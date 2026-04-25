@@ -4,7 +4,7 @@
 #include <thread>
 
 #if WIN32
-#define WIN32_LEAN_AND_MEAN 
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #endif
 
@@ -16,45 +16,6 @@
 #include "Renderer.h"
 #include "ResourceManager.h"
 #include "GameTime.h"
-#include "EventQueue/EventManager.h"
-#include "EventQueue/IObserver.h"
-
-#if USE_STEAMWORKS
-#pragma warning (push)
-#pragma warning (disable:4996)
-#include <steam_api.h>
-#pragma warning (pop)
-#endif
-
-
-#if USE_STEAMWORKS
-#include "Achievements/CSteamAchievements.h"
-#include "Achievements/AchievementObserver.h"
-
-// Defining our achievements
-enum EAchievements
-{
-	ACH_WIN_ONE_GAME = 0,
-	ACH_WIN_100_GAMES = 1,
-	ACH_TRAVEL_FAR_ACCUM = 2,
-	ACH_TRAVEL_FAR_SINGLE = 3,
-};
-
-// Achievement array which will hold data about the achievements and their state
-dae::Achievement_t g_Achievements[] =
-{
-	_ACH_ID(ACH_WIN_ONE_GAME, "Winner"),
-	_ACH_ID(ACH_WIN_100_GAMES, "Champion"),
-	_ACH_ID(ACH_TRAVEL_FAR_ACCUM, "Interstellar"),
-	_ACH_ID(ACH_TRAVEL_FAR_SINGLE, "Orbiter"),
-};
-
-// Global access to Achievements object
-static dae::CSteamAchievements* g_SteamAchievements = NULL;
-
-static dae::AchievementObserver* g_AchievementObserver = nullptr;
-
-#endif // USE_STEAMWORKS
 
 SDL_Window* g_window{};
 
@@ -71,62 +32,35 @@ void LogSDLVersion(const std::string& message, int major, int minor, int patch)
 
 #ifdef __EMSCRIPTEN__
 #include "emscripten.h"
-
 void LoopCallback(void* arg)
 {
 	static_cast<dae::Minigin*>(arg)->RunOneFrame();
 }
 #endif
 
-// Why bother with this? Because sometimes students have a different SDL version installed on their pc.
-// That is not a problem unless for some reason the dll's from this project are not copied next to the exe.
-// These entries in the debug output help to identify that issue.
 void PrintSDLVersion()
 {
-	LogSDLVersion("Compiled with SDL", SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_MICRO_VERSION);
+	LogSDLVersion("Compiled with SDL ", SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_MICRO_VERSION);
 	int version = SDL_GetVersion();
-	LogSDLVersion("Linked with SDL ", SDL_VERSIONNUM_MAJOR(version), SDL_VERSIONNUM_MINOR(version), SDL_VERSIONNUM_MICRO(version));
-	// LogSDLVersion("Compiled with SDL_image ",SDL_IMAGE_MAJOR_VERSION, SDL_IMAGE_MINOR_VERSION, SDL_IMAGE_MICRO_VERSION);
-	// version = IMG_Version();
-	// LogSDLVersion("Linked with SDL_image ", SDL_VERSIONNUM_MAJOR(version), SDL_VERSIONNUM_MINOR(version), SDL_VERSIONNUM_MICRO(version));
-	LogSDLVersion("Compiled with SDL_ttf ",	SDL_TTF_MAJOR_VERSION, SDL_TTF_MINOR_VERSION,SDL_TTF_MICRO_VERSION);
+	LogSDLVersion("Linked with SDL   ", SDL_VERSIONNUM_MAJOR(version), SDL_VERSIONNUM_MINOR(version), SDL_VERSIONNUM_MICRO(version));
+
+	LogSDLVersion("Compiled with SDL_ttf ", SDL_TTF_MAJOR_VERSION, SDL_TTF_MINOR_VERSION, SDL_TTF_MICRO_VERSION);
 	version = TTF_Version();
-	LogSDLVersion("Linked with SDL_ttf ", SDL_VERSIONNUM_MAJOR(version), SDL_VERSIONNUM_MINOR(version),	SDL_VERSIONNUM_MICRO(version));
+	LogSDLVersion("Linked with SDL_ttf   ", SDL_VERSIONNUM_MAJOR(version), SDL_VERSIONNUM_MINOR(version), SDL_VERSIONNUM_MICRO(version));
 }
 
 dae::Minigin::Minigin(const std::filesystem::path& dataPath)
 {
 	PrintSDLVersion();
-	
+
 	if (!SDL_InitSubSystem(SDL_INIT_VIDEO))
 	{
 		SDL_Log("Renderer error: %s", SDL_GetError());
 		throw std::runtime_error(std::string("SDL_Init Error: ") + SDL_GetError());
 	}
 
-#if USE_STEAMWORKS
-	// Initialize Steam
-	bool bRet = SteamAPI_Init();
-	if (!bRet)
-	{
-		SDL_Log("Warning: Steam must be running to play this game (SteamAPI_Init() failed).");
-	}
-	else
-	{
-		// Create the SteamAchievements object if Steam was successfully initialized
-		g_SteamAchievements = new CSteamAchievements(g_Achievements, 4);
-		g_AchievementObserver = new dae::AchievementObserver(g_SteamAchievements);
-		dae::EventManager::GetInstance().AddObserver(*g_AchievementObserver);
-	}
-#endif
-
-	g_window = SDL_CreateWindow(
-		"Programming 4 assignment",
-		1024,
-		576,
-		SDL_WINDOW_OPENGL
-	);
-	if (g_window == nullptr) 
+	g_window = SDL_CreateWindow("Programming 4 assignment", 1024, 576, SDL_WINDOW_OPENGL);
+	if (!g_window)
 	{
 		throw std::runtime_error(std::string("SDL_CreateWindow Error: ") + SDL_GetError());
 	}
@@ -143,18 +77,6 @@ dae::Minigin::~Minigin()
 	SDL_DestroyWindow(g_window);
 	g_window = nullptr;
 	SDL_Quit();
-
-#if USE_STEAMWORKS
-	if (g_SteamAchievements)
-	{
-		dae::EventManager::GetInstance().RemoveObserver(*g_AchievementObserver);
-		delete g_AchievementObserver;
-		g_AchievementObserver = nullptr;
-		delete g_SteamAchievements;
-		g_SteamAchievements = nullptr;
-	}
-	SteamAPI_Shutdown();
-#endif
 }
 
 void dae::Minigin::Run(const std::function<void()>& load)
@@ -176,19 +98,12 @@ void dae::Minigin::RunOneFrame()
 	const float deltaTime = std::chrono::duration<float>(currentTime - m_lastTime).count();
 	m_lastTime = currentTime;
 
-	// Update Time singleton with current frame's delta time
 	dae::GameTime::GetInstance().SetDeltaTime(deltaTime);
-
 	m_quit = !InputManager::GetInstance().ProcessInput();
-
-#if USE_STEAMWORKS
-	SteamAPI_RunCallbacks();
-#endif 
 
 	SceneManager::GetInstance().Update();
 	Renderer::GetInstance().Render();
 
-	// Frame rate limiting (60 FPS = ~16.67ms per frame)
 	const auto sleepTime = currentTime + std::chrono::milliseconds(16) - std::chrono::high_resolution_clock::now();
 	std::this_thread::sleep_for(sleepTime);
 }
