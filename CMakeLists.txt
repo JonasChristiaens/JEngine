@@ -84,6 +84,12 @@ endif()
 
 # ----- SDL3_ttf -----
 if(EMSCRIPTEN)
+  set(SDLTTF_VENDORED ON CACHE BOOL "Use vendored dependencies for SDL_ttf" FORCE)
+
+  # Optional compatibility knobs for some SDL_ttf revisions.
+  set(SDLTTF_USE_VENDORED_FREETYPE ON CACHE BOOL "" FORCE)
+  set(SDLTTF_USE_VENDORED_HARFBUZZ ON CACHE BOOL "" FORCE)
+
   FetchContent_Declare(
       SDL3_ttf
       GIT_REPOSITORY https://github.com/libsdl-org/SDL_ttf.git
