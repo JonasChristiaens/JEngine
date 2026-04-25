@@ -11,5 +11,9 @@ namespace dae
 		{
 			NotifyObservers(e, pSubjectActor);
 		}
+
+	private:
+		friend class Singleton<EventManager>;
+		EventManager() = default;
 	};
 }

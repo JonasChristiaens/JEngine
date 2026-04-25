@@ -92,6 +92,14 @@ if(EMSCRIPTEN)
       GIT_TAG release-3.2.2
       GIT_SHALLOW TRUE
   )
+
+  list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/emscripten")
+  set(SDL3TTF_USE_SYSTEM_FREETYPE ON CACHE BOOL "" FORCE)
+  set(SDL3TTF_VENDORED OFF CACHE BOOL "" FORCE)
+  set(SDLTTF_PLUTOSVG OFF CACHE BOOL "" FORCE)
+
+  add_compile_options(-sUSE_FREETYPE=1 -sUSE_HARFBUZZ=1)
+  add_link_options(-sUSE_FREETYPE=1 -sUSE_HARFBUZZ=1)
 else()
   FetchContent_Declare(
       SDL3_ttf
