@@ -38,10 +38,17 @@ add_executable(${TARGET_NAME} ${TARGET_PARAM}
   Minigin/Components/ScoreComponent.cpp
   Minigin/Components/CollisionComponent.cpp
   Minigin/Components/PickupComponent.cpp
+  Minigin/Components/DelayedEventComponent.cpp
+  Minigin/Components/DestroyOnAnimationFinishedComponent.cpp
   Minigin/Commands/MoveCommand.cpp
   Minigin/Commands/ChangeHealthCommand.cpp
   Minigin/Commands/ChangeScoreCommand.cpp
   Minigin/Commands/ResetAchievementsCommand.cpp
+  Minigin/Commands/SpawnBombCommand.cpp
+  Minigin/BombEventObserver.cpp
+  Minigin/ServiceLocator.cpp
+  Minigin/Audio/SDLMixerAudioService.cpp
+  Minigin/Audio/AudioEventObserver.cpp
 )
 
 # Enable C++20 features
@@ -108,6 +115,28 @@ FetchContent_MakeAvailable(SDL3_ttf)
 if(NOT EMSCRIPTEN)
   list(PREPEND CMAKE_PREFIX_PATH "${sdl3_ttf_SOURCE_DIR}")
   find_package(SDL3_ttf CONFIG REQUIRED)
+endif()
+
+# ----- SDL3_mixer -----
+if(EMSCRIPTEN)
+  FetchContent_Declare(
+      SDL3_mixer
+      GIT_REPOSITORY https://github.com/libsdl-org/SDL_mixer.git
+      GIT_TAG release-3.2.0
+      GIT_SHALLOW TRUE
+  )
+else()
+  FetchContent_Declare(
+      SDL3_mixer
+      URL https://www.libsdl.org/projects/SDL_mixer/release/SDL3_mixer-devel-3.2.0-VC.zip
+  )
+endif()
+
+FetchContent_MakeAvailable(SDL3_mixer)
+
+if(NOT EMSCRIPTEN)
+  list(PREPEND CMAKE_PREFIX_PATH "${sdl3_mixer_SOURCE_DIR}")
+  find_package(SDL3_mixer CONFIG REQUIRED)
 endif()
 
 # ----- ImGui -----
@@ -185,9 +214,10 @@ target_include_directories("${TARGET_NAME}" PUBLIC
 # ==============
 # Link Libraries
 # ==============
-target_link_libraries("${TARGET_NAME}" PUBLIC 
-  SDL3::SDL3 
+target_link_libraries("${TARGET_NAME}" PUBLIC
+  SDL3::SDL3
   SDL3_ttf::SDL3_ttf
+  SDL3_mixer::SDL3_mixer
   glm::glm
   imgui
   imgui_plot
@@ -207,20 +237,9 @@ add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
     "$<TARGET_FILE:SDL3::SDL3>"
     "$<TARGET_FILE:SDL3_ttf::SDL3_ttf>"
+    "$<TARGET_FILE:SDL3_mixer::SDL3_mixer>"
     "$<TARGET_FILE_DIR:${TARGET_NAME}>"
 )
-if(Steamworks_FOUND AND Steamworks_RUNTIME_DLL)
-    add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${Steamworks_RUNTIME_DLL}"
-        "$<TARGET_FILE_DIR:${TARGET_NAME}>"
-    )
-    # Generate steam_appid.txt for development
-    file(GENERATE 
-        OUTPUT "$<TARGET_FILE_DIR:${TARGET_NAME}>/steam_appid.txt" 
-        CONTENT "480"
-    )
-endif()
 endif()
 
 # =================

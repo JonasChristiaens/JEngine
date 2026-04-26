@@ -25,6 +25,5 @@ namespace dae
 
 	private:
 		int m_CurrentScore;
-		bool m_WonTriggered{ false };
 	};
 }
