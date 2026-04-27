@@ -1,4 +1,4 @@
-#include "SpriteAnimatorComponent.h"
+	#include "SpriteAnimatorComponent.h"
 #include "GameObject.h"
 #include "RenderComponent.h"
 #include "GameTime.h"
@@ -40,6 +40,11 @@ void dae::SpriteAnimatorComponent::Update()
 				m_currentFrame = m_frameCount - 1; // Stay on the last frame
 				m_isFinished = true;
 				m_isPlaying = false;
+
+				if (m_onFinishedCallback)
+				{
+					m_onFinishedCallback();
+				}
 			}
 		}
 
@@ -52,6 +57,9 @@ void dae::SpriteAnimatorComponent::SetAnimation(int startColumn, int startRow, i
 	// Ensure we don't reset the current animation if it shouldn't change
 	if (m_startColumn == startColumn && m_startRow == startRow && m_isPlaying)
 		return;
+
+	m_useExplicitFrames = false;
+	m_explicitFrames.clear();
 
 	m_startColumn = startColumn;
 	m_startRow = startRow;
@@ -68,6 +76,24 @@ void dae::SpriteAnimatorComponent::SetAnimation(int startColumn, int startRow, i
 	m_animationTimer = 0.0f;
 	m_isFinished = false;
 	m_isPlaying = true;
+
+	UpdateSprite();
+}
+
+void dae::SpriteAnimatorComponent::SetAnimation(const std::vector<SDL_FRect>& frames, float framesPerSecond, bool isLooping)
+{
+	m_explicitFrames = frames;
+	m_useExplicitFrames = !m_explicitFrames.empty();
+	m_frameCount = static_cast<int>(m_explicitFrames.size());
+
+	if (framesPerSecond > 0.0f)
+		m_frameDuration = 1.0f / framesPerSecond;
+
+	m_isLooping = isLooping;
+	m_currentFrame = 0;
+	m_animationTimer = 0.0f;
+	m_isFinished = false;
+	m_isPlaying = (m_frameCount > 0);
 
 	UpdateSprite();
 }
@@ -98,14 +124,20 @@ void dae::SpriteAnimatorComponent::Stop()
 void dae::SpriteAnimatorComponent::UpdateSprite()
 {
 	if (m_pRenderComponent == nullptr)
-		return;
+	{
+		m_pRenderComponent = GetOwner()->GetComponent<RenderComponent>();
+		if (m_pRenderComponent == nullptr)
+			return;
+	}
 
-	// Calculate wrapping if sequences bleed over into following rows
+	if (m_useExplicitFrames)
+	{
+		if (m_currentFrame >= 0 && m_currentFrame < static_cast<int>(m_explicitFrames.size()))
+			m_pRenderComponent->SetSourceRectangle(m_explicitFrames[m_currentFrame]);
+		return;
+	}
+
 	int columnOffset = m_currentFrame % m_columns;
 	int rowOffset = m_currentFrame / m_columns;
-
-	int currentColumn = m_startColumn + columnOffset;
-	int currentRow = m_startRow + rowOffset;
-
-	m_pRenderComponent->SetSprite(currentColumn, currentRow);
+	m_pRenderComponent->SetSprite(m_startColumn + columnOffset, m_startRow + rowOffset);
 }

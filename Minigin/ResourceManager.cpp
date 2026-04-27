@@ -17,6 +17,11 @@ void dae::ResourceManager::Init(const std::filesystem::path& dataPath)
 	}
 }
 
+const std::filesystem::path& dae::ResourceManager::GetDataPath() const
+{
+	return m_dataPath;
+}
+
 std::shared_ptr<dae::Texture2D> dae::ResourceManager::LoadTexture(const std::string& file)
 {
 	const auto fullPath = m_dataPath/file;

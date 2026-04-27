@@ -2,6 +2,7 @@
 #include <sstream>
 #include <iostream>
 #include <thread>
+#include <memory>
 
 #if WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -11,11 +12,14 @@
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
 #include "Minigin.h"
+#include "Audio/ServiceLocator.h"
+#include "Audio/SoundServiceSdlMixer.h"
 #include "Input/InputManager.h"
 #include "SceneManager.h"
 #include "Renderer.h"
 #include "ResourceManager.h"
 #include "GameTime.h"
+#include "EventQueue/EventManager.h"
 
 SDL_Window* g_window{};
 
@@ -59,6 +63,12 @@ dae::Minigin::Minigin(const std::filesystem::path& dataPath)
 		throw std::runtime_error(std::string("SDL_Init Error: ") + SDL_GetError());
 	}
 
+	if (!SDL_InitSubSystem(SDL_INIT_AUDIO))
+	{
+		SDL_Log("Audio error: %s", SDL_GetError());
+		throw std::runtime_error(std::string("SDL_Init Error: ") + SDL_GetError());
+	}
+
 	g_window = SDL_CreateWindow("Programming 4 assignment", 1024, 576, SDL_WINDOW_OPENGL);
 	if (!g_window)
 	{
@@ -67,11 +77,13 @@ dae::Minigin::Minigin(const std::filesystem::path& dataPath)
 
 	Renderer::GetInstance().Init(g_window);
 	ResourceManager::GetInstance().Init(dataPath);
+   ServiceLocator::RegisterSoundService(std::make_unique<SoundServiceSdlMixer>());
 }
 
 dae::Minigin::~Minigin()
 {
 	SceneManager::GetInstance().RemoveAll();
+	ServiceLocator::RegisterSoundService(nullptr);
 
 	Renderer::GetInstance().Destroy();
 	SDL_DestroyWindow(g_window);
@@ -100,6 +112,7 @@ void dae::Minigin::RunOneFrame()
 
 	dae::GameTime::GetInstance().SetDeltaTime(deltaTime);
 	m_quit = !InputManager::GetInstance().ProcessInput();
+	dae::EventManager::GetInstance().ProcessQueuedEvents();
 
 	SceneManager::GetInstance().Update();
 	Renderer::GetInstance().Render();

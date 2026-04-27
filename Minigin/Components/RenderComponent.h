@@ -31,6 +31,9 @@ namespace dae
 		void SetScale(float scale);
 		float GetScale() const { return m_scale; }
 
+		void SetRenderLayer(int layer) { m_renderLayer = layer; }
+		int GetRenderLayer() const { return m_renderLayer; }
+
 	private:
 		std::shared_ptr<Texture2D> m_texture{};
 		SDL_FRect m_sourceRect{};
@@ -42,5 +45,6 @@ namespace dae
 		int m_rows{ 0 };
 
 		float m_scale{ 1.0f };
+      int m_renderLayer{ 0 };
 	};
 }

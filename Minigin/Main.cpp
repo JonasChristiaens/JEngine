@@ -26,6 +26,10 @@
 #include "Commands/MoveCommand.h"
 #include "Commands/ChangeHealthCommand.h"
 #include "Commands/ChangeScoreCommand.h"
+#include "Commands/SpawnBombCommand.h"
+#include "BombEventObserver.h"
+#include "Audio/AudioEventObserver.h"
+
 #if USE_STEAMWORKS
 #include "Commands/ResetAchievementsCommand.h"
 #endif
@@ -39,6 +43,8 @@ static void load()
 	// Window Setup
 	// ============
 	auto& scene = dae::SceneManager::GetInstance().CreateScene();
+	static std::unique_ptr<dae::BombEventObserver> g_BombObserver{};
+	static std::unique_ptr<dae::AudioEventObserver> g_AudioObserver{};
 
 	// Background
 	auto go = std::make_unique<dae::GameObject>();
@@ -86,6 +92,7 @@ static void load()
 	render->SetSpriteSheet(16, 16, 6, 2);
 	render->SetSprite(4, 0);
 	render->SetScale(2.0f);
+	render->SetRenderLayer(5);
 	go->AddComponent<dae::SpriteAnimatorComponent>();
 	go->AddComponent<dae::PlayerAnimatorComponent>();
 	go->AddComponent<dae::HealthComponent>(3);
@@ -103,6 +110,7 @@ static void load()
 	render->SetSpriteSheet(16, 16, 6, 2);
 	render->SetSprite(4, 0);
 	render->SetScale(2.0f);
+   render->SetRenderLayer(5);
 	go->AddComponent<dae::SpriteAnimatorComponent>();
 	go->AddComponent<dae::PlayerAnimatorComponent>();
 	go->AddComponent<dae::HealthComponent>(3);
@@ -331,6 +339,10 @@ static void load()
 	score100P1->SetGameActor(player1);
 	input.BindKeyboardInput(SDLK_X, dae::KeyState::Down, std::move(score100P1));
 
+	auto spawnBombP1 = std::make_unique<SpawnBombCommand>();
+	spawnBombP1->SetGameActor(player1);
+	input.BindKeyboardInput(SDLK_R, dae::KeyState::Down, std::move(spawnBombP1));
+
 
 	// Player 2 - Controller DPad controls
 	const unsigned int controllerIndex = 0;
@@ -369,6 +381,12 @@ static void load()
 	auto resetAchievements = std::make_unique<ResetAchievementsCommand>();
 	input.BindKeyboardInput(SDLK_F1, dae::KeyState::Down, std::move(resetAchievements));
 #endif
+
+	if (!g_BombObserver)
+		g_BombObserver = std::make_unique<dae::BombEventObserver>(scene);
+
+	if (!g_AudioObserver)
+		g_AudioObserver = std::make_unique<dae::AudioEventObserver>();
 }
 
 

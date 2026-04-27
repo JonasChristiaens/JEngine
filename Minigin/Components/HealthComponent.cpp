@@ -18,6 +18,14 @@ void dae::HealthComponent::ChangeCurrentHealth(int amount)
 {
 	m_CurrentHealth += amount;
 	NotifyObservers(Event(make_sdbm_hash("HealthChanged")), GetOwner());
+
+	if (amount < 0)
+	{
+		Event tookDamageEvent(make_sdbm_hash("TookDamageEvent"));
+		tookDamageEvent.nbArgs = 1;
+		tookDamageEvent.args[0].i = -amount;
+		EventManager::GetInstance().BroadcastEvent(tookDamageEvent, GetOwner());
+	}
 }
 
 void dae::HealthComponent::Notify(const GameObject& pGameActor, Event event)
