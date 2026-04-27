@@ -39,15 +39,14 @@ add_executable(${TARGET_NAME} ${TARGET_PARAM}
   Minigin/Components/CollisionComponent.cpp
   Minigin/Components/PickupComponent.cpp
   Minigin/Components/DelayedEventComponent.cpp
-  Minigin/Components/DestroyOnAnimationFinishedComponent.cpp
   Minigin/Commands/MoveCommand.cpp
   Minigin/Commands/ChangeHealthCommand.cpp
   Minigin/Commands/ChangeScoreCommand.cpp
   Minigin/Commands/ResetAchievementsCommand.cpp
   Minigin/Commands/SpawnBombCommand.cpp
   Minigin/BombEventObserver.cpp
-  Minigin/ServiceLocator.cpp
-  Minigin/Audio/SDLMixerAudioService.cpp
+  Minigin/Audio/ServiceLocator.cpp
+  Minigin/Audio/SoundServiceSdlMixer.cpp
   Minigin/Audio/AudioEventObserver.cpp
 )
 
