@@ -1,6 +1,7 @@
 #include <algorithm>
 #include "Scene.h"
 #include <cassert>
+#include "Components/RenderComponent.h"
 
 using namespace dae;
 
@@ -43,6 +44,35 @@ void Scene::LateUpdate()
 
 void Scene::Render() const
 {
+    std::vector<GameObject*> sortedObjects{};
+	sortedObjects.reserve(m_objects.size());
+
+	for (const auto& object : m_objects)
+	{
+		if (object->GetParent() == nullptr)
+		{
+			sortedObjects.push_back(object.get());
+		}
+	}
+
+	std::stable_sort(sortedObjects.begin(), sortedObjects.end(), [](const GameObject* lhs, const GameObject* rhs)
+	{
+		const auto* lhsRender = lhs->GetComponent<RenderComponent>();
+		const auto* rhsRender = rhs->GetComponent<RenderComponent>();
+
+		const int lhsLayer = lhsRender ? lhsRender->GetRenderLayer() : 0;
+		const int rhsLayer = rhsRender ? rhsRender->GetRenderLayer() : 0;
+
+		return lhsLayer < rhsLayer;
+	});
+
+	for (const auto* object : sortedObjects)
+	{
+		object->Render();
+	}
+
+	return;
+
 	for (const auto& object : m_objects)
 	{
 		// Only render root objects (objects without a parent)
