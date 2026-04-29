@@ -14,7 +14,10 @@ dae::AudioEventObserver::AudioEventObserver()
 
 dae::AudioEventObserver::~AudioEventObserver()
 {
-    dae::EventManager::GetInstance().RemoveObserver(*this);
+ if (dae::EventManager::IsAlive())
+    {
+        dae::EventManager::GetInstance().RemoveObserver(*this);
+    }
 }
 
 void dae::AudioEventObserver::Notify(const GameObject& /*pGameActor*/, Event event)

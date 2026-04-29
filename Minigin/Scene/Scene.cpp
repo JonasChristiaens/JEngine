@@ -70,17 +70,5 @@ void Scene::Render() const
 	{
 		object->Render();
 	}
-
-	return;
-
-	for (const auto& object : m_objects)
-	{
-		// Only render root objects (objects without a parent)
-		// Children will be rendered by their parents
-		if (object->GetParent() == nullptr)
-		{
-			object->Render();
-		}
-	}
 }
 

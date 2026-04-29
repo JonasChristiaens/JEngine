@@ -57,7 +57,7 @@ static void load()
 	go = std::make_unique<dae::GameObject>();
 	auto transform = go->AddComponent<dae::TransformComponent>();
 	transform->SetLocalPosition(358, 180);
-	render = go->AddComponent<dae::RenderComponent>();
+	render = go->AddComponent<dae::RenderComponent>();	
 	render->SetTexture("logo.png");
 	scene.Add(std::move(go));
 
@@ -88,7 +88,7 @@ static void load()
 	transform = go->AddComponent<dae::TransformComponent>();
 	transform->SetLocalPosition(100, 300);
 	render = go->AddComponent<dae::RenderComponent>();
-	render->SetTexture("Resources/BombermanSprites_General.png");
+	render->SetTexture("Textures/BombermanSprites_General.png");
 	render->SetSpriteSheet(16, 16, 6, 2);
 	render->SetSprite(4, 0);
 	render->SetScale(2.0f);
@@ -106,7 +106,7 @@ static void load()
 	transform = go->AddComponent<dae::TransformComponent>();
 	transform->SetLocalPosition(200, 300);
 	render = go->AddComponent<dae::RenderComponent>();
-	render->SetTexture("Resources/BombermanSprites_General.png");
+	render->SetTexture("Textures/BombermanSprites_General.png");
 	render->SetSpriteSheet(16, 16, 6, 2);
 	render->SetSprite(4, 0);
 	render->SetScale(2.0f);
@@ -128,7 +128,7 @@ static void load()
 	transform = go->AddComponent<dae::TransformComponent>();
 	transform->SetLocalPosition(300, 300);
 	render = go->AddComponent<dae::RenderComponent>();
-	render->SetTexture("Resources/BombermanSprites_General.png");
+	render->SetTexture("Textures/BombermanSprites_General.png");
 	render->SetScale(2.0f);
 	render->SetSourceRectangle(0, 224, 16, 16);
 	auto pickupCollider = go->AddComponent<dae::CollisionComponent>(32.0f, 32.0f);
@@ -143,7 +143,7 @@ static void load()
 	transform = go->AddComponent<dae::TransformComponent>();
 	transform->SetLocalPosition(350, 300);
 	render = go->AddComponent<dae::RenderComponent>();
-	render->SetTexture("Resources/BombermanSprites_General.png");
+	render->SetTexture("Textures/BombermanSprites_General.png");
 	render->SetScale(2.0f);
 	render->SetSourceRectangle(0, 224, 16, 16);
 	pickupCollider = go->AddComponent<dae::CollisionComponent>(32.0f, 32.0f);
@@ -157,7 +157,7 @@ static void load()
 	transform = go->AddComponent<dae::TransformComponent>();
 	transform->SetLocalPosition(400, 300);
 	render = go->AddComponent<dae::RenderComponent>();
-	render->SetTexture("Resources/BombermanSprites_General.png");
+	render->SetTexture("Textures/BombermanSprites_General.png");
 	render->SetScale(2.0f);
 	render->SetSourceRectangle(0, 224, 16, 16);
 	pickupCollider = go->AddComponent<dae::CollisionComponent>(32.0f, 32.0f);
@@ -171,7 +171,7 @@ static void load()
 	transform = go->AddComponent<dae::TransformComponent>();
 	transform->SetLocalPosition(450, 300);
 	render = go->AddComponent<dae::RenderComponent>();
-	render->SetTexture("Resources/BombermanSprites_General.png");
+	render->SetTexture("Textures/BombermanSprites_General.png");
 	render->SetScale(2.0f);
 	render->SetSourceRectangle(0, 224, 16, 16);
 	pickupCollider = go->AddComponent<dae::CollisionComponent>(32.0f, 32.0f);
@@ -185,7 +185,7 @@ static void load()
 	transform = go->AddComponent<dae::TransformComponent>();
 	transform->SetLocalPosition(500, 300);
 	render = go->AddComponent<dae::RenderComponent>();
-	render->SetTexture("Resources/BombermanSprites_General.png");
+	render->SetTexture("Textures/BombermanSprites_General.png");
 	render->SetScale(2.0f);
 	render->SetSourceRectangle(0, 224, 16, 16);
 	pickupCollider = go->AddComponent<dae::CollisionComponent>(32.0f, 32.0f);
@@ -199,7 +199,7 @@ static void load()
 	transform = go->AddComponent<dae::TransformComponent>();
 	transform->SetLocalPosition(550, 300);
 	render = go->AddComponent<dae::RenderComponent>();
-	render->SetTexture("Resources/BombermanSprites_General.png");
+	render->SetTexture("Textures/BombermanSprites_General.png");
 	render->SetScale(2.0f);
 	render->SetSourceRectangle(0, 224, 16, 16);
 	pickupCollider = go->AddComponent<dae::CollisionComponent>(32.0f, 32.0f);
@@ -233,19 +233,17 @@ static void load()
 	text->SetColor({ 180, 180, 180, 255 });
 	scene.Add(std::move(go));
 
-#if USE_STEAMWORKS
-	go = std::make_unique<dae::GameObject>();
+   go = std::make_unique<dae::GameObject>();
 	transform = go->AddComponent<dae::TransformComponent>();
-	transform->SetLocalPosition(10, 260);
-	text = go->AddComponent<dae::TextComponent>("Press F1 to reset Steam Achievements", infoFont);
+	transform->SetLocalPosition(10, 140);
+	text = go->AddComponent<dae::TextComponent>("Place bombs with R (keyboard) or Y (controller)", infoFont);
 	text->SetColor({ 180, 180, 180, 255 });
 	scene.Add(std::move(go));
-#endif
 
 	// Bomberman 1 Lives Display
 	go = std::make_unique<dae::GameObject>();
 	transform = go->AddComponent<dae::TransformComponent>();
-	transform->SetLocalPosition(10, 160);
+   transform->SetLocalPosition(10, 190);
 	text = go->AddComponent<dae::TextComponent>("# lives: 3", infoFont);
 	text->SetColor({ 180, 180, 180, 255 });
 	auto livesDisplayP1 = go->AddComponent<dae::DisplayComponent<dae::HealthComponent>>(
@@ -260,7 +258,7 @@ static void load()
 	// Bomberman 1 Score Display
 	go = std::make_unique<dae::GameObject>();
 	transform = go->AddComponent<dae::TransformComponent>();
-	transform->SetLocalPosition(10, 180);
+   transform->SetLocalPosition(10, 210);
 	text = go->AddComponent<dae::TextComponent>("Score: 0", infoFont);
 	text->SetColor({ 180, 180, 180, 255 });
 	auto scoreDisplayP1 = go->AddComponent<dae::DisplayComponent<dae::ScoreComponent>>(
@@ -275,7 +273,7 @@ static void load()
 	// Bomberman 2 Lives Display
 	go = std::make_unique<dae::GameObject>();
 	transform = go->AddComponent<dae::TransformComponent>();
-	transform->SetLocalPosition(10, 200);
+   transform->SetLocalPosition(10, 230);
 	text = go->AddComponent<dae::TextComponent>("# lives: 3", infoFont);
 	text->SetColor({ 180, 180, 180, 255 });
 	auto livesDisplayP2 = go->AddComponent<dae::DisplayComponent<dae::HealthComponent>>(
@@ -290,7 +288,7 @@ static void load()
 	// Bomberman 2 Score Display
 	go = std::make_unique<dae::GameObject>();
 	transform = go->AddComponent<dae::TransformComponent>();
-	transform->SetLocalPosition(10, 220);
+   transform->SetLocalPosition(10, 250);
 	text = go->AddComponent<dae::TextComponent>("Score: 0", infoFont);
 	text->SetColor({ 180, 180, 180, 255 });
 	auto scoreDisplayP2 = go->AddComponent<dae::DisplayComponent<dae::ScoreComponent>>(
@@ -375,6 +373,10 @@ static void load()
 	auto score100P2 = std::make_unique<ChangeScoreCommand>(100);
 	score100P2->SetGameActor(player2);
 	input.BindControllerInput(controllerIndex, ControllerButton::B, dae::KeyState::Down, std::move(score100P2));
+
+	auto spawnBombP2 = std::make_unique<SpawnBombCommand>();
+	spawnBombP2->SetGameActor(player2);
+	input.BindControllerInput(controllerIndex, ControllerButton::Y, dae::KeyState::Down, std::move(spawnBombP2));
 
 #if USE_STEAMWORKS
 	// Utility - Reset Achievements

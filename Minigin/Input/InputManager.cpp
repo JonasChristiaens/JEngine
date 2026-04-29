@@ -22,6 +22,10 @@ bool dae::InputManager::ProcessInput()
 	// Get current keyboard state
 	int numKeys;
 	const bool* keyboardState = SDL_GetKeyboardState(&numKeys);
+	if (!keyboardState || numKeys <= 0)
+	{
+		return true;
+	}
 
 	// Execute controller commands
 	for (auto& [controllerKey, command] : m_controllerCommands)
@@ -55,6 +59,11 @@ bool dae::InputManager::ProcessInput()
 	for (auto& [keyboardKey, command] : m_keyboardCommands)
 	{
 		SDL_Scancode scancode = SDL_GetScancodeFromKey(keyboardKey.key, nullptr);
+      if (scancode == SDL_SCANCODE_UNKNOWN || scancode >= numKeys)
+		{
+			m_previousKeyboardState[keyboardKey.key] = false;
+			continue;
+		}
 		bool isCurrentlyPressed = keyboardState[scancode];
 		bool wasPreviouslyPressed = m_previousKeyboardState[keyboardKey.key];
 		bool shouldExecute = false;
@@ -82,6 +91,11 @@ bool dae::InputManager::ProcessInput()
 	for (auto& [keyboardKey, command] : m_keyboardCommands)
 	{
 		SDL_Scancode scancode = SDL_GetScancodeFromKey(keyboardKey.key, nullptr);
+     if (scancode == SDL_SCANCODE_UNKNOWN || scancode >= numKeys)
+		{
+			m_previousKeyboardState[keyboardKey.key] = false;
+			continue;
+		}
 		m_previousKeyboardState[keyboardKey.key] = keyboardState[scancode];
 	}
 

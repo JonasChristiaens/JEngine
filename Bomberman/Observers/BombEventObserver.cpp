@@ -25,7 +25,10 @@ dae::BombEventObserver::BombEventObserver(Scene& scene)
 
 dae::BombEventObserver::~BombEventObserver()
 {
-    dae::EventManager::GetInstance().RemoveObserver(*this);
+ if (dae::EventManager::IsAlive())
+    {
+        dae::EventManager::GetInstance().RemoveObserver(*this);
+    }
 }
 
 void dae::BombEventObserver::Notify(const GameObject& pGameActor, Event event)
