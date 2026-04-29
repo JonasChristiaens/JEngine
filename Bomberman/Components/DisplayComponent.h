@@ -1,8 +1,8 @@
 #pragma once
 #include "BaseComponent.h"
 #include "TextComponent.h"
-#include "../EventQueue/IObserver.h"
-#include "../GameObject.h"
+#include "EventQueue/IObserver.h"
+#include "Scene/GameObject.h"
 #include <string>
 #include <functional>
 

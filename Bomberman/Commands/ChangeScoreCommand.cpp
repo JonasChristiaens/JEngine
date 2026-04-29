@@ -1,6 +1,6 @@
 #include "ChangeScoreCommand.h"
-#include "../EventQueue/EventManager.h"
-#include "../GameObject.h"
+#include "EventQueue/EventManager.h"
+#include "Scene/GameObject.h"
 
 ChangeScoreCommand::ChangeScoreCommand(int deltaScore)
 	: m_deltaScore(deltaScore)

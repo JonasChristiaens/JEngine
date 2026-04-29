@@ -1,7 +1,7 @@
 #pragma once
 #include "BaseComponent.h"
-#include "../EventQueue/ISubject.h"
-#include "../EventQueue/IObserver.h"
+#include "EventQueue/ISubject.h"
+#include "EventQueue/IObserver.h"
 
 namespace dae
 {

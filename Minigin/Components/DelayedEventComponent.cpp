@@ -1,6 +1,6 @@
 #include "DelayedEventComponent.h"
 #include "../EventQueue/EventManager.h"
-#include "../GameTime.h"
+#include "../Core/GameTime.h"
 
 dae::DelayedEventComponent::DelayedEventComponent(GameObject* pOwner, const Event& eventToSend, float delaySeconds)
     : BaseComponent(pOwner)

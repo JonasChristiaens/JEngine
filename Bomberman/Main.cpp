@@ -5,11 +5,11 @@
 #include <vld.h>
 #endif
 
-#include "Minigin.h"
-#include "SceneManager.h"
-#include "ResourceManager.h"
-#include "Scene.h"
-#include "GameObject.h"
+#include "Core/Minigin.h"
+#include "Scene/SceneManager.h"
+#include "Resources/ResourceManager.h"
+#include "Scene/Scene.h"
+#include "Scene/GameObject.h"
 #include "Input/InputManager.h"
 #include "Input/ControllerButtons.h"
 #include "Components/TransformComponent.h"
@@ -27,7 +27,7 @@
 #include "Commands/ChangeHealthCommand.h"
 #include "Commands/ChangeScoreCommand.h"
 #include "Commands/SpawnBombCommand.h"
-#include "BombEventObserver.h"
+#include "Observers/BombEventObserver.h"
 #include "Audio/AudioEventObserver.h"
 
 #if USE_STEAMWORKS

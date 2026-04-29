@@ -1,5 +1,5 @@
 #pragma once
-#include "../GameObject.h"
+#include "../Scene/GameObject.h"
 #include "Event.h"
 
 namespace dae

@@ -1,6 +1,6 @@
 #include "PickupComponent.h"
-#include "../EventQueue/EventManager.h"
-#include "../GameObject.h"
+#include "EventQueue/EventManager.h"
+#include "Scene/GameObject.h"
 
 namespace dae
 {

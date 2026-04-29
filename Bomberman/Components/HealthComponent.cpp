@@ -1,6 +1,6 @@
 #include "HealthComponent.h"
-#include "../EventQueue/EventManager.h"
-#include "../GameObject.h"
+#include "EventQueue/EventManager.h"
+#include "Scene/GameObject.h"
 
 dae::HealthComponent::HealthComponent(GameObject* pOwner, int health)
 	: BaseComponent(pOwner)

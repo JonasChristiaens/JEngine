@@ -1,6 +1,6 @@
 #include "BombEventObserver.h"
-#include "Scene.h"
-#include "GameObject.h"
+#include "Scene/Scene.h"
+#include "Scene/GameObject.h"
 #include "Components/TransformComponent.h"
 #include "Components/RenderComponent.h"
 #include "Components/SpriteAnimatorComponent.h"

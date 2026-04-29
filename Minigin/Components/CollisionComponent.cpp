@@ -1,5 +1,5 @@
 #include "CollisionComponent.h"
-#include "../GameObject.h"
+#include "../Scene/GameObject.h"
 #include "TransformComponent.h"
 
 namespace dae

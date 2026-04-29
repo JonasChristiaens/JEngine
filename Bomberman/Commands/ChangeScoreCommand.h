@@ -1,6 +1,6 @@
 #pragma once
 #include "Command.h"
-#include "../Components/ScoreComponent.h"
+#include "Components/ScoreComponent.h"
 
 class ChangeScoreCommand final : public Command
 {

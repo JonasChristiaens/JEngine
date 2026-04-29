@@ -1,5 +1,5 @@
 #pragma once
-#include "../Singleton.h"
+#include "../Core/Singleton.h"
 #include "ISubject.h"
 #include <queue>
 #include <mutex>

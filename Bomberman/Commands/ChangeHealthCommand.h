@@ -1,6 +1,6 @@
 #pragma once
 #include "Command.h"
-#include "../Components/HealthComponent.h"
+#include "Components/HealthComponent.h"
 
 class ChangeHealthCommand final : public Command
 {

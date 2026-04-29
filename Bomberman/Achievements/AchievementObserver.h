@@ -1,8 +1,8 @@
 #pragma once
 
 #if USE_STEAMWORKS
-#include "../EventQueue/IObserver.h"
-#include "../EventQueue/Event.h"
+#include "EventQueue/IObserver.h"
+#include "EventQueue/Event.h"
 
 namespace dae
 {

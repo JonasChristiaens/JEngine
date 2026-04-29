@@ -1,7 +1,7 @@
 #include "SpawnBombCommand.h"
-#include "../EventQueue/EventManager.h"
-#include "../GameObject.h"
-#include "../Components/TransformComponent.h"
+#include "EventQueue/EventManager.h"
+#include "Scene/GameObject.h"
+#include "Components/TransformComponent.h"
 
 void SpawnBombCommand::Execute()
 {

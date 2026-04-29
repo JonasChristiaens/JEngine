@@ -1,6 +1,6 @@
 #include "ChangeHealthCommand.h"
-#include "../EventQueue/EventManager.h"
-#include "../GameObject.h"
+#include "EventQueue/EventManager.h"
+#include "Scene/GameObject.h"
 
 ChangeHealthCommand::ChangeHealthCommand(int deltaHealth)
 	: m_deltaHealth(deltaHealth)

@@ -1,6 +1,6 @@
 #include "ResetAchievementsCommand.h"
 #if USE_STEAMWORKS
-#include "../EventQueue/EventManager.h"
+#include "EventQueue/EventManager.h"
 
 void ResetAchievementsCommand::Execute()
 {
