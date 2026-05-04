@@ -1,8 +1,8 @@
-﻿#include <stdexcept>
-#include <sstream>
-#include <iostream>
-#include <thread>
+﻿#include <iostream>
 #include <memory>
+#include <sstream>
+#include <stdexcept>
+#include <thread>
 
 #if WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -21,6 +21,10 @@
 #include "GameTime.h"
 #include "EventQueue/EventManager.h"
 
+#ifdef __EMSCRIPTEN__
+#include "emscripten.h"
+#endif
+
 SDL_Window* g_window{};
 
 void LogSDLVersion(const std::string& message, int major, int minor, int patch)
@@ -35,7 +39,6 @@ void LogSDLVersion(const std::string& message, int major, int minor, int patch)
 }
 
 #ifdef __EMSCRIPTEN__
-#include "emscripten.h"
 void LoopCallback(void* arg)
 {
 	static_cast<dae::Minigin*>(arg)->RunOneFrame();
@@ -63,11 +66,13 @@ dae::Minigin::Minigin(const std::filesystem::path& dataPath)
 		throw std::runtime_error(std::string("SDL_Init Error: ") + SDL_GetError());
 	}
 
+#ifndef __EMSCRIPTEN__
 	if (!SDL_InitSubSystem(SDL_INIT_AUDIO))
 	{
 		SDL_Log("Audio error: %s", SDL_GetError());
 		throw std::runtime_error(std::string("SDL_Init Error: ") + SDL_GetError());
 	}
+#endif
 
 	g_window = SDL_CreateWindow("Programming 4 assignment", 1024, 576, SDL_WINDOW_OPENGL);
 	if (!g_window)
@@ -75,9 +80,13 @@ dae::Minigin::Minigin(const std::filesystem::path& dataPath)
 		throw std::runtime_error(std::string("SDL_CreateWindow Error: ") + SDL_GetError());
 	}
 
-	Renderer::GetInstance().Init(g_window);
+    Renderer::GetInstance().Init(g_window);
 	ResourceManager::GetInstance().Init(dataPath);
-   ServiceLocator::RegisterSoundService(std::make_unique<SoundServiceSdlMixer>());
+#ifndef __EMSCRIPTEN__
+	ServiceLocator::RegisterSoundService(std::make_unique<SoundServiceSdlMixer>());
+#else
+	ServiceLocator::RegisterSoundService(nullptr);
+#endif
 }
 
 dae::Minigin::~Minigin()
