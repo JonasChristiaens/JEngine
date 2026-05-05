@@ -18,17 +18,20 @@
 #include "Components/FPSComponent.h"
 #include "Components/SpriteAnimatorComponent.h"
 #include "Components/PlayerAnimatorComponent.h"
+#include "Components/CameraComponent.h"
 #include "Components/HealthComponent.h"
 #include "Components/ScoreComponent.h"
 #include "Components/DisplayComponent.h"
 #include "Components/CollisionComponent.h"
 #include "Components/PickupComponent.h"
+#include "Components/PlayfieldComponent.h"
 #include "Commands/MoveCommand.h"
 #include "Commands/ChangeHealthCommand.h"
 #include "Commands/ChangeScoreCommand.h"
 #include "Commands/SpawnBombCommand.h"
 #include "Observers/BombEventObserver.h"
 #include "Audio/AudioEventObserver.h"
+#include "Rendering/Renderer.h"
 
 #if USE_STEAMWORKS
 #include "Commands/ResetAchievementsCommand.h"
@@ -46,38 +49,32 @@ static void load()
 	static std::unique_ptr<dae::BombEventObserver> g_BombObserver{};
 	static std::unique_ptr<dae::AudioEventObserver> g_AudioObserver{};
 
-	// Background
+	const float playfieldWidth = 496.0f;
+	const float playfieldHeight = 208.0f;
+	const auto windowSize = dae::Renderer::GetInstance().GetWindowSize();
+	const float windowWidth = static_cast<float>(windowSize.x);
+	const float windowHeight = static_cast<float>(windowSize.y);
+	const float playfieldScale = windowHeight / playfieldHeight;
+	const float playfieldScaledWidth = playfieldWidth * playfieldScale;
+
+	// Camera Root
+	auto cameraRoot = std::make_unique<dae::GameObject>();
+	auto cameraTransform = cameraRoot->AddComponent<dae::TransformComponent>();
+	cameraTransform->SetLocalPosition(0, 0);
+
+
+	// Playfield
 	auto go = std::make_unique<dae::GameObject>();
 	go->AddComponent<dae::TransformComponent>();
 	auto render = go->AddComponent<dae::RenderComponent>();
-	render->SetTexture("background.png");
+	render->SetTexture("Textures/BombermanSprites_Playfield.png");
+	render->SetSourceRectangle(0, 0, playfieldWidth, playfieldHeight);
+	render->SetScale(playfieldScale);
+	render->SetRenderLayer(0);
+	go->SetParent(cameraRoot.get(), false);
 	scene.Add(std::move(go));
 
-	// Logo
-	go = std::make_unique<dae::GameObject>();
-	auto transform = go->AddComponent<dae::TransformComponent>();
-	transform->SetLocalPosition(358, 180);
-	render = go->AddComponent<dae::RenderComponent>();	
-	render->SetTexture("logo.png");
-	scene.Add(std::move(go));
-
-	// Text
-	auto font = dae::ResourceManager::GetInstance().LoadFont("Lingua.otf", 36);
-	go = std::make_unique<dae::GameObject>();
-	transform = go->AddComponent<dae::TransformComponent>();
-	transform->SetLocalPosition(292, 20);
-	auto text = go->AddComponent<dae::TextComponent>("Programming 4 Assignment", font);
-	text->SetColor({ 255, 255, 255, 255 });
-	scene.Add(std::move(go));
-
-	// FPS Counter
-	go = std::make_unique<dae::GameObject>();
-	transform = go->AddComponent<dae::TransformComponent>();
-	transform->SetLocalPosition(10, 10);
-	text = go->AddComponent<dae::TextComponent>("0.0 FPS", font);
-	text->SetColor({ 255, 255, 255, 255 });
-	go->AddComponent<dae::FPSComponent>();
-	scene.Add(std::move(go));
+	cameraRoot->AddComponent<dae::PlayfieldComponent>(scene, playfieldWidth, playfieldHeight, playfieldScale);
 
 
 	// ============
@@ -85,130 +82,46 @@ static void load()
 	// ============
 	// Player 1 (WASD controls)
 	go = std::make_unique<dae::GameObject>();
-	transform = go->AddComponent<dae::TransformComponent>();
-	transform->SetLocalPosition(100, 300);
+	auto transform = go->AddComponent<dae::TransformComponent>();
+	const float tileWorldSize = 16.0f * playfieldScale;
+	transform->SetLocalPosition(tileWorldSize * 1.5f, tileWorldSize * 2.0f);
 	render = go->AddComponent<dae::RenderComponent>();
 	render->SetTexture("Textures/BombermanSprites_General.png");
 	render->SetSpriteSheet(16, 16, 6, 2);
 	render->SetSprite(4, 0);
-	render->SetScale(2.0f);
+	render->SetScale(3.0f);
+	render->SetPivot({ 0.5f, 1.0f });
 	render->SetRenderLayer(5);
 	go->AddComponent<dae::SpriteAnimatorComponent>();
 	go->AddComponent<dae::PlayerAnimatorComponent>();
 	go->AddComponent<dae::HealthComponent>(3);
 	go->AddComponent<dae::ScoreComponent>(0);
-	go->AddComponent<dae::CollisionComponent>(32.0f, 32.0f);
+	auto player1Collider = go->AddComponent<dae::CollisionComponent>(32.0f, 32.0f, true);
+	player1Collider->SetOffset({ -16.0f, -32.0f });
 	auto player1 = go.get();
+	go->SetParent(cameraRoot.get(), false);
 	scene.Add(std::move(go));
 
 	// Player 2 (DPad controls)
 	go = std::make_unique<dae::GameObject>();
 	transform = go->AddComponent<dae::TransformComponent>();
-	transform->SetLocalPosition(200, 300);
+	transform->SetLocalPosition(tileWorldSize * 3.5f, tileWorldSize * 2.0f);
 	render = go->AddComponent<dae::RenderComponent>();
 	render->SetTexture("Textures/BombermanSprites_General.png");
 	render->SetSpriteSheet(16, 16, 6, 2);
 	render->SetSprite(4, 0);
-	render->SetScale(2.0f);
-   render->SetRenderLayer(5);
+	render->SetScale(3.0f);
+	render->SetPivot({ 0.5f, 1.0f });
+	render->SetRenderLayer(5);
 	go->AddComponent<dae::SpriteAnimatorComponent>();
 	go->AddComponent<dae::PlayerAnimatorComponent>();
 	go->AddComponent<dae::HealthComponent>(3);
 	go->AddComponent<dae::ScoreComponent>(0);
-	go->AddComponent<dae::CollisionComponent>(32.0f, 32.0f);
+	auto player2Collider = go->AddComponent<dae::CollisionComponent>(32.0f, 32.0f, true);
+	player2Collider->SetOffset({ -16.0f, -32.0f });
 	auto player2 = go.get();
+	go->SetParent(cameraRoot.get(), false);
 	scene.Add(std::move(go));
-	
-
-	// ==========================
-	// Pickup Setup
-	// ==========================
-	// Pickup worth 10
-	go = std::make_unique<dae::GameObject>();
-	transform = go->AddComponent<dae::TransformComponent>();
-	transform->SetLocalPosition(300, 300);
-	render = go->AddComponent<dae::RenderComponent>();
-	render->SetTexture("Textures/BombermanSprites_General.png");
-	render->SetScale(2.0f);
-	render->SetSourceRectangle(0, 224, 16, 16);
-	auto pickupCollider = go->AddComponent<dae::CollisionComponent>(32.0f, 32.0f);
-	auto pickupComp = go->AddComponent<dae::PickupComponent>(10);
-	pickupCollider->SetOnCollisionCallback([pickupComp](dae::GameObject* other) {
-		pickupComp->OnCollision(other);
-	});
-	scene.Add(std::move(go));
-
-	// Pickups worth 100
-	go = std::make_unique<dae::GameObject>();
-	transform = go->AddComponent<dae::TransformComponent>();
-	transform->SetLocalPosition(350, 300);
-	render = go->AddComponent<dae::RenderComponent>();
-	render->SetTexture("Textures/BombermanSprites_General.png");
-	render->SetScale(2.0f);
-	render->SetSourceRectangle(0, 224, 16, 16);
-	pickupCollider = go->AddComponent<dae::CollisionComponent>(32.0f, 32.0f);
-	pickupComp = go->AddComponent<dae::PickupComponent>(100);
-	pickupCollider->SetOnCollisionCallback([pickupComp](dae::GameObject* other) {
-		pickupComp->OnCollision(other);
-		});
-	scene.Add(std::move(go));
-
-	go = std::make_unique<dae::GameObject>();
-	transform = go->AddComponent<dae::TransformComponent>();
-	transform->SetLocalPosition(400, 300);
-	render = go->AddComponent<dae::RenderComponent>();
-	render->SetTexture("Textures/BombermanSprites_General.png");
-	render->SetScale(2.0f);
-	render->SetSourceRectangle(0, 224, 16, 16);
-	pickupCollider = go->AddComponent<dae::CollisionComponent>(32.0f, 32.0f);
-	pickupComp = go->AddComponent<dae::PickupComponent>(100);
-	pickupCollider->SetOnCollisionCallback([pickupComp](dae::GameObject* other) {
-		pickupComp->OnCollision(other);
-		});
-	scene.Add(std::move(go));
-
-	go = std::make_unique<dae::GameObject>();
-	transform = go->AddComponent<dae::TransformComponent>();
-	transform->SetLocalPosition(450, 300);
-	render = go->AddComponent<dae::RenderComponent>();
-	render->SetTexture("Textures/BombermanSprites_General.png");
-	render->SetScale(2.0f);
-	render->SetSourceRectangle(0, 224, 16, 16);
-	pickupCollider = go->AddComponent<dae::CollisionComponent>(32.0f, 32.0f);
-	pickupComp = go->AddComponent<dae::PickupComponent>(100);
-	pickupCollider->SetOnCollisionCallback([pickupComp](dae::GameObject* other) {
-		pickupComp->OnCollision(other);
-		});
-	scene.Add(std::move(go));
-
-	go = std::make_unique<dae::GameObject>();
-	transform = go->AddComponent<dae::TransformComponent>();
-	transform->SetLocalPosition(500, 300);
-	render = go->AddComponent<dae::RenderComponent>();
-	render->SetTexture("Textures/BombermanSprites_General.png");
-	render->SetScale(2.0f);
-	render->SetSourceRectangle(0, 224, 16, 16);
-	pickupCollider = go->AddComponent<dae::CollisionComponent>(32.0f, 32.0f);
-	pickupComp = go->AddComponent<dae::PickupComponent>(100);
-	pickupCollider->SetOnCollisionCallback([pickupComp](dae::GameObject* other) {
-		pickupComp->OnCollision(other);
-		});
-	scene.Add(std::move(go));
-
-	go = std::make_unique<dae::GameObject>();
-	transform = go->AddComponent<dae::TransformComponent>();
-	transform->SetLocalPosition(550, 300);
-	render = go->AddComponent<dae::RenderComponent>();
-	render->SetTexture("Textures/BombermanSprites_General.png");
-	render->SetScale(2.0f);
-	render->SetSourceRectangle(0, 224, 16, 16);
-	pickupCollider = go->AddComponent<dae::CollisionComponent>(32.0f, 32.0f);
-	pickupComp = go->AddComponent<dae::PickupComponent>(100);
-	pickupCollider->SetOnCollisionCallback([pickupComp](dae::GameObject* other) {
-		pickupComp->OnCollision(other);
-		});
-	scene.Add(std::move(go));
-
 
 
 	// ==========================
@@ -221,7 +134,7 @@ static void load()
 	go = std::make_unique<dae::GameObject>();
 	transform = go->AddComponent<dae::TransformComponent>();
 	transform->SetLocalPosition(10, 100);
-	text = go->AddComponent<dae::TextComponent>("Use the D-Pad to move Bomberman 1, X to inflict damage, A and B to pick up points", infoFont);
+	auto text = go->AddComponent<dae::TextComponent>("Use the D-Pad to move Bomberman 1, X to inflict damage, A and B to pick up points", infoFont);
 	text->SetColor({ 180, 180, 180, 255 });
 	scene.Add(std::move(go));
 
@@ -233,7 +146,7 @@ static void load()
 	text->SetColor({ 180, 180, 180, 255 });
 	scene.Add(std::move(go));
 
-   go = std::make_unique<dae::GameObject>();
+	go = std::make_unique<dae::GameObject>();
 	transform = go->AddComponent<dae::TransformComponent>();
 	transform->SetLocalPosition(10, 140);
 	text = go->AddComponent<dae::TextComponent>("Place bombs with R (keyboard) or Y (controller)", infoFont);
@@ -243,7 +156,7 @@ static void load()
 	// Bomberman 1 Lives Display
 	go = std::make_unique<dae::GameObject>();
 	transform = go->AddComponent<dae::TransformComponent>();
-   transform->SetLocalPosition(10, 190);
+	transform->SetLocalPosition(10, 190);
 	text = go->AddComponent<dae::TextComponent>("# lives: 3", infoFont);
 	text->SetColor({ 180, 180, 180, 255 });
 	auto livesDisplayP1 = go->AddComponent<dae::DisplayComponent<dae::HealthComponent>>(
@@ -258,7 +171,7 @@ static void load()
 	// Bomberman 1 Score Display
 	go = std::make_unique<dae::GameObject>();
 	transform = go->AddComponent<dae::TransformComponent>();
-   transform->SetLocalPosition(10, 210);
+	transform->SetLocalPosition(10, 210);
 	text = go->AddComponent<dae::TextComponent>("Score: 0", infoFont);
 	text->SetColor({ 180, 180, 180, 255 });
 	auto scoreDisplayP1 = go->AddComponent<dae::DisplayComponent<dae::ScoreComponent>>(
@@ -273,7 +186,7 @@ static void load()
 	// Bomberman 2 Lives Display
 	go = std::make_unique<dae::GameObject>();
 	transform = go->AddComponent<dae::TransformComponent>();
-   transform->SetLocalPosition(10, 230);
+	transform->SetLocalPosition(10, 230);
 	text = go->AddComponent<dae::TextComponent>("# lives: 3", infoFont);
 	text->SetColor({ 180, 180, 180, 255 });
 	auto livesDisplayP2 = go->AddComponent<dae::DisplayComponent<dae::HealthComponent>>(
@@ -288,7 +201,7 @@ static void load()
 	// Bomberman 2 Score Display
 	go = std::make_unique<dae::GameObject>();
 	transform = go->AddComponent<dae::TransformComponent>();
-   transform->SetLocalPosition(10, 250);
+	transform->SetLocalPosition(10, 250);
 	text = go->AddComponent<dae::TextComponent>("Score: 0", infoFont);
 	text->SetColor({ 180, 180, 180, 255 });
 	auto scoreDisplayP2 = go->AddComponent<dae::DisplayComponent<dae::ScoreComponent>>(
@@ -300,7 +213,11 @@ static void load()
 	player2->GetComponent<dae::ScoreComponent>()->AddObserver(*scoreDisplayP2);
 	scene.Add(std::move(go));
 
-
+	// =================
+	// Camera Setup
+	// =================
+	cameraRoot->AddComponent<dae::CameraComponent>(player1, windowWidth, playfieldScaledWidth);
+	scene.Add(std::move(cameraRoot));
 	// =======================
 	// Input Commands bindings
 	// =======================
@@ -392,7 +309,7 @@ static void load()
 }
 
 
-int main(int, char*[]) {
+int main(int, char* []) {
 #if __EMSCRIPTEN__
 	fs::path data_location = "";
 #else

@@ -47,7 +47,7 @@ void dae::Renderer::Render() const
 	SDL_RenderClear(m_renderer);
 
 	SceneManager::GetInstance().Render();
-		
+
 	//ImGui::Render();
 
 	//ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), m_renderer);
@@ -99,3 +99,13 @@ void dae::Renderer::RenderTexture(const Texture2D& texture, const float x, const
 }
 
 SDL_Renderer* dae::Renderer::GetSDLRenderer() const { return m_renderer; }
+
+SDL_Point dae::Renderer::GetWindowSize() const
+{
+	SDL_Point size{};
+	if (m_window == nullptr)
+		return size;
+
+	SDL_GetWindowSizeInPixels(m_window, &size.x, &size.y);
+	return size;
+}

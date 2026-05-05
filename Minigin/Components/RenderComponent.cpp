@@ -7,8 +7,7 @@
 
 dae::RenderComponent::RenderComponent(GameObject* pOwner)
 	: BaseComponent(pOwner)
-{
-}
+{}
 
 void dae::RenderComponent::Render() const
 {
@@ -25,7 +24,14 @@ void dae::RenderComponent::Render() const
 	{
 		const float scaledWidth = m_sourceRect.w * m_scale;
 		const float scaledHeight = m_sourceRect.h * m_scale;
-		Renderer::GetInstance().RenderTexture(*m_texture, pos.x, pos.y, scaledWidth, scaledHeight, m_sourceRect);
+		Renderer::GetInstance().RenderTexture(
+			*m_texture,
+			pos.x - m_pivot.x * scaledWidth,
+			pos.y - m_pivot.y * scaledHeight,
+			scaledWidth,
+			scaledHeight,
+			m_sourceRect
+		);
 	}
 	else
 	{
@@ -63,6 +69,11 @@ void dae::RenderComponent::ClearSourceRectangle()
 void dae::RenderComponent::SetScale(float scale)
 {
 	m_scale = scale;
+}
+
+void dae::RenderComponent::SetPivot(const glm::vec2& pivot)
+{
+	m_pivot = pivot;
 }
 
 void dae::RenderComponent::SetSpriteSheet(int spriteWidth, int spriteHeight, int columns, int rows)

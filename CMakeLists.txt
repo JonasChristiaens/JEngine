@@ -218,6 +218,8 @@ add_executable(${GAME_TARGET} ${GAME_TARGET_PARAM}
   Bomberman/Commands/ChangeHealthCommand.cpp
   Bomberman/Commands/ChangeScoreCommand.cpp
   Bomberman/Commands/ResetAchievementsCommand.cpp
+  Bomberman/Components/CameraComponent.cpp
+  Bomberman/Components/PlayfieldComponent.cpp
   Bomberman/Components/PlayerAnimatorComponent.cpp
   Bomberman/Components/HealthComponent.cpp
   Bomberman/Components/ScoreComponent.cpp

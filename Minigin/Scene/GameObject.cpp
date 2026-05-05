@@ -6,6 +6,9 @@ dae::GameObject::~GameObject() = default;
 
 void dae::GameObject::Update()
 {
+    if (m_markedForDeletion)
+		return;
+
 	for (auto& component : m_components)
 	{
 		component->Update();
@@ -20,6 +23,9 @@ void dae::GameObject::Update()
 
 void dae::GameObject::Render() const
 {
+  if (m_markedForDeletion)
+		return;
+
 	for (const auto& component : m_components)
 	{
 		component->Render();
@@ -35,6 +41,12 @@ void dae::GameObject::Render() const
 void dae::GameObject::MarkForDeletion()
 {
 	m_markedForDeletion = true;
+
+	if (m_pParent)
+	{
+		m_pParent->RemoveChild(this);
+		m_pParent = nullptr;
+	}
 
 	// Mark children for deletion as well
 	for (auto* pChild : m_children)

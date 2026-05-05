@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 #include <SDL3/SDL.h>
+#include <glm/vec2.hpp>
 
 namespace dae
 {
@@ -19,7 +20,7 @@ namespace dae
 		void Render() const override;
 
 		void SetTexture(const std::string& filename);
-		void SetTexture(std::shared_ptr<Texture2D> texture);	
+		void SetTexture(std::shared_ptr<Texture2D> texture);
 
 		void SetSourceRectangle(float x, float y, float width, float height);
 		void SetSourceRectangle(const SDL_FRect& rect);
@@ -30,6 +31,7 @@ namespace dae
 
 		void SetScale(float scale);
 		float GetScale() const { return m_scale; }
+		void SetPivot(const glm::vec2& pivot);
 
 		void SetRenderLayer(int layer) { m_renderLayer = layer; }
 		int GetRenderLayer() const { return m_renderLayer; }
@@ -45,6 +47,7 @@ namespace dae
 		int m_rows{ 0 };
 
 		float m_scale{ 1.0f };
-      int m_renderLayer{ 0 };
+		int m_renderLayer{ 0 };
+		glm::vec2 m_pivot{ 0.0f, 0.0f };
 	};
 }
