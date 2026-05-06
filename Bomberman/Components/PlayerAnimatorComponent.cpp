@@ -2,6 +2,8 @@
 #include "GameObject.h"
 #include "TransformComponent.h"
 #include "SpriteAnimatorComponent.h"
+#include "Rendering/Renderer.h"
+#include <SDL3/SDL.h>
 #include <cmath>
 
 dae::PlayerAnimatorComponent::PlayerAnimatorComponent(GameObject* pOwner)
@@ -20,7 +22,7 @@ void dae::PlayerAnimatorComponent::Update()
 		return;
 
 	glm::vec3 currentPos = m_pTransform->GetLocalPosition();
-	
+
 	if (!m_isInitialized)
 	{
 		m_lastPosition = currentPos;
@@ -53,4 +55,21 @@ void dae::PlayerAnimatorComponent::Update()
 		// Idle frame
 		m_pAnimator->SetAnimation(4, 0, 1, 1, 10.0f, true);
 	}
+}
+
+void dae::PlayerAnimatorComponent::Render() const
+{
+	if (m_pTransform == nullptr)
+		return;
+
+	const auto& pos = m_pTransform->GetWorldPosition();
+	SDL_Renderer* renderer = Renderer::GetInstance().GetSDLRenderer();
+	SDL_SetRenderDrawColor(renderer, 0, 120, 255, 255);
+	SDL_FRect rect{};
+	constexpr float markerSize = 6.0f;
+	rect.x = pos.x - markerSize * 0.5f;
+	rect.y = pos.y - markerSize * 0.5f;
+	rect.w = markerSize;
+	rect.h = markerSize;
+	SDL_RenderFillRect(renderer, &rect);
 }

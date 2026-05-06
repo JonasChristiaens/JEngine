@@ -39,7 +39,68 @@
 #endif
 
 #include <filesystem>
+#include <vector>
 namespace fs = std::filesystem;
+
+namespace
+{
+	struct LevelData
+	{
+		int softBlockCount{ 0 };
+		std::vector<glm::ivec2> reservedTiles{};
+		int balloomCount{ 0 };
+		int onealCount{ 0 };
+		int dollCount{ 0 };
+		int minvoCount{ 0 };
+		int extraBombPickupCount{ 0 };
+		int detonatorPickupCount{ 0 };
+		int flamesPickupCount{ 0 };
+	};
+
+	dae::PlayfieldComponent::PlayfieldConfig ToPlayfieldConfig(const LevelData& levelData)
+	{
+		dae::PlayfieldComponent::PlayfieldConfig config{};
+		config.softBlockCount = levelData.softBlockCount;
+		config.reservedTiles = levelData.reservedTiles;
+		return config;
+	}
+
+	std::vector<LevelData> BuildLevelData()
+	{
+		std::vector<LevelData> levels{};
+
+		LevelData stage1{};
+		stage1.softBlockCount = 54;
+		stage1.reservedTiles = {
+			{ 1, 1 },
+			{ 1, 2 },
+			{ 2, 1 },
+			{ 3, 1 },
+			{ 3, 2 },
+			{ 2, 2 }
+		};
+		stage1.balloomCount = 6;
+		stage1.flamesPickupCount = 1;
+		levels.push_back(stage1);
+
+		LevelData stage2 = stage1;
+		stage2.softBlockCount = 56;
+		stage2.balloomCount = 3;
+		stage2.onealCount = 3;
+		stage2.extraBombPickupCount = 1;
+		levels.push_back(stage2);
+
+		LevelData stage3 = stage1;
+		stage3.softBlockCount = 58;
+		stage3.balloomCount = 2;
+		stage3.onealCount = 2;
+		stage3.dollCount = 2;
+		stage3.detonatorPickupCount = 1;
+		levels.push_back(stage3);
+
+		return levels;
+	}
+}
 
 static void load()
 {
@@ -48,7 +109,7 @@ static void load()
 	// ============
 	auto& scene = dae::SceneManager::GetInstance().CreateScene();
 	static std::unique_ptr<dae::BombEventObserver> g_BombObserver{};
-  static std::unique_ptr<dae::EntityDeathObserver> g_EntityDeathObserver{};
+	static std::unique_ptr<dae::EntityDeathObserver> g_EntityDeathObserver{};
 	static std::unique_ptr<dae::AudioEventObserver> g_AudioObserver{};
 
 	const float playfieldWidth = 496.0f;
@@ -76,7 +137,11 @@ static void load()
 	go->SetParent(cameraRoot.get(), false);
 	scene.Add(std::move(go));
 
-	cameraRoot->AddComponent<dae::PlayfieldComponent>(scene, playfieldWidth, playfieldHeight, playfieldScale);
+	const auto levels = BuildLevelData();
+	const size_t currentLevelIndex = 0;
+	const auto& levelData = levels.at(currentLevelIndex);
+
+	cameraRoot->AddComponent<dae::PlayfieldComponent>(scene, playfieldWidth, playfieldHeight, playfieldScale, ToPlayfieldConfig(levelData));
 
 
 	// ============
@@ -92,14 +157,15 @@ static void load()
 	render->SetSpriteSheet(16, 16, 6, 2);
 	render->SetSprite(4, 0);
 	render->SetScale(3.0f);
-	render->SetPivot({ 0.5f, 1.0f });
-	render->SetRenderLayer(5);
+	render->SetPivot({ 0.5f, 0.5f });
+  render->SetRenderLayer(4);
 	go->AddComponent<dae::SpriteAnimatorComponent>();
 	go->AddComponent<dae::PlayerAnimatorComponent>();
-	go->AddComponent<dae::HealthComponent>(3);
+	go->AddComponent<dae::HealthComponent>(4);
 	go->AddComponent<dae::ScoreComponent>(0);
-	auto player1Collider = go->AddComponent<dae::CollisionComponent>(32.0f, 32.0f, true);
-	player1Collider->SetOffset({ -16.0f, -32.0f });
+    const float playerColliderSize = tileWorldSize * 0.8f;
+	auto player1Collider = go->AddComponent<dae::CollisionComponent>(playerColliderSize, playerColliderSize);
+	player1Collider->SetOffset({ -playerColliderSize * 0.5f, -playerColliderSize * 0.5f });
 	auto player1 = go.get();
 	go->SetParent(cameraRoot.get(), false);
 	scene.Add(std::move(go));
@@ -113,14 +179,14 @@ static void load()
 	render->SetSpriteSheet(16, 16, 6, 2);
 	render->SetSprite(4, 0);
 	render->SetScale(3.0f);
-	render->SetPivot({ 0.5f, 1.0f });
-	render->SetRenderLayer(5);
+	render->SetPivot({ 0.5f, 0.5f });
+  render->SetRenderLayer(4);
 	go->AddComponent<dae::SpriteAnimatorComponent>();
 	go->AddComponent<dae::PlayerAnimatorComponent>();
-	go->AddComponent<dae::HealthComponent>(3);
+	go->AddComponent<dae::HealthComponent>(4);
 	go->AddComponent<dae::ScoreComponent>(0);
-	auto player2Collider = go->AddComponent<dae::CollisionComponent>(32.0f, 32.0f, true);
-	player2Collider->SetOffset({ -16.0f, -32.0f });
+    auto player2Collider = go->AddComponent<dae::CollisionComponent>(playerColliderSize, playerColliderSize);
+	player2Collider->SetOffset({ -playerColliderSize * 0.5f, -playerColliderSize * 0.5f });
 	auto player2 = go.get();
 	go->SetParent(cameraRoot.get(), false);
 	scene.Add(std::move(go));
@@ -159,7 +225,7 @@ static void load()
 	go = std::make_unique<dae::GameObject>();
 	transform = go->AddComponent<dae::TransformComponent>();
 	transform->SetLocalPosition(10, 190);
-	text = go->AddComponent<dae::TextComponent>("# lives: 3", infoFont);
+	text = go->AddComponent<dae::TextComponent>("# lives: 4", infoFont);
 	text->SetColor({ 180, 180, 180, 255 });
 	auto livesDisplayP1 = go->AddComponent<dae::DisplayComponent<dae::HealthComponent>>(
 		text,
@@ -189,7 +255,7 @@ static void load()
 	go = std::make_unique<dae::GameObject>();
 	transform = go->AddComponent<dae::TransformComponent>();
 	transform->SetLocalPosition(10, 230);
-	text = go->AddComponent<dae::TextComponent>("# lives: 3", infoFont);
+	text = go->AddComponent<dae::TextComponent>("# lives: 4", infoFont);
 	text->SetColor({ 180, 180, 180, 255 });
 	auto livesDisplayP2 = go->AddComponent<dae::DisplayComponent<dae::HealthComponent>>(
 		text,

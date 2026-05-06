@@ -15,7 +15,6 @@ namespace dae
 
     private:
         Scene* m_pScene{};
-        int m_NextBombId{ 0 };
         float m_TileWorldSize{ 0.0f };
         int m_ExplosionRange{ 1 };
     };

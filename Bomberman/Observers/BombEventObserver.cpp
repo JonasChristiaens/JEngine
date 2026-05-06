@@ -8,6 +8,7 @@
 #include "Components/CollisionComponent.h"
 #include "Components/HealthComponent.h"
 #include "EventQueue/EventManager.h"
+#include <cmath>
 #include <vector>
 
 namespace
@@ -48,8 +49,13 @@ void dae::BombEventObserver::Notify(const GameObject& pGameActor, Event event)
 
 	if (event.id == kPlaceBombEventId)
 	{
-		float x = pGameActor.GetWorldPosition().x;
-		float y = pGameActor.GetWorldPosition().y;
+		auto* actorTransform = pGameActor.GetComponent<dae::TransformComponent>();
+		if (!actorTransform)
+			return;
+
+		const auto& actorLocalPos = actorTransform->GetLocalPosition();
+		float x = actorLocalPos.x;
+		float y = actorLocalPos.y;
 
 		if (event.nbArgs >= 2)
 		{
@@ -57,21 +63,31 @@ void dae::BombEventObserver::Notify(const GameObject& pGameActor, Event event)
 			y = event.args[1].f;
 		}
 
+     const float tileCoordX = (x / m_TileWorldSize) - 0.5f;
+		const float tileCoordY = (y / m_TileWorldSize) - 0.5f;
+		const int column = std::max(0, static_cast<int>(std::lround(tileCoordX)));
+		const int row = std::max(0, static_cast<int>(std::lround(tileCoordY)));
+		const float snappedX = (static_cast<float>(column) + 0.5f) * m_TileWorldSize;
+		const float snappedY = (static_cast<float>(row) + 0.5f) * m_TileWorldSize;
+
+		x = snappedX;
+		y = snappedY;
+
 		dae::Event playAudioEvent(kPlayAudioEventId);
 		playAudioEvent.nbArgs = 1;
 		playAudioEvent.args[0].p = const_cast<char*>(kBombLaySfxPath);
 		dae::EventManager::GetInstance().BroadcastEvent(playAudioEvent, pSubject);
 
-		auto bomb = std::make_unique<dae::GameObject>();
+        auto bomb = std::make_unique<dae::GameObject>();
 		auto* transform = bomb->AddComponent<dae::TransformComponent>();
 		transform->SetLocalPosition(x, y, 0.0f);
 
 		auto* render = bomb->AddComponent<dae::RenderComponent>();
 		render->SetTexture("Resources/BombermanSprites_General.png");
-		render->SetScale(kBombScale);
-		render->SetRenderLayer(4);
+     render->SetScale(kBombScale + 0.5f);
+		render->SetRenderLayer(2);
 		render->SetSourceRectangle(0.f, 49.f, 16.f, 16.f);
-		render->SetPivot({ 0.5f, 1.0f });
+       render->SetPivot({ 0.5f, 0.5f });
 
 		auto* animator = bomb->AddComponent<dae::SpriteAnimatorComponent>();
 		animator->SetAnimation(
@@ -85,27 +101,34 @@ void dae::BombEventObserver::Notify(const GameObject& pGameActor, Event event)
 		);
 
 
-		++m_NextBombId;
 		dae::Event detonateEvent(kDetonateBombEventId);
-		detonateEvent.nbArgs = 3;
-		detonateEvent.args[0].i = m_NextBombId;
-		detonateEvent.args[1].f = x;
-		detonateEvent.args[2].f = y;
+		detonateEvent.nbArgs = 2;
+		detonateEvent.args[0].f = x;
+		detonateEvent.args[1].f = y;
 
 		bomb->AddComponent<dae::DelayedEventComponent>(detonateEvent, 3.0f);
 
+     if (auto* parent = pSubject->GetParent())
+		{
+			bomb->SetParent(parent, false);
+		}
 		m_pScene->Add(std::move(bomb));
 	}
 	else if (event.id == kDetonateBombEventId)
 	{
+        auto* bombParent = pGameActor.GetParent();
 		pSubject->MarkForDeletion();
 
-		float x = pGameActor.GetWorldPosition().x;
-		float y = pGameActor.GetWorldPosition().y;
-		if (event.nbArgs >= 3)
+      auto* bombTransform = pGameActor.GetComponent<dae::TransformComponent>();
+		if (bombTransform == nullptr)
+			return;
+
+		float x = bombTransform->GetLocalPosition().x;
+		float y = bombTransform->GetLocalPosition().y;
+		if (event.nbArgs >= 2)
 		{
-			x = event.args[1].f;
-			y = event.args[2].f;
+			x = event.args[0].f;
+			y = event.args[1].f;
 		}
 
 		dae::Event playAudioEvent(kPlayAudioEventId);
@@ -113,12 +136,11 @@ void dae::BombEventObserver::Notify(const GameObject& pGameActor, Event event)
 		playAudioEvent.args[0].p = const_cast<char*>(kBombExplosionSfxPath);
 		dae::EventManager::GetInstance().BroadcastEvent(playAudioEvent, pSubject);
 
-		constexpr float bombSpriteSize = 16.0f;
-		const float bombCenterX = x;
-		const float bombCenterY = y - (bombSpriteSize * kBombScale * 0.5f);
+        const float bombCenterX = x;
+		const float bombCenterY = y;
 		const int explosionRange = m_ExplosionRange;
 
-		auto explosionVisual = std::make_unique<dae::GameObject>();
+        auto explosionVisual = std::make_unique<dae::GameObject>();
 		auto* visualTransform = explosionVisual->AddComponent<dae::TransformComponent>();
 		const float explosionHalfSize = kExplosionSpriteSize * kExplosionScale * 0.5f;
 		visualTransform->SetLocalPosition(bombCenterX - explosionHalfSize, bombCenterY - explosionHalfSize, 0.0f);
@@ -144,8 +166,8 @@ void dae::BombEventObserver::Notify(const GameObject& pGameActor, Event event)
 		std::vector<dae::GameObject*> damageTiles{};
 		damageTiles.reserve(static_cast<size_t>(1 + explosionRange * 4));
 
-		auto addDamageTile = [&](float centerX, float centerY)
-			{
+        auto addDamageTile = [&](float centerX, float centerY)
+       {
 				auto damageTile = std::make_unique<dae::GameObject>();
 				auto* transform = damageTile->AddComponent<dae::TransformComponent>();
 				transform->SetLocalPosition(centerX, centerY, 0.0f);
@@ -167,6 +189,10 @@ void dae::BombEventObserver::Notify(const GameObject& pGameActor, Event event)
 						dae::EventManager::GetInstance().BroadcastEvent(damageEvent, other);
 					});
 
+              if (bombParent)
+				{
+                   damageTile->SetParent(bombParent, false);
+				}
 				damageTiles.push_back(damageTile.get());
 				m_pScene->Add(std::move(damageTile));
 			};
@@ -198,6 +224,10 @@ void dae::BombEventObserver::Notify(const GameObject& pGameActor, Event event)
 				}
 			});
 
+        if (bombParent)
+		{
+          explosionVisual->SetParent(bombParent, false);
+		}
 		m_pScene->Add(std::move(explosionVisual));
 	}
 }
