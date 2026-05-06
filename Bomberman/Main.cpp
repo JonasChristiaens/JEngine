@@ -30,6 +30,7 @@
 #include "Commands/ChangeScoreCommand.h"
 #include "Commands/SpawnBombCommand.h"
 #include "Observers/BombEventObserver.h"
+#include "Observers/EntityDeathObserver.h"
 #include "Audio/AudioEventObserver.h"
 #include "Rendering/Renderer.h"
 
@@ -47,6 +48,7 @@ static void load()
 	// ============
 	auto& scene = dae::SceneManager::GetInstance().CreateScene();
 	static std::unique_ptr<dae::BombEventObserver> g_BombObserver{};
+  static std::unique_ptr<dae::EntityDeathObserver> g_EntityDeathObserver{};
 	static std::unique_ptr<dae::AudioEventObserver> g_AudioObserver{};
 
 	const float playfieldWidth = 496.0f;
@@ -301,8 +303,11 @@ static void load()
 	input.BindKeyboardInput(SDLK_F1, dae::KeyState::Down, std::move(resetAchievements));
 #endif
 
-	if (!g_BombObserver)
-		g_BombObserver = std::make_unique<dae::BombEventObserver>(scene);
+    if (!g_BombObserver)
+		g_BombObserver = std::make_unique<dae::BombEventObserver>(scene, tileWorldSize);
+
+	if (!g_EntityDeathObserver)
+		g_EntityDeathObserver = std::make_unique<dae::EntityDeathObserver>(scene);
 
 	if (!g_AudioObserver)
 		g_AudioObserver = std::make_unique<dae::AudioEventObserver>();

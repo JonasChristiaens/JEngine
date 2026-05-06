@@ -2,7 +2,6 @@
 #include "EventQueue/EventManager.h"
 #include "Scene/GameObject.h"
 #include "Components/TransformComponent.h"
-#include "Components/CollisionComponent.h"
 
 void SpawnBombCommand::Execute()
 {
@@ -13,14 +12,12 @@ void SpawnBombCommand::Execute()
 	if (pTransform == nullptr)
 		return;
 
-	const auto& pos = pTransform->GetWorldPosition();
-	auto* collider = m_pGameActor->GetComponent<dae::CollisionComponent>();
-	const float bombOffsetY = collider ? collider->GetHeight() : 0.0f;
+	const auto& pos = pTransform->GetLocalPosition();
 
 	dae::Event placeBombEvent(dae::make_sdbm_hash("PlaceBombEvent"));
 	placeBombEvent.nbArgs = 2;
 	placeBombEvent.args[0].f = pos.x;
-	placeBombEvent.args[1].f = pos.y - bombOffsetY;
+	placeBombEvent.args[1].f = pos.y;
 
 	dae::EventManager::GetInstance().BroadcastEvent(placeBombEvent, m_pGameActor);
 }

@@ -19,6 +19,12 @@ void dae::HealthComponent::ChangeCurrentHealth(int amount)
 	m_CurrentHealth += amount;
 	NotifyObservers(Event(make_sdbm_hash("HealthChanged")), GetOwner());
 
+	if (m_CurrentHealth <= 0)
+	{
+      Event diedEvent(make_sdbm_hash("EntityDied"));
+		EventManager::GetInstance().BroadcastEvent(diedEvent, GetOwner());
+	}
+
 	if (amount < 0)
 	{
 		Event tookDamageEvent(make_sdbm_hash("TookDamageEvent"));

@@ -213,6 +213,7 @@ target_link_libraries(minigin PUBLIC
 add_executable(${GAME_TARGET} ${GAME_TARGET_PARAM}
   Bomberman/Main.cpp
   Bomberman/Observers/BombEventObserver.cpp
+  Bomberman/Observers/EntityDeathObserver.cpp
   Bomberman/Commands/SpawnBombCommand.cpp
   Bomberman/Commands/MoveCommand.cpp
   Bomberman/Commands/ChangeHealthCommand.cpp
