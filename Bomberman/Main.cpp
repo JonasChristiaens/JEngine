@@ -25,6 +25,7 @@
 #include "Components/CollisionComponent.h"
 #include "Components/PickupComponent.h"
 #include "Components/PlayfieldComponent.h"
+#include "Factories/EnemyFactory.h"
 #include "Commands/MoveCommand.h"
 #include "Commands/ChangeHealthCommand.h"
 #include "Commands/ChangeScoreCommand.h"
@@ -119,6 +120,7 @@ static void load()
 	const float windowHeight = static_cast<float>(windowSize.y);
 	const float playfieldScale = windowHeight / playfieldHeight;
 	const float playfieldScaledWidth = playfieldWidth * playfieldScale;
+	const float tileWorldSize = 16.0f * playfieldScale;
 
 	// Camera Root
 	auto cameraRoot = std::make_unique<dae::GameObject>();
@@ -143,6 +145,23 @@ static void load()
 
 	cameraRoot->AddComponent<dae::PlayfieldComponent>(scene, playfieldWidth, playfieldHeight, playfieldScale, ToPlayfieldConfig(levelData));
 
+	// Player starting positions — computed here so the enemy spawner can avoid them.
+	   // (Enemies are spawned before player GameObjects exist, so we pass positions explicitly.)
+	const glm::vec3 player1StartPos{ tileWorldSize * 1.5f, tileWorldSize * 2.0f, 0.0f };
+	const glm::vec3 player2StartPos{ tileWorldSize * 3.5f, tileWorldSize * 2.0f, 0.0f };
+	const std::vector<glm::vec3> playerStartPositions{ player1StartPos, player2StartPos };
+
+	if (levelData.balloomCount > 0)
+	{
+		const int gridColumns = static_cast<int>(std::floor(playfieldWidth / 16.0f));
+		const int gridRows = static_cast<int>(std::floor(playfieldHeight / 16.0f));
+		const float balloomSpeed = 110.0f;
+		for (int i = 0; i < levelData.balloomCount; ++i)
+		{
+			dae::EnemyFactory::CreateBalloom(scene, *cameraRoot, gridColumns, gridRows, tileWorldSize, balloomSpeed, playerStartPositions);
+		}
+	}
+
 
 	// ============
 	// Player Setup
@@ -150,20 +169,19 @@ static void load()
 	// Player 1 (WASD controls)
 	go = std::make_unique<dae::GameObject>();
 	auto transform = go->AddComponent<dae::TransformComponent>();
-	const float tileWorldSize = 16.0f * playfieldScale;
-	transform->SetLocalPosition(tileWorldSize * 1.5f, tileWorldSize * 2.0f);
+	transform->SetLocalPosition(player1StartPos);
 	render = go->AddComponent<dae::RenderComponent>();
 	render->SetTexture("Textures/BombermanSprites_General.png");
 	render->SetSpriteSheet(16, 16, 6, 2);
 	render->SetSprite(4, 0);
 	render->SetScale(3.0f);
 	render->SetPivot({ 0.5f, 0.5f });
-  render->SetRenderLayer(4);
+	render->SetRenderLayer(4);
 	go->AddComponent<dae::SpriteAnimatorComponent>();
 	go->AddComponent<dae::PlayerAnimatorComponent>();
 	go->AddComponent<dae::HealthComponent>(4);
 	go->AddComponent<dae::ScoreComponent>(0);
-    const float playerColliderSize = tileWorldSize * 0.8f;
+	const float playerColliderSize = tileWorldSize * 0.8f;
 	auto player1Collider = go->AddComponent<dae::CollisionComponent>(playerColliderSize, playerColliderSize);
 	player1Collider->SetOffset({ -playerColliderSize * 0.5f, -playerColliderSize * 0.5f });
 	auto player1 = go.get();
@@ -173,19 +191,19 @@ static void load()
 	// Player 2 (DPad controls)
 	go = std::make_unique<dae::GameObject>();
 	transform = go->AddComponent<dae::TransformComponent>();
-	transform->SetLocalPosition(tileWorldSize * 3.5f, tileWorldSize * 2.0f);
+	transform->SetLocalPosition(player2StartPos);
 	render = go->AddComponent<dae::RenderComponent>();
 	render->SetTexture("Textures/BombermanSprites_General.png");
 	render->SetSpriteSheet(16, 16, 6, 2);
 	render->SetSprite(4, 0);
 	render->SetScale(3.0f);
 	render->SetPivot({ 0.5f, 0.5f });
-  render->SetRenderLayer(4);
+	render->SetRenderLayer(4);
 	go->AddComponent<dae::SpriteAnimatorComponent>();
 	go->AddComponent<dae::PlayerAnimatorComponent>();
 	go->AddComponent<dae::HealthComponent>(4);
 	go->AddComponent<dae::ScoreComponent>(0);
-    auto player2Collider = go->AddComponent<dae::CollisionComponent>(playerColliderSize, playerColliderSize);
+	auto player2Collider = go->AddComponent<dae::CollisionComponent>(playerColliderSize, playerColliderSize);
 	player2Collider->SetOffset({ -playerColliderSize * 0.5f, -playerColliderSize * 0.5f });
 	auto player2 = go.get();
 	go->SetParent(cameraRoot.get(), false);
@@ -369,7 +387,7 @@ static void load()
 	input.BindKeyboardInput(SDLK_F1, dae::KeyState::Down, std::move(resetAchievements));
 #endif
 
-    if (!g_BombObserver)
+	if (!g_BombObserver)
 		g_BombObserver = std::make_unique<dae::BombEventObserver>(scene, tileWorldSize);
 
 	if (!g_EntityDeathObserver)

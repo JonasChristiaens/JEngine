@@ -21,6 +21,7 @@ namespace dae
 		float GetWidth() const { return m_width; }
 		float GetHeight() const { return m_height; }
 		bool IsTrigger() const { return m_isTrigger; }
+        const glm::vec2& GetOffset() const { return m_offset; }
 		void SetOffset(const glm::vec2& offset);
 		bool WouldCollide(const glm::vec3& worldPosition) const;
 

@@ -408,3 +408,8 @@ imgui.ini
 steamworks_sdk_*/
 
 .DS_Store
+
+# Custom project files to ignore
+game-rules.md
+project-requirements.md
+copilot-instructions.md
