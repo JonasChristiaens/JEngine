@@ -13,13 +13,13 @@
 
 namespace dae
 {
- PlayfieldComponent::PlayfieldComponent(GameObject* pOwner, Scene& scene, float playfieldWidth, float playfieldHeight, float playfieldScale, PlayfieldConfig config)
+	PlayfieldComponent::PlayfieldComponent(GameObject* pOwner, Scene& scene, float playfieldWidth, float playfieldHeight, float playfieldScale, PlayfieldConfig config)
 		: BaseComponent(pOwner)
 		, m_pScene(&scene)
 		, m_playfieldWidth(playfieldWidth)
 		, m_playfieldHeight(playfieldHeight)
 		, m_playfieldScale(playfieldScale)
-       , m_config(std::move(config))
+		, m_config(std::move(config))
 	{
 		BuildPlayfield();
 	}
@@ -35,14 +35,14 @@ namespace dae
 		if (m_pScene == nullptr)
 			return;
 
-       ClearSpawnedObjects();
+		ClearSpawnedObjects();
 
 		const float tileSize = m_config.tileSize;
 		const float tileScale = m_playfieldScale;
 		const float tileWorldSize = tileSize * tileScale;
 		const float gridOriginX = 0.0f;
 		const float gridOriginY = 0.0f;
-      const int gridColumns = static_cast<int>(std::floor(m_playfieldWidth / tileSize));
+		const int gridColumns = static_cast<int>(std::floor(m_playfieldWidth / tileSize));
 		const int gridRows = static_cast<int>(std::floor(m_playfieldHeight / tileSize));
 
 		m_occupiedTiles.assign(gridRows, std::vector<bool>(gridColumns, false));
@@ -56,13 +56,13 @@ namespace dae
 					gridOriginY + row * tileWorldSize,
 					0.0f
 				);
-              block->AddComponent<CollisionComponent>(tileWorldSize, tileWorldSize);
+				block->AddComponent<CollisionComponent>(tileWorldSize, tileWorldSize);
 				block->SetParent(GetOwner(), false);
-                m_spawnedBlocks.push_back(block.get());
+				m_spawnedBlocks.push_back(block.get());
 				m_pScene->Add(std::move(block));
 			};
 
-     std::vector<std::pair<int, int>> brickCandidates{};
+		std::vector<std::pair<int, int>> brickCandidates{};
 		brickCandidates.reserve(static_cast<size_t>(gridColumns * gridRows));
 
 		for (int row = 0; row < gridRows; ++row)
@@ -72,12 +72,12 @@ namespace dae
 				const bool isBorder = row == 0 || column == 0 || row == gridRows - 1 || column == gridColumns - 1;
 				const bool isPillar = !isBorder && (row % 2 == 0) && (column % 2 == 0);
 
-              const bool isReserved = IsReservedTile(column, row);
+				const bool isReserved = IsReservedTile(column, row);
 				if (isBorder || isPillar)
 				{
 					createSolidCollider(column, row);
 				}
-              else if (!isReserved)
+				else if (!isReserved)
 				{
 					brickCandidates.emplace_back(column, row);
 				}
@@ -87,7 +87,7 @@ namespace dae
 		std::random_device randomDevice{};
 		std::mt19937 rng(randomDevice());
 		std::shuffle(brickCandidates.begin(), brickCandidates.end(), rng);
-     const float brickRatio = m_config.softBlockRatio;
+		const float brickRatio = m_config.softBlockRatio;
 		const size_t brickCount = (m_config.softBlockCount > 0)
 			? std::min(static_cast<size_t>(m_config.softBlockCount), brickCandidates.size())
 			: static_cast<size_t>(brickCandidates.size() * brickRatio);
@@ -102,7 +102,7 @@ namespace dae
 				gridOriginY + row * tileWorldSize,
 				0.0f
 			);
-         auto* brickRender = brick->AddComponent<RenderComponent>();
+			auto* brickRender = brick->AddComponent<RenderComponent>();
 			brickRender->SetTexture(m_config.softBlockTexture);
 			brickRender->SetSourceRectangle(m_config.softBlockSource.x, m_config.softBlockSource.y, m_config.softBlockSource.w, m_config.softBlockSource.h);
 			brickRender->SetScale(tileScale);
@@ -110,7 +110,7 @@ namespace dae
 			brick->AddComponent<CollisionComponent>(tileWorldSize, tileWorldSize);
 			brick->AddComponent<HealthComponent>(1);
 			brick->SetParent(GetOwner(), false);
-            m_spawnedBlocks.push_back(brick.get());
+			m_spawnedBlocks.push_back(brick.get());
 			m_pScene->Add(std::move(brick));
 			m_occupiedTiles[row][column] = true;
 		}

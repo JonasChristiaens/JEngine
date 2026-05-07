@@ -3,17 +3,17 @@
 
 namespace dae
 {
-    class Scene;
+	class Scene;
 
-    class EntityDeathObserver final : public IObserver
-    {
-    public:
-        explicit EntityDeathObserver(Scene& scene);
-        ~EntityDeathObserver() override;
+	class EntityDeathObserver final : public IObserver
+	{
+	public:
+		explicit EntityDeathObserver(Scene& scene);
+		~EntityDeathObserver() override;
 
-        void Notify(const GameObject& pGameActor, Event event) override;
+		void Notify(const GameObject& pGameActor, Event event) override;
 
-    private:
-        Scene* m_pScene{};
-    };
+	private:
+		Scene* m_pScene{};
+	};
 }

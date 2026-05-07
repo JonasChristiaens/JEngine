@@ -14,16 +14,12 @@
 #include "Input/ControllerButtons.h"
 #include "Components/TransformComponent.h"
 #include "Components/RenderComponent.h"
-#include "Components/TextComponent.h"
-#include "Components/FPSComponent.h"
 #include "Components/SpriteAnimatorComponent.h"
 #include "Components/PlayerAnimatorComponent.h"
 #include "Components/CameraComponent.h"
 #include "Components/HealthComponent.h"
 #include "Components/ScoreComponent.h"
-#include "Components/DisplayComponent.h"
 #include "Components/CollisionComponent.h"
-#include "Components/PickupComponent.h"
 #include "Components/PlayfieldComponent.h"
 #include "Factories/EnemyFactory.h"
 #include "Commands/MoveCommand.h"
@@ -145,8 +141,7 @@ static void load()
 
 	cameraRoot->AddComponent<dae::PlayfieldComponent>(scene, playfieldWidth, playfieldHeight, playfieldScale, ToPlayfieldConfig(levelData));
 
-	// Player starting positions — computed here so the enemy spawner can avoid them.
-	   // (Enemies are spawned before player GameObjects exist, so we pass positions explicitly.)
+	// Player starting positions
 	const glm::vec3 player1StartPos{ tileWorldSize * 1.5f, tileWorldSize * 2.0f, 0.0f };
 	const glm::vec3 player2StartPos{ tileWorldSize * 3.5f, tileWorldSize * 2.0f, 0.0f };
 	const std::vector<glm::vec3> playerStartPositions{ player1StartPos, player2StartPos };
@@ -161,7 +156,6 @@ static void load()
 			dae::EnemyFactory::CreateBalloom(scene, *cameraRoot, gridColumns, gridRows, tileWorldSize, balloomSpeed, playerStartPositions);
 		}
 	}
-
 
 	// ============
 	// Player Setup
@@ -209,101 +203,12 @@ static void load()
 	go->SetParent(cameraRoot.get(), false);
 	scene.Add(std::move(go));
 
-
-	// ==========================
-	// Player Information Display
-	// ==========================
-	// Instructions
-	auto infoFont = dae::ResourceManager::GetInstance().LoadFont("Lingua.otf", 18);
-
-	// Bomberman 1 Instructions
-	go = std::make_unique<dae::GameObject>();
-	transform = go->AddComponent<dae::TransformComponent>();
-	transform->SetLocalPosition(10, 100);
-	auto text = go->AddComponent<dae::TextComponent>("Use the D-Pad to move Bomberman 1, X to inflict damage, A and B to pick up points", infoFont);
-	text->SetColor({ 180, 180, 180, 255 });
-	scene.Add(std::move(go));
-
-	// Bomberman 2 Instructions
-	go = std::make_unique<dae::GameObject>();
-	transform = go->AddComponent<dae::TransformComponent>();
-	transform->SetLocalPosition(10, 120);
-	text = go->AddComponent<dae::TextComponent>("Use WASD to move Bomberman 2, C to inflict damage, Z and X to pick up points", infoFont);
-	text->SetColor({ 180, 180, 180, 255 });
-	scene.Add(std::move(go));
-
-	go = std::make_unique<dae::GameObject>();
-	transform = go->AddComponent<dae::TransformComponent>();
-	transform->SetLocalPosition(10, 140);
-	text = go->AddComponent<dae::TextComponent>("Place bombs with R (keyboard) or Y (controller)", infoFont);
-	text->SetColor({ 180, 180, 180, 255 });
-	scene.Add(std::move(go));
-
-	// Bomberman 1 Lives Display
-	go = std::make_unique<dae::GameObject>();
-	transform = go->AddComponent<dae::TransformComponent>();
-	transform->SetLocalPosition(10, 190);
-	text = go->AddComponent<dae::TextComponent>("# lives: 4", infoFont);
-	text->SetColor({ 180, 180, 180, 255 });
-	auto livesDisplayP1 = go->AddComponent<dae::DisplayComponent<dae::HealthComponent>>(
-		text,
-		dae::make_sdbm_hash("HealthChanged"),
-		"# lives: ",
-		[](const dae::HealthComponent* c) { return std::to_string(c->GetHealth()); }
-	);
-	player1->GetComponent<dae::HealthComponent>()->AddObserver(*livesDisplayP1);
-	scene.Add(std::move(go));
-
-	// Bomberman 1 Score Display
-	go = std::make_unique<dae::GameObject>();
-	transform = go->AddComponent<dae::TransformComponent>();
-	transform->SetLocalPosition(10, 210);
-	text = go->AddComponent<dae::TextComponent>("Score: 0", infoFont);
-	text->SetColor({ 180, 180, 180, 255 });
-	auto scoreDisplayP1 = go->AddComponent<dae::DisplayComponent<dae::ScoreComponent>>(
-		text,
-		dae::make_sdbm_hash("ScoreChanged"),
-		"Score: ",
-		[](const dae::ScoreComponent* c) { return std::to_string(c->GetScore()); }
-	);
-	player1->GetComponent<dae::ScoreComponent>()->AddObserver(*scoreDisplayP1);
-	scene.Add(std::move(go));
-
-	// Bomberman 2 Lives Display
-	go = std::make_unique<dae::GameObject>();
-	transform = go->AddComponent<dae::TransformComponent>();
-	transform->SetLocalPosition(10, 230);
-	text = go->AddComponent<dae::TextComponent>("# lives: 4", infoFont);
-	text->SetColor({ 180, 180, 180, 255 });
-	auto livesDisplayP2 = go->AddComponent<dae::DisplayComponent<dae::HealthComponent>>(
-		text,
-		dae::make_sdbm_hash("HealthChanged"),
-		"# lives: ",
-		[](const dae::HealthComponent* c) { return std::to_string(c->GetHealth()); }
-	);
-	player2->GetComponent<dae::HealthComponent>()->AddObserver(*livesDisplayP2);
-	scene.Add(std::move(go));
-
-	// Bomberman 2 Score Display
-	go = std::make_unique<dae::GameObject>();
-	transform = go->AddComponent<dae::TransformComponent>();
-	transform->SetLocalPosition(10, 250);
-	text = go->AddComponent<dae::TextComponent>("Score: 0", infoFont);
-	text->SetColor({ 180, 180, 180, 255 });
-	auto scoreDisplayP2 = go->AddComponent<dae::DisplayComponent<dae::ScoreComponent>>(
-		text,
-		dae::make_sdbm_hash("ScoreChanged"),
-		"Score: ",
-		[](const dae::ScoreComponent* c) { return std::to_string(c->GetScore()); }
-	);
-	player2->GetComponent<dae::ScoreComponent>()->AddObserver(*scoreDisplayP2);
-	scene.Add(std::move(go));
-
 	// =================
 	// Camera Setup
 	// =================
 	cameraRoot->AddComponent<dae::CameraComponent>(player1, windowWidth, playfieldScaledWidth);
 	scene.Add(std::move(cameraRoot));
+
 	// =======================
 	// Input Commands bindings
 	// =======================

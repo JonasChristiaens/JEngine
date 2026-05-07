@@ -3,19 +3,18 @@
 
 namespace dae
 {
-    class GameObject;
+	class GameObject;
 
-    class EnemyState : public State
-    {
-    public:
-        explicit EnemyState(GameObject* owner)
-            : m_pOwner(owner)
-        {
-        }
+	class EnemyState : public State
+	{
+	public:
+		explicit EnemyState(GameObject* owner)
+			: m_pOwner(owner)
+		{}
 
-        GameObject* GetOwner() const { return m_pOwner; }
+		GameObject* GetOwner() const { return m_pOwner; }
 
-    private:
-        GameObject* m_pOwner{};
-    };
+	private:
+		GameObject* m_pOwner{};
+	};
 }

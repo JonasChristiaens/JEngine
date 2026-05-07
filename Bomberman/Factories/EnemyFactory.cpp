@@ -70,7 +70,7 @@ namespace
         return false;
     }
 
-    // Converts a world position to the tile column/row it falls on.
+    // Convert world pos to tile
     std::pair<int, int> WorldToTile(const glm::vec3& worldPos, float tileWorldSize)
     {
         return {
@@ -87,8 +87,7 @@ namespace
         std::uniform_int_distribution<int> rowDist(0, gridRows - 1);
         std::uniform_real_distribution<float> fallbackOffset(0.0f, tileWorldSize * 0.5f);
 
-        // Pre-convert reserved world positions to tile coordinates so we can do
-        // a fast integer comparison for each candidate tile.
+        // store reserved tiles
         std::vector<std::pair<int, int>> reservedTiles{};
         reservedTiles.reserve(reservedWorldPositions.size());
         for (const auto& pos : reservedWorldPositions)
@@ -100,7 +99,7 @@ namespace
             const int column = columnDist(GetRng());
             const int row = rowDist(GetRng());
 
-            // Reject tiles that overlap any reserved position (player starts, etc.).
+            // check for overlap
             bool isReserved = false;
             for (const auto& [reservedCol, reservedRow] : reservedTiles)
             {

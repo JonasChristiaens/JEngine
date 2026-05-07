@@ -9,10 +9,10 @@ namespace dae
 {
 	class Scene;
 
-   class PlayfieldComponent final : public BaseComponent
+	class PlayfieldComponent final : public BaseComponent
 	{
 	public:
-        struct PlayfieldConfig
+		struct PlayfieldConfig
 		{
 			int softBlockCount{ 0 };
 			float softBlockRatio{ 0.0f };
@@ -35,12 +35,12 @@ namespace dae
 		float m_playfieldWidth{};
 		float m_playfieldHeight{};
 		float m_playfieldScale{};
-       std::vector<std::vector<bool>> m_occupiedTiles{};
+		std::vector<std::vector<bool>> m_occupiedTiles{};
 		std::vector<GameObject*> m_spawnedBlocks{};
 		PlayfieldConfig m_config{};
 
 		void BuildPlayfield();
-      void ClearSpawnedObjects();
+		void ClearSpawnedObjects();
 		bool IsReservedTile(int column, int row) const;
 	};
 }

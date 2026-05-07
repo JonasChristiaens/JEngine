@@ -63,7 +63,7 @@ void dae::BombEventObserver::Notify(const GameObject& pGameActor, Event event)
 			y = event.args[1].f;
 		}
 
-     const float tileCoordX = (x / m_TileWorldSize) - 0.5f;
+		const float tileCoordX = (x / m_TileWorldSize) - 0.5f;
 		const float tileCoordY = (y / m_TileWorldSize) - 0.5f;
 		const int column = std::max(0, static_cast<int>(std::lround(tileCoordX)));
 		const int row = std::max(0, static_cast<int>(std::lround(tileCoordY)));
@@ -78,16 +78,16 @@ void dae::BombEventObserver::Notify(const GameObject& pGameActor, Event event)
 		playAudioEvent.args[0].p = const_cast<char*>(kBombLaySfxPath);
 		dae::EventManager::GetInstance().BroadcastEvent(playAudioEvent, pSubject);
 
-        auto bomb = std::make_unique<dae::GameObject>();
+		auto bomb = std::make_unique<dae::GameObject>();
 		auto* transform = bomb->AddComponent<dae::TransformComponent>();
 		transform->SetLocalPosition(x, y, 0.0f);
 
 		auto* render = bomb->AddComponent<dae::RenderComponent>();
 		render->SetTexture("Resources/BombermanSprites_General.png");
-     render->SetScale(kBombScale + 0.5f);
+		render->SetScale(kBombScale + 0.5f);
 		render->SetRenderLayer(2);
 		render->SetSourceRectangle(0.f, 49.f, 16.f, 16.f);
-       render->SetPivot({ 0.5f, 0.5f });
+		render->SetPivot({ 0.5f, 0.5f });
 
 		auto* animator = bomb->AddComponent<dae::SpriteAnimatorComponent>();
 		animator->SetAnimation(
@@ -108,7 +108,7 @@ void dae::BombEventObserver::Notify(const GameObject& pGameActor, Event event)
 
 		bomb->AddComponent<dae::DelayedEventComponent>(detonateEvent, 3.0f);
 
-     if (auto* parent = pSubject->GetParent())
+		if (auto* parent = pSubject->GetParent())
 		{
 			bomb->SetParent(parent, false);
 		}
@@ -116,10 +116,10 @@ void dae::BombEventObserver::Notify(const GameObject& pGameActor, Event event)
 	}
 	else if (event.id == kDetonateBombEventId)
 	{
-        auto* bombParent = pGameActor.GetParent();
+		auto* bombParent = pGameActor.GetParent();
 		pSubject->MarkForDeletion();
 
-      auto* bombTransform = pGameActor.GetComponent<dae::TransformComponent>();
+		auto* bombTransform = pGameActor.GetComponent<dae::TransformComponent>();
 		if (bombTransform == nullptr)
 			return;
 
@@ -136,11 +136,11 @@ void dae::BombEventObserver::Notify(const GameObject& pGameActor, Event event)
 		playAudioEvent.args[0].p = const_cast<char*>(kBombExplosionSfxPath);
 		dae::EventManager::GetInstance().BroadcastEvent(playAudioEvent, pSubject);
 
-        const float bombCenterX = x;
+		const float bombCenterX = x;
 		const float bombCenterY = y;
 		const int explosionRange = m_ExplosionRange;
 
-        auto explosionVisual = std::make_unique<dae::GameObject>();
+		auto explosionVisual = std::make_unique<dae::GameObject>();
 		auto* visualTransform = explosionVisual->AddComponent<dae::TransformComponent>();
 		const float explosionHalfSize = kExplosionSpriteSize * kExplosionScale * 0.5f;
 		visualTransform->SetLocalPosition(bombCenterX - explosionHalfSize, bombCenterY - explosionHalfSize, 0.0f);
@@ -166,8 +166,8 @@ void dae::BombEventObserver::Notify(const GameObject& pGameActor, Event event)
 		std::vector<dae::GameObject*> damageTiles{};
 		damageTiles.reserve(static_cast<size_t>(1 + explosionRange * 4));
 
-        auto addDamageTile = [&](float centerX, float centerY)
-       {
+		auto addDamageTile = [&](float centerX, float centerY)
+			{
 				auto damageTile = std::make_unique<dae::GameObject>();
 				auto* transform = damageTile->AddComponent<dae::TransformComponent>();
 				transform->SetLocalPosition(centerX, centerY, 0.0f);
@@ -189,9 +189,9 @@ void dae::BombEventObserver::Notify(const GameObject& pGameActor, Event event)
 						dae::EventManager::GetInstance().BroadcastEvent(damageEvent, other);
 					});
 
-              if (bombParent)
+				if (bombParent)
 				{
-                   damageTile->SetParent(bombParent, false);
+					damageTile->SetParent(bombParent, false);
 				}
 				damageTiles.push_back(damageTile.get());
 				m_pScene->Add(std::move(damageTile));
@@ -224,9 +224,9 @@ void dae::BombEventObserver::Notify(const GameObject& pGameActor, Event event)
 				}
 			});
 
-        if (bombParent)
+		if (bombParent)
 		{
-          explosionVisual->SetParent(bombParent, false);
+			explosionVisual->SetParent(bombParent, false);
 		}
 		m_pScene->Add(std::move(explosionVisual));
 	}

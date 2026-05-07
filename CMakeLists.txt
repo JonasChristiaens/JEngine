@@ -176,6 +176,8 @@ add_library(minigin STATIC
   Minigin/Components/SpriteAnimatorComponent.cpp
   Minigin/Components/CollisionComponent.cpp
   Minigin/Components/DelayedEventComponent.cpp
+
+  # States
   Minigin/State/StateStack.cpp
 
   # Audio
