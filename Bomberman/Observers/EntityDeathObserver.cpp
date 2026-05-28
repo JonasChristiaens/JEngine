@@ -9,7 +9,7 @@ namespace
 
 namespace dae
 {
-	EntityDeathObserver::EntityDeathObserver(Scene& scene)
+	EntityDeathObserver::EntityDeathObserver(Scene& )
 		: IObserver()
 	{
 		EventManager::GetInstance().AddObserver(*this);
