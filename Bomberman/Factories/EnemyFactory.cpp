@@ -23,7 +23,6 @@ namespace
     constexpr float kBalloomSpriteSheetY = 241.0f;
     constexpr float kBalloomSpriteWidth = 16.0f;
     constexpr float kBalloomSpriteHeight = 16.0f;
-    constexpr float kBalloomSpriteSheetWidth = 96.0f;
 }
 
 namespace
