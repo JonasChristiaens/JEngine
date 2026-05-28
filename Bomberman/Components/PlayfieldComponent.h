@@ -14,13 +14,24 @@ namespace dae
 	public:
 		struct PlayfieldConfig
 		{
-			int softBlockCount{ 0 };
-			float softBlockRatio{ 0.0f };
-			float tileSize{ 16.0f };
-			std::string softBlockTexture{ "Textures/BombermanSprites_Playfield.png" };
-			SDL_FRect softBlockSource{ 16.0f, 210.0f, 16.0f, 16.0f };
-			int softBlockRenderLayer{ 2 };
-			std::vector<glm::ivec2> reservedTiles{};
+			int softBlockCount;
+			float softBlockRatio;
+			float tileSize;
+			std::string softBlockTexture;
+			SDL_FRect softBlockSource;
+			int softBlockRenderLayer;
+			std::vector<glm::ivec2> reservedTiles;
+
+			PlayfieldConfig()
+				: softBlockCount(0)
+				, softBlockRatio(0.0f)
+				, tileSize(16.0f)
+				, softBlockTexture("Textures/BombermanSprites_Playfield.png")
+				, softBlockSource{ 16.0f, 210.0f, 16.0f, 16.0f }
+				, softBlockRenderLayer(2)
+				, reservedTiles{}
+			{
+			}
 		};
 
 		PlayfieldComponent(GameObject* pOwner, Scene& scene, float playfieldWidth, float playfieldHeight, float playfieldScale, PlayfieldConfig config = {});
