@@ -8,12 +8,11 @@ namespace dae
 	class EntityDeathObserver final : public IObserver
 	{
 	public:
-		explicit EntityDeathObserver(Scene& scene);
+		explicit EntityDeathObserver(Scene&);
 		~EntityDeathObserver() override;
 
 		void Notify(const GameObject& pGameActor, Event event) override;
 
 	private:
-		Scene* m_pScene{};
 	};
 }
