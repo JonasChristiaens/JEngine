@@ -12,6 +12,8 @@ namespace dae
 			: m_pOwner(owner)
 		{}
 
+		virtual ~EnemyState() = default;
+
 		GameObject* GetOwner() const { return m_pOwner; }
 
 	private:

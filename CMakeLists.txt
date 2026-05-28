@@ -178,7 +178,7 @@ add_library(minigin STATIC
   Minigin/Components/DelayedEventComponent.cpp
 
   # States
-  Minigin/State/StateStack.cpp
+  Minigin/State/StateMachine.cpp
 
   # Audio
   Minigin/Audio/ServiceLocator.cpp
@@ -228,7 +228,7 @@ add_executable(${GAME_TARGET} ${GAME_TARGET_PARAM}
   Bomberman/Components/HealthComponent.cpp
   Bomberman/Components/ScoreComponent.cpp
   Bomberman/Components/PickupComponent.cpp
-  Bomberman/Components/StateStackComponent.cpp
+  Bomberman/Components/StateMachineComponent.cpp
   Bomberman/Components/EnemyComponent.cpp
   Bomberman/Components/EnemyMovementComponent.cpp
   Bomberman/Factories/EnemyFactory.cpp

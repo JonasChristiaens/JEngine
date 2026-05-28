@@ -3,7 +3,7 @@
 
 namespace dae
 {
-    class StateStackComponent;
+    class StateMachineComponent;
 
     class EnemyComponent final : public BaseComponent
     {
@@ -12,9 +12,9 @@ namespace dae
 
         void Update() override {}
 
-        StateStackComponent* GetStateStackComponent() const { return m_pStateStack; }
+        StateMachineComponent* GetStateMachineComponent() const { return m_pStateMachine; }
 
     private:
-        StateStackComponent* m_pStateStack{};
+        StateMachineComponent* m_pStateMachine{};
     };
 }

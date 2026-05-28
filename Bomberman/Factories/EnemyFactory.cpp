@@ -8,7 +8,7 @@
 #include "Components/HealthComponent.h"
 #include "Components/EnemyComponent.h"
 #include "Components/EnemyMovementComponent.h"
-#include "Components/StateStackComponent.h"
+#include "Components/StateMachineComponent.h"
 #include "State/BalloomIdleState.h"
 #include <random>
 #include <glm/vec3.hpp>
@@ -143,7 +143,7 @@ namespace dae::EnemyFactory
 
         enemy->AddComponent<SpriteAnimatorComponent>();
         auto* enemyComp = enemy->AddComponent<EnemyComponent>();
-        auto* stateStack = enemyComp->GetStateStackComponent();
+        auto* stateMachine = enemyComp->GetStateMachineComponent();
 
         enemy->AddComponent<EnemyMovementComponent>(moveSpeed, kBalloomMinDirectionTime, kBalloomMaxDirectionTime);
         enemy->AddComponent<HealthComponent>(1);
@@ -151,9 +151,9 @@ namespace dae::EnemyFactory
         auto* collider = enemy->AddComponent<CollisionComponent>(colliderSize, colliderSize);
         collider->SetOffset({ -colliderSize * 0.5f, -colliderSize * 0.5f });
 
-        if (stateStack)
+        if (stateMachine)
         {
-            stateStack->GetStateStack().Push(std::make_unique<BalloomIdleState>(enemy.get()));
+            stateMachine->GetStateMachine().SetState(std::make_unique<BalloomIdleState>(enemy.get()));
         }
 
         enemy->SetParent(&parent, false);

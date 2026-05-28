@@ -1,5 +1,5 @@
 #include "EnemyComponent.h"
-#include "StateStackComponent.h"
+#include "StateMachineComponent.h"
 #include "GameObject.h"
 
 namespace dae
@@ -7,10 +7,10 @@ namespace dae
     EnemyComponent::EnemyComponent(GameObject* pOwner)
         : BaseComponent(pOwner)
     {
-        m_pStateStack = pOwner->GetComponent<StateStackComponent>();
-        if (!m_pStateStack)
+        m_pStateMachine = pOwner->GetComponent<StateMachineComponent>();
+        if (!m_pStateMachine)
         {
-            m_pStateStack = pOwner->AddComponent<StateStackComponent>();
+            m_pStateMachine = pOwner->AddComponent<StateMachineComponent>();
         }
     }
 }
