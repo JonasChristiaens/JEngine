@@ -22,5 +22,6 @@ namespace dae
 		
 		glm::vec3 m_lastPosition{};
 		bool m_isInitialized{ false };
+		float m_stepElapsed{};
 	};
 }

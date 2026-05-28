@@ -3,8 +3,18 @@
 #include "TransformComponent.h"
 #include "SpriteAnimatorComponent.h"
 #include "Rendering/Renderer.h"
+#include "EventQueue/EventManager.h"
+#include "Core/GameTime.h"
 #include <SDL3/SDL.h>
 #include <cmath>
+
+namespace
+{
+	constexpr dae::EventId kPlayAudioEventId = dae::make_sdbm_hash("PlayAudioEvent");
+	constexpr const char* kFootstepHorizontalSfxPath = "Audio/Effects/step_horizontal.wav";
+	constexpr const char* kFootstepVerticalSfxPath = "Audio/Effects/step_vertical.wav";
+	constexpr float kFootstepIntervalSeconds = 0.25f;
+}
 
 dae::PlayerAnimatorComponent::PlayerAnimatorComponent(GameObject* pOwner)
 	: BaseComponent(pOwner)
@@ -31,11 +41,31 @@ void dae::PlayerAnimatorComponent::Update()
 
 	glm::vec3 delta = currentPos - m_lastPosition;
 	m_lastPosition = currentPos;
+	const bool movedHorizontally = std::abs(delta.x) > 0.01f;
+	const bool movedVertically = std::abs(delta.y) > 0.01f;
+	const bool movedThisFrame = movedHorizontally || movedVertically;
+	if (movedThisFrame)
+	{
+		m_stepElapsed += dae::GameTime::GetInstance().GetDeltaTime();
+		if (m_stepElapsed >= kFootstepIntervalSeconds)
+		{
+			const char* sfxPath = movedVertically ? kFootstepVerticalSfxPath : kFootstepHorizontalSfxPath;
+			dae::Event playAudioEvent(kPlayAudioEventId);
+			playAudioEvent.nbArgs = 1;
+			playAudioEvent.args[0].p = const_cast<char*>(sfxPath);
+			dae::EventManager::GetInstance().BroadcastEvent(playAudioEvent, GetOwner());
+			m_stepElapsed = 0.0f;
+		}
+	}
+	else
+	{
+		m_stepElapsed = 0.0f;
+	}
 
 	// Calculate if we moved this frame
-	if (std::abs(delta.x) > 0.01f || std::abs(delta.y) > 0.01f)
+	if (movedThisFrame)
 	{
-		if (std::abs(delta.y) > 0.01f)
+		if (movedVertically)
 		{
 			if (delta.y > 0)
 				m_pAnimator->SetAnimation(3, 0, 3, 3, 10.0f, true); // Walk Down
