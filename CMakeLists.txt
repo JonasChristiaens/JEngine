@@ -165,6 +165,7 @@ add_library(minigin STATIC
   # Input
   Minigin/Input/InputManager.cpp
   Minigin/Input/ControllerInput.cpp
+  Minigin/Input/KeyboardInput.cpp
 
   # Components
   Minigin/Components/TransformComponent.cpp
@@ -232,6 +233,7 @@ add_executable(${GAME_TARGET} ${GAME_TARGET_PARAM}
   Bomberman/Components/SceneStateMachineComponent.cpp
   Bomberman/Components/EnemyComponent.cpp
   Bomberman/Components/EnemyMovementComponent.cpp
+  Bomberman/Components/BombComponent.cpp
   Bomberman/Factories/EnemyFactory.cpp
   Bomberman/State/BalloomIdleState.cpp
   Bomberman/State/TitleSceneState.cpp

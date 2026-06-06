@@ -1,6 +1,7 @@
 #pragma once
 #include "Scene/Scene.h"
 #include "Scene/GameObject.h"
+#include "GameMode.h"
 
 namespace dae
 {
@@ -11,5 +12,5 @@ namespace dae
 		float tileWorldSize{};
 	};
 
-	GameplaySceneData BuildGameplayScene(Scene& scene);
+	GameplaySceneData BuildGameplayScene(Scene& scene, GameMode gameMode);
 }

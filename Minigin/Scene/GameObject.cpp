@@ -1,46 +1,65 @@
 #include "GameObject.h"
 #include "Components/BaseComponent.h"
 #include "Components/TransformComponent.h"
+#include "Components/RenderComponent.h"
+#include <algorithm>
 
 dae::GameObject::~GameObject() = default;
 
 void dae::GameObject::Update()
 {
-    if (m_markedForDeletion)
+    if (m_MarkedForDeletion)
 		return;
 
-	for (auto& component : m_components)
+	for (auto& component : m_Components)
 	{
 		component->Update();
 	}
 
-	// Update children
-	for (auto* pChild : m_children)
+	// Update snapshot of children; callbacks may detach children during update.
+	const auto children = m_Children;
+	for (auto* pChild : children)
 	{
-		pChild->Update();
+		if (pChild)
+		{
+			pChild->Update();
+		}
 	}
 }
 
 void dae::GameObject::Render() const
 {
-  if (m_markedForDeletion)
+	if (m_MarkedForDeletion)
 		return;
 
-	for (const auto& component : m_components)
+	for (const auto& component : m_Components)
 	{
 		component->Render();
 	}
 
-	// Render children
-	for (const auto* pChild : m_children)
+	auto children = m_Children;
+	std::stable_sort(children.begin(), children.end(),
+		[](const GameObject* a, const GameObject* b)
+		{
+			const auto* ra = a->GetComponent<RenderComponent>();
+			const auto* rb = b->GetComponent<RenderComponent>();
+			const int la = ra ? ra->GetRenderLayer() : 0;
+			const int lb = rb ? rb->GetRenderLayer() : 0;
+			return la < lb;
+		});
+
+	for (const auto* pChild : children)
 	{
-		pChild->Render();
+		if (pChild)
+		{
+			pChild->Render();
+		}
 	}
 }
 
 void dae::GameObject::MarkForDeletion()
 {
-	m_markedForDeletion = true;
+	m_MarkedForDeletion = true;
 
 	if (m_pParent)
 	{
@@ -49,7 +68,7 @@ void dae::GameObject::MarkForDeletion()
 	}
 
 	// Mark children for deletion as well
-	for (auto* pChild : m_children)
+	for (auto* pChild : m_Children)
 	{
 		pChild->MarkForDeletion();
 	}
@@ -90,7 +109,7 @@ void dae::GameObject::AddChild(GameObject* pChild)
 	if (pChild == this || m_pParent == pChild)
 		return;
 
-	m_children.push_back(pChild);
+	m_Children.push_back(pChild);
 }
 
 void dae::GameObject::RemoveChild(GameObject* pChild)
@@ -98,7 +117,7 @@ void dae::GameObject::RemoveChild(GameObject* pChild)
 	if (pChild == nullptr || !IsChild(pChild))
 		return;
 
-	m_children.erase(std::find(m_children.begin(), m_children.end(), pChild));
+	m_Children.erase(std::find(m_Children.begin(), m_Children.end(), pChild));
 }
 
 bool dae::GameObject::IsChild(GameObject* pChild) const
@@ -106,7 +125,7 @@ bool dae::GameObject::IsChild(GameObject* pChild) const
 	if (pChild == nullptr)
 		return false;
 
-	return std::find(m_children.begin(), m_children.end(), pChild) != m_children.end();
+	return std::find(m_Children.begin(), m_Children.end(), pChild) != m_Children.end();
 }
 
 void dae::GameObject::SetLocalPosition(const glm::vec3& pos)

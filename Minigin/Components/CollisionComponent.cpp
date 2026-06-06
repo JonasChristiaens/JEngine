@@ -6,35 +6,35 @@
 
 namespace dae
 {
-	std::vector<CollisionComponent*> CollisionComponent::m_allColliders{};
+	std::vector<CollisionComponent*> CollisionComponent::m_AllColliders{};
 
 	CollisionComponent::CollisionComponent(GameObject* pOwner, float width, float height, bool isTrigger)
 		: BaseComponent(pOwner)
-		, m_width(width)
-		, m_height(height)
-		, m_isTrigger(isTrigger)
+		, m_Width(width)
+		, m_Height(height)
+		, m_IsTrigger(isTrigger)
 	{
-		m_allColliders.push_back(this);
+		m_AllColliders.push_back(this);
 	}
 
 	CollisionComponent::~CollisionComponent()
 	{
-		m_allColliders.erase(std::remove(m_allColliders.begin(), m_allColliders.end(), this), m_allColliders.end());
+		m_AllColliders.erase(std::remove(m_AllColliders.begin(), m_AllColliders.end(), this), m_AllColliders.end());
 	}
 
 	void CollisionComponent::SetOffset(const glm::vec2& offset)
 	{
-		m_offset = offset;
+		m_Offset = offset;
 	}
 
 	bool CollisionComponent::WouldCollide(const glm::vec3& worldPosition) const
 	{
-		const float left1 = worldPosition.x + m_offset.x;
-		const float right1 = left1 + m_width;
-		const float top1 = worldPosition.y + m_offset.y;
-		const float bottom1 = top1 + m_height;
+		const float left1 = worldPosition.x + m_Offset.x;
+		const float right1 = left1 + m_Width;
+		const float top1 = worldPosition.y + m_Offset.y;
+		const float bottom1 = top1 + m_Height;
 
-		for (auto* other : m_allColliders)
+		for (auto* other : m_AllColliders)
 		{
 			if (other == this)
 				continue;
@@ -48,9 +48,9 @@ namespace dae
 				continue;
 
 			const auto otherPos = otherTransform->GetWorldPosition();
-			const float left2 = otherPos.x + other->m_offset.x;
+			const float left2 = otherPos.x + other->m_Offset.x;
 			const float right2 = left2 + other->GetWidth();
-			const float top2 = otherPos.y + other->m_offset.y;
+			const float top2 = otherPos.y + other->m_Offset.y;
 			const float bottom2 = top2 + other->GetHeight();
 
 			if (left1 < right2 && right1 > left2 && top1 < bottom2 && bottom1 > top2)
@@ -69,11 +69,14 @@ namespace dae
 			return;
 
 		const auto pos = transform->GetWorldPosition();
+		float cameraX = 0.0f, cameraY = 0.0f;
+		Renderer::GetInstance().GetCameraOffset(cameraX, cameraY);
+
 		SDL_FRect rect{};
-		rect.x = pos.x + m_offset.x;
-		rect.y = pos.y + m_offset.y;
-		rect.w = m_width;
-		rect.h = m_height;
+		rect.x = pos.x + m_Offset.x + cameraX;
+		rect.y = pos.y + m_Offset.y + cameraY;
+		rect.w = m_Width;
+		rect.h = m_Height;
 
 		SDL_Renderer* renderer = Renderer::GetInstance().GetSDLRenderer();
 		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
@@ -82,18 +85,18 @@ namespace dae
 
 	void CollisionComponent::Update()
 	{
-		if (!m_onCollision) return;
+		if (!m_OnCollision) return;
 
 		auto transform = GetOwner()->GetComponent<TransformComponent>();
 		if (!transform) return;
 
 		const auto pos = transform->GetWorldPosition();
-		const float left1 = pos.x + m_offset.x;
-		const float right1 = left1 + m_width;
-		const float top1 = pos.y + m_offset.y;
-		const float bottom1 = top1 + m_height;
+		const float left1 = pos.x + m_Offset.x;
+		const float right1 = left1 + m_Width;
+		const float top1 = pos.y + m_Offset.y;
+		const float bottom1 = top1 + m_Height;
 
-		for (auto* other : m_allColliders)
+		for (auto* other : m_AllColliders)
 		{
 			if (other == this) continue;
 			if (other->GetOwner()->IsMarkedForDeletion()) continue;
@@ -102,14 +105,14 @@ namespace dae
 			if (!otherTransform) continue;
 
 			const auto otherPos = otherTransform->GetWorldPosition();
-			const float left2 = otherPos.x + other->m_offset.x;
+			const float left2 = otherPos.x + other->m_Offset.x;
 			const float right2 = left2 + other->GetWidth();
-			const float top2 = otherPos.y + other->m_offset.y;
+			const float top2 = otherPos.y + other->m_Offset.y;
 			const float bottom2 = top2 + other->GetHeight();
 
 			if (left1 < right2 && right1 > left2 && top1 < bottom2 && bottom1 > top2)
 			{
-				m_onCollision(other->GetOwner());
+				m_OnCollision(other->GetOwner());
 			}
 		}
 	}
