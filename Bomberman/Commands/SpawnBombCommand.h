@@ -1,8 +1,11 @@
 #pragma once
 #include "Command.h"
 
-class SpawnBombCommand final : public Command
+namespace dae
 {
-public:
-    void Execute() override;
-};
+	class SpawnBombCommand final : public Command
+	{
+	public:
+		void Execute() override;
+	};
+}

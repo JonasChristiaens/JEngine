@@ -2,14 +2,17 @@
 #include "Command.h"
 #include "Components/ScoreComponent.h"
 
-class ChangeScoreCommand final : public Command
+namespace dae
 {
-public:
-	ChangeScoreCommand(int deltaScore);
-	virtual ~ChangeScoreCommand() = default;
+	class ChangeScoreCommand final : public Command
+	{
+	public:
+		ChangeScoreCommand(int deltaScore);
+		virtual ~ChangeScoreCommand() = default;
 
-	void Execute() override;
+		void Execute() override;
 
-private:
-	int m_deltaScore;
-};
+	private:
+		int m_DeltaScore;
+	};
+}

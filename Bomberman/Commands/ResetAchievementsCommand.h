@@ -3,13 +3,16 @@
 
 #include "Command.h"
 
-class ResetAchievementsCommand final : public Command
+namespace dae
 {
-public:
-	ResetAchievementsCommand() = default;
-	virtual ~ResetAchievementsCommand() = default;
+	class ResetAchievementsCommand final : public Command
+	{
+	public:
+		ResetAchievementsCommand() = default;
+		virtual ~ResetAchievementsCommand() = default;
 
-	void Execute() override;
-};
+		void Execute() override;
+	};
+}
 
 #endif // USE_STEAMWORKS

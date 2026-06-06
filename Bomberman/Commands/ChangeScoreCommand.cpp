@@ -2,18 +2,21 @@
 #include "EventQueue/EventManager.h"
 #include "Scene/GameObject.h"
 
-ChangeScoreCommand::ChangeScoreCommand(int deltaScore)
-	: m_deltaScore(deltaScore)
+namespace dae
 {
-}
-
-void ChangeScoreCommand::Execute()
-{
-	if (m_pGameActor != nullptr)
+	ChangeScoreCommand::ChangeScoreCommand(int deltaScore)
+		: m_DeltaScore(deltaScore)
 	{
-		dae::Event scoreEvent(dae::make_sdbm_hash("ChangeScoreEvent"));
-		scoreEvent.nbArgs = 1;
-		scoreEvent.args[0].i = m_deltaScore;
-		dae::EventManager::GetInstance().BroadcastEvent(scoreEvent, m_pGameActor);
+	}
+
+	void ChangeScoreCommand::Execute()
+	{
+		if (m_pGameActor != nullptr)
+		{
+			dae::Event scoreEvent(dae::make_sdbm_hash("ChangeScoreEvent"));
+			scoreEvent.nbArgs = 1;
+			scoreEvent.args[0].i = m_DeltaScore;
+			dae::EventManager::GetInstance().BroadcastEvent(scoreEvent, m_pGameActor);
+		}
 	}
 }

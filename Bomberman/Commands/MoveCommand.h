@@ -2,15 +2,18 @@
 #include "Command.h"
 #include <glm/glm.hpp>
 
-class MoveCommand final : public Command
+namespace dae
 {
-public:
-	MoveCommand(const glm::vec3& direction, float speed);
-	virtual ~MoveCommand() = default;
+	class MoveCommand final : public Command
+	{
+	public:
+		MoveCommand(const glm::vec3& direction, float speed);
+		virtual ~MoveCommand() = default;
 
-	void Execute() override;
+		void Execute() override;
 
-private:
-	glm::vec3 m_direction;
-	float m_speed;
-};
+	private:
+		glm::vec3 m_Direction;
+		float m_Speed;
+	};
+}
