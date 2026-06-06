@@ -11,7 +11,7 @@ namespace dae
 		explicit BombEventObserver(Scene& scene, float tileWorldSize);
 		~BombEventObserver() override;
 
-		void Notify(const GameObject& pGameActor, Event event) override;
+		void Notify(GameObject& actor, Event event) override;
 
 	private:
 		Scene* m_pScene{};

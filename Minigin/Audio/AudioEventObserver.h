@@ -3,12 +3,12 @@
 
 namespace dae
 {
-    class AudioEventObserver final : public IObserver
-    {
-    public:
-        AudioEventObserver();
-        ~AudioEventObserver() override;
+	class AudioEventObserver final : public IObserver
+	{
+	public:
+		AudioEventObserver();
+		~AudioEventObserver() override;
 
-        void Notify(const GameObject& pGameActor, Event event) override;
-    };
+		void Notify(GameObject& actor, Event event) override;
+	};
 }

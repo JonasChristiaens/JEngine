@@ -10,7 +10,7 @@ namespace dae
 	{
 	}
 
-	void AchievementObserver::Notify(const dae::GameObject&, dae::Event event)
+	void AchievementObserver::Notify(dae::GameObject& /*actor*/, dae::Event event)
 	{
 		if (event.id == dae::make_sdbm_hash("PlayerWon"))
 		{

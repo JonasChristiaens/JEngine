@@ -1,6 +1,7 @@
 #pragma once
-#include "../Scene/GameObject.h"
+
 #include "Event.h"
+#include "../Scene/GameObject.h"
 
 namespace dae
 {
@@ -8,6 +9,6 @@ namespace dae
 	{
 	public:
 		virtual ~IObserver() = default;
-		virtual void Notify(const GameObject& pGameActor, Event event) = 0;
+		virtual void Notify(GameObject& actor, Event event) = 0;
 	};
 }

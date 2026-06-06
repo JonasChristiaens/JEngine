@@ -7,6 +7,7 @@
 #include "Components/DelayedEventComponent.h"
 #include "Components/CollisionComponent.h"
 #include "Components/HealthComponent.h"
+#include "Components/BombComponent.h"
 #include "EventQueue/EventManager.h"
 #include <cmath>
 #include <vector>
@@ -45,16 +46,14 @@ dae::BombEventObserver::~BombEventObserver()
 	}
 }
 
-void dae::BombEventObserver::Notify(const GameObject& pGameActor, Event event)
+void dae::BombEventObserver::Notify(GameObject& actor, Event event)
 {
 	if (m_pScene == nullptr)
 		return;
 
-	auto* pSubject = const_cast<dae::GameObject*>(&pGameActor);
-
 	if (event.id == kPlaceBombEventId)
 	{
-		auto* actorTransform = pGameActor.GetComponent<dae::TransformComponent>();
+		auto* actorTransform = actor.GetComponent<dae::TransformComponent>();
 		if (!actorTransform)
 			return;
 
@@ -81,7 +80,7 @@ void dae::BombEventObserver::Notify(const GameObject& pGameActor, Event event)
 		dae::Event playAudioEvent(kPlayAudioEventId);
 		playAudioEvent.nbArgs = 1;
 		playAudioEvent.args[0].p = const_cast<char*>(kBombLaySfxPath);
-		dae::EventManager::GetInstance().BroadcastEvent(playAudioEvent, pSubject);
+		dae::EventManager::GetInstance().BroadcastEvent(playAudioEvent, &actor);
 
 		auto bomb = std::make_unique<dae::GameObject>();
 		auto* transform = bomb->AddComponent<dae::TransformComponent>();
@@ -90,7 +89,7 @@ void dae::BombEventObserver::Notify(const GameObject& pGameActor, Event event)
 		auto* render = bomb->AddComponent<dae::RenderComponent>();
 		render->SetTexture("Resources/BombermanSprites_General.png");
 		render->SetScale(kBombScale + 0.5f);
-		render->SetRenderLayer(2);
+		render->SetRenderLayer(1);
 		render->SetSourceRectangle(0.f, 49.f, 16.f, 16.f);
 		render->SetPivot({ 0.5f, 0.5f });
 
@@ -111,8 +110,9 @@ void dae::BombEventObserver::Notify(const GameObject& pGameActor, Event event)
 		detonateEvent.args[1].f = y;
 
 		bomb->AddComponent<dae::DelayedEventComponent>(detonateEvent, 3.0f);
+		bomb->AddComponent<dae::BombComponent>(&actor, m_TileWorldSize);
 
-		if (auto* parent = pSubject->GetParent())
+		if (auto* parent = actor.GetParent())
 		{
 			bomb->SetParent(parent, false);
 		}
@@ -120,10 +120,10 @@ void dae::BombEventObserver::Notify(const GameObject& pGameActor, Event event)
 	}
 	else if (event.id == kDetonateBombEventId)
 	{
-		auto* bombParent = pGameActor.GetParent();
-		pSubject->MarkForDeletion();
+		auto* bombParent = actor.GetParent();
+		actor.MarkForDeletion();
 
-		auto* bombTransform = pGameActor.GetComponent<dae::TransformComponent>();
+		auto* bombTransform = actor.GetComponent<dae::TransformComponent>();
 		if (bombTransform == nullptr)
 			return;
 
@@ -138,7 +138,7 @@ void dae::BombEventObserver::Notify(const GameObject& pGameActor, Event event)
 		dae::Event playAudioEvent(kPlayAudioEventId);
 		playAudioEvent.nbArgs = 1;
 		playAudioEvent.args[0].p = const_cast<char*>(kBombExplosionSfxPath);
-		dae::EventManager::GetInstance().BroadcastEvent(playAudioEvent, pSubject);
+		dae::EventManager::GetInstance().BroadcastEvent(playAudioEvent, &actor);
 
 		const float bombCenterX = x;
 		const float bombCenterY = y;

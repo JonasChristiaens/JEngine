@@ -16,12 +16,12 @@ namespace dae
 		HealthComponent& operator=(const HealthComponent& other) = delete;
 		HealthComponent& operator=(HealthComponent&& other) = delete;
 
-		virtual void Update() override {};
+		void Update() override {};
 		void ChangeCurrentHealth(int amount);
 
 		int GetHealth() const { return m_CurrentHealth; }
 
-		virtual void Notify(const GameObject& pGameActor, Event event) override;
+		void Notify(GameObject& actor, Event event) override;
 
 	private:
 		int m_CurrentHealth;

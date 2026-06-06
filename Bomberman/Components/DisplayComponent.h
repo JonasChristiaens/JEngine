@@ -28,15 +28,15 @@ namespace dae
 		DisplayComponent& operator=(const DisplayComponent& other) = delete;
 		DisplayComponent& operator=(DisplayComponent&& other) = delete;
 
-		virtual void Update() override {};
+		void Update() override {};
 
-		virtual void Notify(const GameObject& pGameActor, Event event) override
+		void Notify(GameObject& actor, Event event) override
 		{
 			if (event.id == m_ObservedEvent)
 			{
 				if (m_pTextComponent)
 				{
-					auto comp = pGameActor.GetComponent<T>();
+					auto comp = actor.GetComponent<T>();
 					if (comp)
 					{
 						m_pTextComponent->SetText(m_Prefix + m_ValueAccessor(comp));

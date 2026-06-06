@@ -10,9 +10,9 @@ namespace dae
 		explicit EntityDeathObserver(Scene&);
 		~EntityDeathObserver() override;
 
-		void Notify(const GameObject& pGameActor, Event event) override;
+		void Notify(GameObject& actor, Event event) override;
 
 	private:
-		Scene* m_scene{};
+		Scene* m_pScene{};
 	};
 }

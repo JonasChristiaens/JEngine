@@ -12,7 +12,7 @@ namespace dae
 	{
 	public:
 		AchievementObserver(CSteamAchievements* pAchievements);
-		virtual void Notify(const dae::GameObject& pGameActor, dae::Event event) override;
+		void Notify(dae::GameObject& actor, dae::Event event) override;
 
 	private:
 		CSteamAchievements* m_pAchievements;

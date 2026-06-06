@@ -12,7 +12,7 @@ namespace dae
 {
 	EntityDeathObserver::EntityDeathObserver(Scene& scene)
 		: IObserver()
-		, m_scene(&scene)
+		, m_pScene(&scene)
 	{
 		EventManager::GetInstance().AddObserver(*this);
 	}
@@ -25,18 +25,17 @@ namespace dae
 		}
 	}
 
-	void EntityDeathObserver::Notify(const GameObject& pGameActor, Event event)
+	void EntityDeathObserver::Notify(GameObject& actor, Event event)
 	{
 		if (event.id != kEntityDiedEventId)
 			return;
 
-		if (m_scene == nullptr)
+		if (m_pScene == nullptr)
 			return;
 
-		auto* actor = const_cast<GameObject*>(&pGameActor);
-		if (!actor || !m_scene->Contains(actor) || actor->IsMarkedForDeletion())
+		if (!m_pScene->Contains(&actor) || actor.IsMarkedForDeletion())
 			return;
 
-		actor->MarkForDeletion();
+		actor.MarkForDeletion();
 	}
 }

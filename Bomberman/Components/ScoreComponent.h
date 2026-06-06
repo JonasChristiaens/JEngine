@@ -16,12 +16,12 @@ namespace dae
 		ScoreComponent& operator=(const ScoreComponent& other) = delete;
 		ScoreComponent& operator=(ScoreComponent&& other) = delete;
 
-		virtual void Update() override {};
+		void Update() override {};
 		void ChangeCurrentScore(int amount);
 
 		int GetScore() const { return m_CurrentScore; }
 
-		virtual void Notify(const GameObject& pGameActor, Event event) override;
+		void Notify(GameObject& actor, Event event) override;
 
 	private:
 		int m_CurrentScore;

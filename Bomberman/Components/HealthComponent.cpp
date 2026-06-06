@@ -34,9 +34,9 @@ void dae::HealthComponent::ChangeCurrentHealth(int amount)
 	}
 }
 
-void dae::HealthComponent::Notify(const GameObject& pGameActor, Event event)
+void dae::HealthComponent::Notify(GameObject& actor, Event event)
 {
-	if (&pGameActor == GetOwner())
+	if (&actor == GetOwner())
 	{
 		if (event.id == make_sdbm_hash("ChangeHealthEvent"))
 		{

@@ -2,9 +2,9 @@
 #include "EventQueue/EventManager.h"
 #include "Scene/GameObject.h"
 
-dae::ScoreComponent::ScoreComponent(GameObject* pOwner, int health)
+dae::ScoreComponent::ScoreComponent(GameObject* pOwner, int score)
 	: BaseComponent(pOwner)
-	, m_CurrentScore(health)
+	, m_CurrentScore(score)
 {
 	EventManager::GetInstance().AddObserver(*this);
 }
@@ -20,9 +20,9 @@ void dae::ScoreComponent::ChangeCurrentScore(int amount)
 	NotifyObservers(Event(make_sdbm_hash("ScoreChanged")), GetOwner());
 }
 
-void dae::ScoreComponent::Notify(const GameObject& pGameActor, Event event)
+void dae::ScoreComponent::Notify(GameObject& actor, Event event)
 {
-	if (&pGameActor == GetOwner() && event.id == make_sdbm_hash("ChangeScoreEvent") && event.nbArgs > 0)
+	if (&actor == GetOwner() && event.id == make_sdbm_hash("ChangeScoreEvent") && event.nbArgs > 0)
 	{
 		ChangeCurrentScore(event.args[0].i);
 	}
