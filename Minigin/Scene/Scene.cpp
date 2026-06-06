@@ -16,6 +16,17 @@ void Scene::RemoveAll()
 	m_objects.clear();
 }
 
+bool Scene::Contains(const GameObject* object) const
+{
+	if (!object)
+		return false;
+
+	return std::any_of(m_objects.begin(), m_objects.end(), [object](const std::unique_ptr<GameObject>& entry)
+		{
+			return entry.get() == object;
+		});
+}
+
 void Scene::Update()
 {
 	for(auto& object : m_objects)

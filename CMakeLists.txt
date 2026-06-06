@@ -229,10 +229,16 @@ add_executable(${GAME_TARGET} ${GAME_TARGET_PARAM}
   Bomberman/Components/ScoreComponent.cpp
   Bomberman/Components/PickupComponent.cpp
   Bomberman/Components/StateMachineComponent.cpp
+  Bomberman/Components/SceneStateMachineComponent.cpp
   Bomberman/Components/EnemyComponent.cpp
   Bomberman/Components/EnemyMovementComponent.cpp
   Bomberman/Factories/EnemyFactory.cpp
   Bomberman/State/BalloomIdleState.cpp
+  Bomberman/State/TitleSceneState.cpp
+  Bomberman/State/GameSceneState.cpp
+  Bomberman/State/EndSceneState.cpp
+  Bomberman/Scenes/GameplaySceneBuilder.cpp
+  Bomberman/Level/LevelDataLoader.cpp
 )
 
 target_compile_features(${GAME_TARGET} PUBLIC cxx_std_20)
@@ -292,5 +298,26 @@ if(MSVC)
 else()
   target_compile_options(minigin PRIVATE -Wall -Wextra -Werror)
   target_compile_options(${GAME_TARGET} PRIVATE -Wall -Wextra -Werror)
+endif()
+
+# =========================
+# Emscripten build commands 
+# =========================
+
+if(EMSCRIPTEN)
+  set(EMSCRIPTEN_COMPILE_FLAGS "${EMSCRIPTEN_LINK_FLAGS} -g -sNO_DISABLE_EXCEPTION_CATCHING")
+  set(EMSCRIPTEN_LINK_FLAGS "${EMSCRIPTEN_LINK_FLAGS} -sNO_DISABLE_EXCEPTION_CATCHING -sUSE_FREETYPE=1 -sUSE_HARFBUZZ=1 -g -sALLOW_MEMORY_GROWTH=0 -sINITIAL_MEMORY=1024MB --preload-file \"${CMAKE_CURRENT_SOURCE_DIR}/data@/\"")
+
+  # Use the Emscripten toolchain
+  set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/cmake/EmscriptenToolchain.cmake)
+
+  # Additional settings for Emscripten build
+  set_target_properties(${GAME_TARGET} imgui minigin PROPERTIES
+    COMPILE_FLAGS "${EMSCRIPTEN_COMPILE_FLAGS}"
+    LINK_FLAGS "${EMSCRIPTEN_LINK_FLAGS}"
+  )
+
+  # Have emscripten generate a html page too.
+  set(CMAKE_EXECUTABLE_SUFFIX ".html")
 endif()
 

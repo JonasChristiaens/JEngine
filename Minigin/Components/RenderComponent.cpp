@@ -22,8 +22,8 @@ void dae::RenderComponent::Render() const
 
 	if (m_useSourceRect)
 	{
-		const float scaledWidth = m_sourceRect.w * m_scale;
-		const float scaledHeight = m_sourceRect.h * m_scale;
+		const float scaledWidth = m_useDestinationSize ? m_destinationWidth : m_sourceRect.w * m_scale;
+		const float scaledHeight = m_useDestinationSize ? m_destinationHeight : m_sourceRect.h * m_scale;
 		Renderer::GetInstance().RenderTexture(
 			*m_texture,
 			pos.x - m_pivot.x * scaledWidth,
@@ -35,7 +35,14 @@ void dae::RenderComponent::Render() const
 	}
 	else
 	{
-		Renderer::GetInstance().RenderTexture(*m_texture, pos.x, pos.y);
+		if (m_useDestinationSize)
+		{
+			Renderer::GetInstance().RenderTexture(*m_texture, pos.x, pos.y, m_destinationWidth, m_destinationHeight);
+		}
+		else
+		{
+			Renderer::GetInstance().RenderTexture(*m_texture, pos.x, pos.y);
+		}
 	}
 }
 
@@ -69,6 +76,18 @@ void dae::RenderComponent::ClearSourceRectangle()
 void dae::RenderComponent::SetScale(float scale)
 {
 	m_scale = scale;
+}
+
+void dae::RenderComponent::SetDestinationSize(float width, float height)
+{
+	m_destinationWidth = width;
+	m_destinationHeight = height;
+	m_useDestinationSize = true;
+}
+
+void dae::RenderComponent::ClearDestinationSize()
+{
+	m_useDestinationSize = false;
 }
 
 void dae::RenderComponent::SetPivot(const glm::vec2& pivot)

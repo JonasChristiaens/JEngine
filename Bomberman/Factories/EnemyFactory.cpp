@@ -134,7 +134,7 @@ namespace dae::EnemyFactory
         transform->SetLocalPosition(SelectSpawnPosition(parent, gridColumns, gridRows, tileWorldSize, colliderSize, reservedWorldPositions));
 
         auto* render = enemy->AddComponent<RenderComponent>();
-        render->SetTexture("Textures/BombermanSprites_General.png");
+        render->SetTexture("BombermanSprites_General.png");
         render->SetSourceRectangle(kBalloomSpriteSheetX, kBalloomSpriteSheetY, kBalloomSpriteWidth, kBalloomSpriteHeight);
         render->SetScale(kBalloomScale);
         render->SetPivot({ 0.5f, 0.5f });

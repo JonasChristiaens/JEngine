@@ -17,8 +17,8 @@ namespace
 	constexpr dae::EventId kDetonateBombEventId = dae::make_sdbm_hash("DetonateBombEvent");
 	constexpr dae::EventId kPlayAudioEventId = dae::make_sdbm_hash("PlayAudioEvent");
 
-	constexpr const char* kBombLaySfxPath = "Audio/Effects/bomb_lay.wav";
-	constexpr const char* kBombExplosionSfxPath = "Audio/Effects/bomb_explosion.wav";
+	constexpr const char* kBombLaySfxPath = "bomb_lay.wav";
+	constexpr const char* kBombExplosionSfxPath = "bomb_explosion.wav";
 
 	constexpr float kBombScale = 2.0f;
 	constexpr float kExplosionFrameSize = 80.0f;

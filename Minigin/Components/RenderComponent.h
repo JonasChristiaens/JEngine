@@ -25,6 +25,8 @@ namespace dae
 		void SetSourceRectangle(float x, float y, float width, float height);
 		void SetSourceRectangle(const SDL_FRect& rect);
 		void ClearSourceRectangle();
+		void SetDestinationSize(float width, float height);
+		void ClearDestinationSize();
 
 		void SetSpriteSheet(int spriteWidth, int spriteHeight, int columns, int rows);
 		void SetSprite(int column, int row);
@@ -47,7 +49,10 @@ namespace dae
 		int m_rows{ 0 };
 
 		float m_scale{ 1.0f };
+		float m_destinationWidth{ 0.0f };
+		float m_destinationHeight{ 0.0f };
 		int m_renderLayer{ 0 };
 		glm::vec2 m_pivot{ 0.0f, 0.0f };
+		bool m_useDestinationSize{ false };
 	};
 }

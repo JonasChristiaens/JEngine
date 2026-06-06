@@ -19,7 +19,7 @@ void dae::BalloomIdleState::OnEnter()
 	constexpr float spriteWidth = 16.0f;
 	constexpr float spriteHeight = 16.0f;
 
-	m_pRenderComponent->SetTexture("Textures/BombermanSprites_General.png");
+	m_pRenderComponent->SetTexture("BombermanSprites_General.png");
 	m_pRenderComponent->SetSourceRectangle(spriteX, spriteY, spriteWidth, spriteHeight);
 	m_pRenderComponent->SetScale(3.0f);
 	m_pRenderComponent->SetPivot({ 0.5f, 0.5f });

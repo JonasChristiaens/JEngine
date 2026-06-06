@@ -26,7 +26,7 @@ namespace dae
 				: softBlockCount(0)
 				, softBlockRatio(0.0f)
 				, tileSize(16.0f)
-				, softBlockTexture("Textures/BombermanSprites_Playfield.png")
+				, softBlockTexture("BombermanSprites_Playfield.png")
 				, softBlockSource{ 16.0f, 210.0f, 16.0f, 16.0f }
 				, softBlockRenderLayer(2)
 				, reservedTiles{}

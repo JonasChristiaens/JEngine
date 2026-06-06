@@ -1,10 +1,9 @@
 #pragma once
 #include "EventQueue/IObserver.h"
+#include "Scene/Scene.h"
 
 namespace dae
 {
-	class Scene;
-
 	class EntityDeathObserver final : public IObserver
 	{
 	public:
@@ -14,5 +13,6 @@ namespace dae
 		void Notify(const GameObject& pGameActor, Event event) override;
 
 	private:
+		Scene* m_scene{};
 	};
 }

@@ -11,8 +11,8 @@
 namespace
 {
 	constexpr dae::EventId kPlayAudioEventId = dae::make_sdbm_hash("PlayAudioEvent");
-	constexpr const char* kFootstepHorizontalSfxPath = "Audio/Effects/step_horizontal.wav";
-	constexpr const char* kFootstepVerticalSfxPath = "Audio/Effects/step_vertical.wav";
+	constexpr const char* kFootstepHorizontalSfxPath = "step_horizontal.wav";
+	constexpr const char* kFootstepVerticalSfxPath = "step_vertical.wav";
 	constexpr float kFootstepIntervalSeconds = 0.25f;
 }
 

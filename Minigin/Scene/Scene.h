@@ -10,6 +10,7 @@ namespace dae
 	public:
 		void Add(std::unique_ptr<GameObject> object);
 		void RemoveAll();
+		bool Contains(const GameObject* object) const;
 
 		void Update();
 		void LateUpdate();

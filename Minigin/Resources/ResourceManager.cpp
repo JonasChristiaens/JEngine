@@ -4,6 +4,8 @@
 #include "Renderer.h"
 #include "Texture2D.h"
 #include "Font.h"
+#include <fstream>
+#include <sstream>
 
 namespace fs = std::filesystem;
 
@@ -39,6 +41,19 @@ std::shared_ptr<dae::Font> dae::ResourceManager::LoadFont(const std::string& fil
 	if(m_loadedFonts.find(key) == m_loadedFonts.end())
 		m_loadedFonts.insert(std::pair(key,std::make_shared<Font>(fullPath.string(), size)));
 	return m_loadedFonts.at(key);
+}
+
+std::string dae::ResourceManager::LoadTextFile(const std::string& file)
+{
+	const auto fullPath = m_dataPath / file;
+	std::ifstream stream(fullPath);
+	if (!stream.is_open())
+	{
+		throw std::runtime_error("Failed to open text file");
+	}
+	std::stringstream buffer;
+	buffer << stream.rdbuf();
+	return buffer.str();
 }
 
 void dae::ResourceManager::UnloadUnusedResources()
