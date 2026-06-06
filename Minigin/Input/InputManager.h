@@ -2,6 +2,8 @@
 #include "Singleton.h"
 
 #include "ControllerInput.h"
+#include "KeyCodes.h"
+#include "KeyboardInput.h"
 #include "Commands/Command.h"
 
 #include <memory>
@@ -41,14 +43,14 @@ namespace dae
 
 	struct KeyboardKey
 	{
-		SDL_Keycode key;
+		KeyCode key;
 		KeyState keyState;
 
 		bool operator<(const KeyboardKey& other) const
 		{
 			if (key != other.key)
-				return key < other.key;
-			return keyState < other.keyState;
+				return static_cast<int>(key) < static_cast<int>(other.key);
+			return static_cast<int>(keyState) < static_cast<int>(other.keyState);
 		}
 
 		bool operator==(const KeyboardKey& other) const
@@ -72,7 +74,7 @@ namespace dae
 	{
 		std::size_t operator()(const KeyboardKey& k) const
 		{
-			std::size_t h1 = std::hash<SDL_Keycode>{}(k.key);
+			std::size_t h1 = std::hash<KeyCode>{}(k.key);
 			std::size_t h2 = std::hash<int>{}(static_cast<int>(k.keyState));
 			return h1 ^ (h2 << 1);
 		}
@@ -84,20 +86,23 @@ namespace dae
 		bool ProcessInput();
 
 		bool BindControllerInput(unsigned int controllerIndex, unsigned int button, KeyState keyState, std::unique_ptr<Command> command);
-		void BindKeyboardInput(SDL_Keycode key, KeyState keyState, std::unique_ptr<Command> command);
+		void BindKeyboardInput(KeyCode key, KeyState keyState, std::unique_ptr<Command> command);
 
 		void AddController(unsigned int controllerIndex);
 		void RemoveController(unsigned int controllerIndex);
 		bool HasController(unsigned int controllerIndex) const;
 
 		void UnBindControllerInput(unsigned int controllerIndex, unsigned int button, KeyState keyState);
-		void UnBindKeyboardInput(SDL_Keycode key, KeyState keyState);
+		void UnBindKeyboardInput(KeyCode key, KeyState keyState);
+
+		void ClearAllBindings();
 
 	private:
-		std::unordered_map<unsigned int, std::unique_ptr<ControllerInput>> m_controllers;
+		std::unordered_map<unsigned int, std::unique_ptr<ControllerInput>> m_Controllers;
 
-		std::unordered_map<ControllerKey, std::unique_ptr<Command>, ControllerKeyHash> m_controllerCommands;
-		std::unordered_map<KeyboardKey, std::unique_ptr<Command>, KeyboardKeyHash> m_keyboardCommands;
-		std::unordered_map<SDL_Keycode, bool> m_previousKeyboardState;
+		std::unordered_map<ControllerKey, std::unique_ptr<Command>, ControllerKeyHash> m_ControllerCommands;
+		std::unordered_map<KeyboardKey, std::unique_ptr<Command>, KeyboardKeyHash> m_KeyboardCommands;
+
+		KeyboardInput m_KeyboardInput;
 	};
 }

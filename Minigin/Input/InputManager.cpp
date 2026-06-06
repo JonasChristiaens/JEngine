@@ -1,9 +1,9 @@
 #include <SDL3/SDL.h>
 #include "InputManager.h"
+#include <vector>
 
 bool dae::InputManager::ProcessInput()
 {
-	// Process SDL events
 	SDL_Event e;
 	while (SDL_PollEvent(&e))
 	{
@@ -13,25 +13,19 @@ bool dae::InputManager::ProcessInput()
 		}
 	}
 
-	// Update all controllers
-	for (auto& [index, controller] : m_controllers)
+	for (auto& [index, controller] : m_Controllers)
 	{
 		controller->Update();
 	}
 
-	// Get current keyboard state
-	int numKeys;
-	const bool* keyboardState = SDL_GetKeyboardState(&numKeys);
-	if (!keyboardState || numKeys <= 0)
-	{
-		return true;
-	}
+	m_KeyboardInput.Update();
 
-	// Execute controller commands
-	for (auto& [controllerKey, command] : m_controllerCommands)
+	std::vector<ControllerKey> controllerCommandsToRun{};
+	controllerCommandsToRun.reserve(m_ControllerCommands.size());
+	for (auto& [controllerKey, command] : m_ControllerCommands)
 	{
-		auto controllerIt = m_controllers.find(controllerKey.controllerIndex);
-		if (controllerIt != m_controllers.end())
+		auto controllerIt = m_Controllers.find(controllerKey.controllerIndex);
+		if (controllerIt != m_Controllers.end())
 		{
 			bool shouldExecute = false;
 
@@ -50,53 +44,50 @@ bool dae::InputManager::ProcessInput()
 
 			if (shouldExecute)
 			{
-				command->Execute();
+				controllerCommandsToRun.push_back(controllerKey);
 			}
 		}
 	}
-
-	// Execute keyboard commands
-	for (auto& [keyboardKey, command] : m_keyboardCommands)
+	for (const auto& controllerKey : controllerCommandsToRun)
 	{
-		SDL_Scancode scancode = SDL_GetScancodeFromKey(keyboardKey.key, nullptr);
-      if (scancode == SDL_SCANCODE_UNKNOWN || scancode >= numKeys)
+		auto commandIt = m_ControllerCommands.find(controllerKey);
+		if (commandIt != m_ControllerCommands.end())
 		{
-			m_previousKeyboardState[keyboardKey.key] = false;
-			continue;
+			commandIt->second->Execute();
 		}
-		bool isCurrentlyPressed = keyboardState[scancode];
-		bool wasPreviouslyPressed = m_previousKeyboardState[keyboardKey.key];
+	}
+
+	std::vector<KeyboardKey> keyboardCommandsToRun{};
+	keyboardCommandsToRun.reserve(m_KeyboardCommands.size());
+	for (auto& [keyboardKey, command] : m_KeyboardCommands)
+	{
 		bool shouldExecute = false;
 
 		switch (keyboardKey.keyState)
 		{
 		case KeyState::Down:
-			shouldExecute = isCurrentlyPressed && !wasPreviouslyPressed;
+			shouldExecute = m_KeyboardInput.IsDownThisFrame(keyboardKey.key);
 			break;
 		case KeyState::Up:
-			shouldExecute = !isCurrentlyPressed && wasPreviouslyPressed;
+			shouldExecute = m_KeyboardInput.IsUpThisFrame(keyboardKey.key);
 			break;
 		case KeyState::Pressed:
-			shouldExecute = isCurrentlyPressed;
+			shouldExecute = m_KeyboardInput.IsPressed(keyboardKey.key);
 			break;
 		}
 
 		if (shouldExecute)
 		{
-			command->Execute();
+			keyboardCommandsToRun.push_back(keyboardKey);
 		}
 	}
-
-	// Update the previous keyboard state tracking after all commands have been evaluated
-	for (auto& [keyboardKey, command] : m_keyboardCommands)
+	for (const auto& keyboardKey : keyboardCommandsToRun)
 	{
-		SDL_Scancode scancode = SDL_GetScancodeFromKey(keyboardKey.key, nullptr);
-     if (scancode == SDL_SCANCODE_UNKNOWN || scancode >= numKeys)
+		auto commandIt = m_KeyboardCommands.find(keyboardKey);
+		if (commandIt != m_KeyboardCommands.end())
 		{
-			m_previousKeyboardState[keyboardKey.key] = false;
-			continue;
+			commandIt->second->Execute();
 		}
-		m_previousKeyboardState[keyboardKey.key] = keyboardState[scancode];
 	}
 
 	return true;
@@ -104,47 +95,52 @@ bool dae::InputManager::ProcessInput()
 
 bool dae::InputManager::BindControllerInput(unsigned int controllerIndex, unsigned int button, KeyState keyState, std::unique_ptr<Command> command)
 {
-	// If no controller present, return early
-	if (m_controllers.find(controllerIndex) == m_controllers.end())
+	if (m_Controllers.find(controllerIndex) == m_Controllers.end())
 	{
 		return false;
 	}
 
-	m_controllerCommands.emplace(ControllerKey{ controllerIndex, button, keyState }, std::move(command));
+	m_ControllerCommands.emplace(ControllerKey{ controllerIndex, button, keyState }, std::move(command));
 	return true;
 }
 
-void dae::InputManager::BindKeyboardInput(SDL_Keycode key, KeyState keyState, std::unique_ptr<Command> command)
+void dae::InputManager::BindKeyboardInput(KeyCode key, KeyState keyState, std::unique_ptr<Command> command)
 {
-	m_keyboardCommands.emplace(KeyboardKey{ key, keyState }, std::move(command));
+	m_KeyboardCommands.emplace(KeyboardKey{ key, keyState }, std::move(command));
 }
 
 void dae::InputManager::UnBindControllerInput(unsigned int controllerIndex, unsigned int button, KeyState keyState)
 {
 	ControllerKey key{ controllerIndex, button, keyState };
-	m_controllerCommands.erase(key);
+	m_ControllerCommands.erase(key);
 }
 
-void dae::InputManager::UnBindKeyboardInput(SDL_Keycode key, KeyState keyState)
+void dae::InputManager::UnBindKeyboardInput(KeyCode key, KeyState keyState)
 {
 	KeyboardKey keyboardKey{ key, keyState };
-	m_keyboardCommands.erase(keyboardKey);
+	m_KeyboardCommands.erase(keyboardKey);
 }
 
 void dae::InputManager::AddController(unsigned int controllerIndex)
 {
-	if (m_controllers.find(controllerIndex) == m_controllers.end())
+	if (m_Controllers.find(controllerIndex) == m_Controllers.end())
 	{
-		m_controllers[controllerIndex] = std::make_unique<ControllerInput>(controllerIndex);
+		m_Controllers[controllerIndex] = std::make_unique<ControllerInput>(controllerIndex);
 	}
 }
 
 void dae::InputManager::RemoveController(unsigned int controllerIndex)
 {
-	m_controllers.erase(controllerIndex);
+	m_Controllers.erase(controllerIndex);
 }
 
 bool dae::InputManager::HasController(unsigned int controllerIndex) const
 {
-	return m_controllers.find(controllerIndex) != m_controllers.end();
+	return m_Controllers.find(controllerIndex) != m_Controllers.end();
+}
+
+void dae::InputManager::ClearAllBindings()
+{
+	m_KeyboardCommands.clear();
+	m_ControllerCommands.clear();
 }
