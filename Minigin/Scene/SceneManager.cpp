@@ -3,20 +3,20 @@
 
 void dae::SceneManager::Update()
 {
-	for(auto& scene : m_scenes)
+	for (size_t i = 0; i < m_Scenes.size(); ++i)
 	{
-		scene->Update();
+		m_Scenes[i]->Update();
 	}
 
-	for(auto& scene : m_scenes)
+	for (size_t i = 0; i < m_Scenes.size(); ++i)
 	{
-		scene->LateUpdate();
+		m_Scenes[i]->LateUpdate();
 	}
 }
 
 void dae::SceneManager::Render()
 {
-	for (const auto& scene : m_scenes)
+	for (const auto& scene : m_Scenes)
 	{
 		scene->Render();
 	}
@@ -24,11 +24,11 @@ void dae::SceneManager::Render()
 
 dae::Scene& dae::SceneManager::CreateScene()
 {
-	m_scenes.emplace_back(new Scene());
-	return *m_scenes.back();
+	m_Scenes.emplace_back(new Scene());
+	return *m_Scenes.back();
 }
 
 void dae::SceneManager::RemoveAll()
 {
-	m_scenes.clear();
+	m_Scenes.clear();
 }

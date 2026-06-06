@@ -9,13 +9,20 @@ namespace dae
 	class EventManager final : public Singleton<EventManager>, public ISubject
 	{
 	public:
-       static bool IsAlive() { return s_isAlive; }
+	   static bool IsAlive() { return s_isAlive; }
 		void BroadcastEvent(Event e, GameObject* pSubjectActor) { QueueEvent(e, pSubjectActor); }
 
 		void QueueEvent(Event e, GameObject* pSubjectActor)
 		{
 			std::lock_guard lock(m_QueueMutex);
 			m_Queue.push({ e, pSubjectActor });
+		}
+
+		void ClearQueue()
+		{
+			std::lock_guard lock(m_QueueMutex);
+			std::queue<QueuedEvent> empty;
+			std::swap(m_Queue, empty);
 		}
 
 		void ProcessQueuedEvents()
@@ -36,7 +43,7 @@ namespace dae
 
 	private:
 		friend class Singleton<EventManager>;
-       EventManager() { s_isAlive = true; }
+	   EventManager() { s_isAlive = true; }
 		~EventManager() { s_isAlive = false; }
 
 		inline static bool s_isAlive{ false };
