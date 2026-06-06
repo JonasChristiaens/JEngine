@@ -3,17 +3,18 @@
 #include <cassert>
 #include "Components/RenderComponent.h"
 
-using namespace dae;
+namespace dae
+{
 
 void Scene::Add(std::unique_ptr<GameObject> object)
 {
 	assert(object != nullptr && "Cannot add a null GameObject to the scene.");
-	m_objects.emplace_back(std::move(object));
+	m_Objects.emplace_back(std::move(object));
 }
 
 void Scene::RemoveAll()
 {
-	m_objects.clear();
+	m_Objects.clear();
 }
 
 bool Scene::Contains(const GameObject* object) const
@@ -21,7 +22,7 @@ bool Scene::Contains(const GameObject* object) const
 	if (!object)
 		return false;
 
-	return std::any_of(m_objects.begin(), m_objects.end(), [object](const std::unique_ptr<GameObject>& entry)
+	return std::any_of(m_Objects.begin(), m_Objects.end(), [object](const std::unique_ptr<GameObject>& entry)
 		{
 			return entry.get() == object;
 		});
@@ -29,10 +30,8 @@ bool Scene::Contains(const GameObject* object) const
 
 void Scene::Update()
 {
-	for(auto& object : m_objects)
+	for (auto& object : m_Objects)
 	{
-		// Only update root objects (objects without a parent)
-		// Children will be updated by their parents
 		if (object->GetParent() == nullptr)
 		{
 			object->Update();
@@ -42,23 +41,22 @@ void Scene::Update()
 
 void Scene::LateUpdate()
 {
-	// Remove objects that are marked for deletion after all updates are done
-	m_objects.erase(
+	m_Objects.erase(
 		std::remove_if(
-			m_objects.begin(),
-			m_objects.end(),
+			m_Objects.begin(),
+			m_Objects.end(),
 			[](const auto& object) { return object->IsMarkedForDeletion(); }
 		),
-		m_objects.end()
+		m_Objects.end()
 	);
 }
 
 void Scene::Render() const
 {
-    std::vector<GameObject*> sortedObjects{};
-	sortedObjects.reserve(m_objects.size());
+	std::vector<GameObject*> sortedObjects{};
+	sortedObjects.reserve(m_Objects.size());
 
-	for (const auto& object : m_objects)
+	for (const auto& object : m_Objects)
 	{
 		if (object->GetParent() == nullptr)
 		{
@@ -83,3 +81,4 @@ void Scene::Render() const
 	}
 }
 
+}

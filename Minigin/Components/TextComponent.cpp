@@ -9,9 +9,9 @@
 
 dae::TextComponent::TextComponent(GameObject* pOwner, const std::string& text, std::shared_ptr<Font> font)
 	: BaseComponent(pOwner)
-	, m_needsUpdate(true)
-	, m_text(text)
-	, m_font(std::move(font))
+	, m_NeedsUpdate(true)
+	, m_Text(text)
+	, m_Font(std::move(font))
 {
 	m_pRenderComponent = GetOwner()->GetComponent<RenderComponent>();
 	if (m_pRenderComponent == nullptr)
@@ -22,9 +22,9 @@ dae::TextComponent::TextComponent(GameObject* pOwner, const std::string& text, s
 
 void dae::TextComponent::Update()
 {
-	if (m_needsUpdate)
+	if (m_NeedsUpdate)
 	{
-		const auto surf = TTF_RenderText_Blended(m_font->GetFont(), m_text.c_str(), m_text.length(), m_color);
+		const auto surf = TTF_RenderText_Blended(m_Font->GetFont(), m_Text.c_str(), m_Text.length(), m_Color);
 		if (surf == nullptr)
 		{
 			throw std::runtime_error(std::string("Render text failed: ") + SDL_GetError());
@@ -39,7 +39,7 @@ void dae::TextComponent::Update()
 		SDL_DestroySurface(surf);
 		auto textTexture = std::make_shared<Texture2D>(texture);
 		m_pRenderComponent->SetTexture(textTexture);
-		m_needsUpdate = false;
+		m_NeedsUpdate = false;
 	}
 }
 
@@ -53,12 +53,12 @@ void dae::TextComponent::Render() const
 
 void dae::TextComponent::SetText(const std::string& text)
 {
-	m_text = text;
-	m_needsUpdate = true;
+	m_Text = text;
+	m_NeedsUpdate = true;
 }
 
 void dae::TextComponent::SetColor(const SDL_Color& color)
 {
-	m_color = color;
-	m_needsUpdate = true;
+	m_Color = color;
+	m_NeedsUpdate = true;
 }

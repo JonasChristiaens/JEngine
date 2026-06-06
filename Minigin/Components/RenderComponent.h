@@ -32,27 +32,27 @@ namespace dae
 		void SetSprite(int column, int row);
 
 		void SetScale(float scale);
-		float GetScale() const { return m_scale; }
+		float GetScale() const { return m_Scale; }
 		void SetPivot(const glm::vec2& pivot);
 
-		void SetRenderLayer(int layer) { m_renderLayer = layer; }
-		int GetRenderLayer() const { return m_renderLayer; }
+		void SetRenderLayer(int layer) { m_RenderLayer = layer; }
+		int GetRenderLayer() const { return m_RenderLayer; }
 
 	private:
-		std::shared_ptr<Texture2D> m_texture{};
-		SDL_FRect m_sourceRect{};
-		bool m_useSourceRect{ false };
+		std::shared_ptr<Texture2D> m_Texture{};
+		SDL_FRect m_SourceRect{};
+		bool m_UseSourceRect{ false };
 
-		int m_spriteWidth{ 0 };
-		int m_spriteHeight{ 0 };
-		int m_columns{ 0 };
-		int m_rows{ 0 };
+		int m_SpriteWidth{ 0 };
+		int m_SpriteHeight{ 0 };
+		int m_Columns{ 0 };
+		int m_Rows{ 0 };
 
-		float m_scale{ 1.0f };
-		float m_destinationWidth{ 0.0f };
-		float m_destinationHeight{ 0.0f };
-		int m_renderLayer{ 0 };
-		glm::vec2 m_pivot{ 0.0f, 0.0f };
-		bool m_useDestinationSize{ false };
+		float m_Scale{ 1.0f };
+		float m_DestinationWidth{ 0.0f };
+		float m_DestinationHeight{ 0.0f };
+		int m_RenderLayer{ 0 };
+		glm::vec2 m_Pivot{ 0.0f, 0.0f };
+		bool m_UseDestinationSize{ false };
 	};
 }

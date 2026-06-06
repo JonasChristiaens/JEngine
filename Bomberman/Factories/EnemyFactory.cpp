@@ -15,14 +15,14 @@
 
 namespace
 {
-    constexpr float kBalloomScale = 3.0f;
-    constexpr float kBalloomColliderScale = 0.8f;
-    constexpr float kBalloomMinDirectionTime = 2.0f;
-    constexpr float kBalloomMaxDirectionTime = 4.0f;
-    constexpr float kBalloomSpriteSheetX = 0.0f;
-    constexpr float kBalloomSpriteSheetY = 241.0f;
-    constexpr float kBalloomSpriteWidth = 16.0f;
-    constexpr float kBalloomSpriteHeight = 16.0f;
+    constexpr float kBalloomScale{ 3.0f };
+    constexpr float kBalloomColliderScale{ 0.8f };
+    constexpr float kBalloomMinDirectionTime{ 2.0f };
+    constexpr float kBalloomMaxDirectionTime{ 4.0f };
+    constexpr float kBalloomSpriteSheetX{ 0.0f };
+    constexpr float kBalloomSpriteSheetY{ 241.0f };
+    constexpr float kBalloomSpriteWidth{ 16.0f };
+    constexpr float kBalloomSpriteHeight{ 16.0f };
 }
 
 namespace
@@ -92,7 +92,7 @@ namespace
         for (const auto& pos : reservedWorldPositions)
             reservedTiles.push_back(WorldToTile(pos, tileWorldSize));
 
-        constexpr int maxAttempts = 128;
+        constexpr int maxAttempts{ 128 };
         for (int attempt = 0; attempt < maxAttempts; ++attempt)
         {
             const int column = columnDist(GetRng());
@@ -126,7 +126,7 @@ namespace
 namespace dae::EnemyFactory
 {
     GameObject* CreateBalloom(Scene& scene, GameObject& parent, int gridColumns, int gridRows, float tileWorldSize, float moveSpeed,
-        const std::vector<glm::vec3>& reservedWorldPositions)
+        const std::vector<glm::vec3>& reservedWorldPositions, bool useAiMovement)
     {
         auto enemy = std::make_unique<GameObject>();
         auto* transform = enemy->AddComponent<TransformComponent>();
@@ -144,7 +144,10 @@ namespace dae::EnemyFactory
         auto* enemyComp = enemy->AddComponent<EnemyComponent>();
         auto* stateMachine = enemyComp->GetStateMachineComponent();
 
-        enemy->AddComponent<EnemyMovementComponent>(moveSpeed, kBalloomMinDirectionTime, kBalloomMaxDirectionTime);
+        if (useAiMovement)
+        {
+            enemy->AddComponent<EnemyMovementComponent>(moveSpeed, kBalloomMinDirectionTime, kBalloomMaxDirectionTime);
+        }
         enemy->AddComponent<HealthComponent>(1);
 
         auto* collider = enemy->AddComponent<CollisionComponent>(colliderSize, colliderSize);

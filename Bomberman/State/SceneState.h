@@ -1,5 +1,6 @@
 #pragma once
 #include "State/State.h"
+#include "GameMode.h"
 
 namespace dae
 {
@@ -9,11 +10,15 @@ namespace dae
 	{
 	public:
 		explicit SceneState(SceneStateMachineComponent& owner)
-			: m_owner(owner)
+			: m_Owner(owner)
 		{
 		}
 
+		GameMode GetGameMode() const { return m_GameMode; }
+		void SetGameMode(GameMode gameMode) { m_GameMode = gameMode; }
+
 	protected:
-		SceneStateMachineComponent& m_owner;
+		SceneStateMachineComponent& m_Owner;
+		GameMode m_GameMode{ GameMode::Solo };
 	};
 }

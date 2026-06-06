@@ -9,6 +9,6 @@ namespace dae
 
 	namespace EnemyFactory
 	{
-		GameObject* CreateBalloom(Scene& scene, GameObject& parent, int gridColumns, int gridRows, float tileWorldSize, float moveSpeed, const std::vector<glm::vec3>& reservedWorldPositions = {});
+		GameObject* CreateBalloom(Scene& scene, GameObject& parent, int gridColumns, int gridRows, float tileWorldSize, float moveSpeed, const std::vector<glm::vec3>& reservedWorldPositions = {}, bool useAiMovement = true);
 	}
 }

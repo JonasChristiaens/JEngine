@@ -23,10 +23,10 @@ namespace dae
 		void SetColor(const SDL_Color& color);
 
 	private:
-		bool m_needsUpdate{};
-		std::string m_text{};
-		SDL_Color m_color{ 255, 255, 255, 255 };
-		std::shared_ptr<Font> m_font{};
+		bool m_NeedsUpdate{};
+		std::string m_Text{};
+		SDL_Color m_Color{ 255, 255, 255, 255 };
+		std::shared_ptr<Font> m_Font{};
 		RenderComponent* m_pRenderComponent{};
 	};
 }

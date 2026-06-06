@@ -20,8 +20,8 @@ namespace dae
 		SpriteAnimatorComponent* m_pAnimator{ nullptr };
 		TransformComponent* m_pTransform{ nullptr };
 		
-		glm::vec3 m_lastPosition{};
-		bool m_isInitialized{ false };
-		float m_stepElapsed{};
+		glm::vec3 m_LastPosition{};
+		bool m_IsInitialized{ false };
+		float m_StepElapsed{};
 	};
 }

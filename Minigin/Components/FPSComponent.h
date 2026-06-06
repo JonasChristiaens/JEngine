@@ -15,11 +15,11 @@ namespace dae
 		void Update() override;
 
 	private:
-		float m_fpsUpdateInterval{ 0.1f };
-		float m_timeSinceLastUpdate{ 0.0f };
-		float m_currentFPS{ 0.0f };
-		int m_frameCount{ 0 };
+		float m_FpsUpdateInterval{ 0.1f };
+		float m_TimeSinceLastUpdate{ 0.0f };
+		float m_CurrentFPS{ 0.0f };
+		int m_FrameCount{ 0 };
 
-		TextComponent* m_textComponent{ nullptr };
+		TextComponent* m_TextComponent{ nullptr };
 	};
 }

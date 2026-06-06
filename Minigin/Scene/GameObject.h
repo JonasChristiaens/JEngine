@@ -25,10 +25,10 @@ namespace dae
 		void Render() const;
 
 		// Getters
-		bool IsMarkedForDeletion() const { return m_markedForDeletion; }
+		bool IsMarkedForDeletion() const { return m_MarkedForDeletion; }
 
 		GameObject* GetParent() const { return m_pParent; }
-		const std::vector<GameObject*>& GetChildren() const { return m_children; }
+		const std::vector<GameObject*>& GetChildren() const { return m_Children; }
 
 		const glm::vec3& GetWorldPosition() const;
 		const glm::vec3& GetLocalPosition() const;
@@ -55,13 +55,13 @@ namespace dae
 		bool HasComponent() const;
 
 	private:
-		std::vector<std::unique_ptr<BaseComponent>> m_components{};
-		std::unordered_map<std::type_index, BaseComponent*> m_componentMap{};
+		std::vector<std::unique_ptr<BaseComponent>> m_Components{};
+		std::unordered_map<std::type_index, BaseComponent*> m_ComponentMap{};
 
-		bool m_markedForDeletion{ false };
+		bool m_MarkedForDeletion{ false };
 
 		GameObject* m_pParent{ nullptr };
-		std::vector<GameObject*> m_children{};
+		std::vector<GameObject*> m_Children{};
 
 		// Helper functions
 		void AddChild(GameObject* pChild);
@@ -87,8 +87,8 @@ namespace dae
 		T* componentPtr = component.get();
 
 		// Store in both containers
-		m_components.push_back(std::move(component));
-		m_componentMap[std::type_index(typeid(T))] = componentPtr;
+		m_Components.push_back(std::move(component));
+		m_ComponentMap[std::type_index(typeid(T))] = componentPtr;
 
 		return componentPtr;
 	}
@@ -101,24 +101,24 @@ namespace dae
 		const auto typeIndex = std::type_index(typeid(T));
 
 		// Remove from map
-		auto mapIt = m_componentMap.find(typeIndex);
-		if (mapIt == m_componentMap.end())
+		auto mapIt = m_ComponentMap.find(typeIndex);
+		if (mapIt == m_ComponentMap.end())
 			return;
 
 		BaseComponent* componentPtr = mapIt->second;
-		m_componentMap.erase(mapIt);
+		m_ComponentMap.erase(mapIt);
 
 		// Remove from vector
-		m_components.erase(
+		m_Components.erase(
 			std::remove_if(
-				m_components.begin(),
-				m_components.end(),
+				m_Components.begin(),
+				m_Components.end(),
 				[componentPtr](const std::unique_ptr<BaseComponent>& comp)
 				{
 					return comp.get() == componentPtr;
 				}
 			),
-			m_components.end()
+			m_Components.end()
 		);
 	}
 
@@ -127,8 +127,8 @@ namespace dae
 	{
 		static_assert(std::is_base_of<BaseComponent, T>::value, "T must derive from BaseComponent");
 
-		const auto it = m_componentMap.find(std::type_index(typeid(T)));
-		if (it != m_componentMap.end())
+		const auto it = m_ComponentMap.find(std::type_index(typeid(T)));
+		if (it != m_ComponentMap.end())
 		{
 			return static_cast<T*>(it->second);
 		}
@@ -139,6 +139,6 @@ namespace dae
 	bool GameObject::HasComponent() const
 	{
 		static_assert(std::is_base_of<BaseComponent, T>::value, "T must derive from BaseComponent");
-		return m_componentMap.find(std::type_index(typeid(T))) != m_componentMap.end();
+		return m_ComponentMap.find(std::type_index(typeid(T))) != m_ComponentMap.end();
 	}
 }

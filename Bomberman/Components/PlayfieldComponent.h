@@ -38,17 +38,17 @@ namespace dae
 		virtual ~PlayfieldComponent() = default;
 
 		void Update() override {}
-		const std::vector<std::vector<bool>>& GetOccupiedTiles() const { return m_occupiedTiles; }
+		const std::vector<std::vector<bool>>& GetOccupiedTiles() const { return m_OccupiedTiles; }
 		void Rebuild(const PlayfieldConfig& config);
 
 	private:
 		Scene* m_pScene{};
-		float m_playfieldWidth{};
-		float m_playfieldHeight{};
-		float m_playfieldScale{};
-		std::vector<std::vector<bool>> m_occupiedTiles{};
-		std::vector<GameObject*> m_spawnedBlocks{};
-		PlayfieldConfig m_config{};
+		float m_PlayfieldWidth{};
+		float m_PlayfieldHeight{};
+		float m_PlayfieldScale{};
+		std::vector<std::vector<bool>> m_OccupiedTiles{};
+		std::vector<GameObject*> m_SpawnedBlocks{};
+		PlayfieldConfig m_Config{};
 
 		void BuildPlayfield();
 		void ClearSpawnedObjects();

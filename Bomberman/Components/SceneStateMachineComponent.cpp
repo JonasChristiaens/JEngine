@@ -18,13 +18,13 @@ namespace dae
 
 	void SceneStateMachineComponent::Update()
 	{
-		m_stateMachine.HandleInput();
-		m_stateMachine.Update();
+		m_StateMachine.HandleInput();
+		m_StateMachine.Update();
 	}
 
 	void SceneStateMachineComponent::Render() const
 	{
-		m_stateMachine.Render();
+		m_StateMachine.Render();
 	}
 
 	void SceneStateMachineComponent::SetActiveScene(Scene& scene)
@@ -40,12 +40,12 @@ namespace dae
 	{
 		if (player)
 		{
-			m_players.push_back(player);
+			m_Players.push_back(player);
 		}
 	}
 
 	void SceneStateMachineComponent::ClearPlayers()
 	{
-		m_players.clear();
+		m_Players.clear();
 	}
 }

@@ -16,18 +16,18 @@ namespace dae
 		RotateComponent& operator=(const RotateComponent& other) = delete;
 		RotateComponent& operator=(RotateComponent&& other) = delete;
 
-		virtual void Update() override;
+		void Update() override;
 
-		void SetRadius(float radius) { m_radius = radius; }
-		void SetSpeed(float speed) { m_speed = speed; }
+		void SetRadius(float radius) { m_Radius = radius; }
+		void SetSpeed(float speed) { m_Speed = speed; }
 
-		float GetRadius() const { return m_radius; }
-		float GetSpeed() const { return m_speed; }
+		float GetRadius() const { return m_Radius; }
+		float GetSpeed() const { return m_Speed; }
 
 	private:
 		TransformComponent* m_pTransform{ nullptr };
-		float m_radius;
-		float m_speed;
-		float m_angle{ 0.0f };
+		float m_Radius;
+		float m_Speed;
+		float m_Angle{ 0.0f };
 	};
 }

@@ -5,13 +5,13 @@ dae::NullSoundService dae::ServiceLocator::m_NullSoundService{};
 
 dae::ISoundService& dae::ServiceLocator::GetSoundService()
 {
-    if (m_pSoundService)
-        return *m_pSoundService;
+	if (m_pSoundService)
+		return *m_pSoundService;
 
-    return m_NullSoundService;
+	return m_NullSoundService;
 }
 
 void dae::ServiceLocator::RegisterSoundService(std::unique_ptr<ISoundService> pService)
 {
-    m_pSoundService = std::move(pService);
+	m_pSoundService = std::move(pService);
 }

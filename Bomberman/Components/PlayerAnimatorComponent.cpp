@@ -33,33 +33,33 @@ void dae::PlayerAnimatorComponent::Update()
 
 	glm::vec3 currentPos = m_pTransform->GetLocalPosition();
 
-	if (!m_isInitialized)
+	if (!m_IsInitialized)
 	{
-		m_lastPosition = currentPos;
-		m_isInitialized = true;
+		m_LastPosition = currentPos;
+		m_IsInitialized = true;
 	}
 
-	glm::vec3 delta = currentPos - m_lastPosition;
-	m_lastPosition = currentPos;
+	glm::vec3 delta = currentPos - m_LastPosition;
+	m_LastPosition = currentPos;
 	const bool movedHorizontally = std::abs(delta.x) > 0.01f;
 	const bool movedVertically = std::abs(delta.y) > 0.01f;
 	const bool movedThisFrame = movedHorizontally || movedVertically;
 	if (movedThisFrame)
 	{
-		m_stepElapsed += dae::GameTime::GetInstance().GetDeltaTime();
-		if (m_stepElapsed >= kFootstepIntervalSeconds)
+		m_StepElapsed += dae::GameTime::GetInstance().GetDeltaTime();
+		if (m_StepElapsed >= kFootstepIntervalSeconds)
 		{
 			const char* sfxPath = movedVertically ? kFootstepVerticalSfxPath : kFootstepHorizontalSfxPath;
 			dae::Event playAudioEvent(kPlayAudioEventId);
 			playAudioEvent.nbArgs = 1;
 			playAudioEvent.args[0].p = const_cast<char*>(sfxPath);
 			dae::EventManager::GetInstance().BroadcastEvent(playAudioEvent, GetOwner());
-			m_stepElapsed = 0.0f;
+			m_StepElapsed = 0.0f;
 		}
 	}
 	else
 	{
-		m_stepElapsed = 0.0f;
+		m_StepElapsed = 0.0f;
 	}
 
 	// Calculate if we moved this frame

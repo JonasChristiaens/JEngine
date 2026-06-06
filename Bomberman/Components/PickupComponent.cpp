@@ -6,7 +6,7 @@ namespace dae
 {
 	PickupComponent::PickupComponent(GameObject* pOwner, int scoreValue)
 		: BaseComponent(pOwner)
-		, m_scoreValue(scoreValue)
+		, m_ScoreValue(scoreValue)
 	{
 	}
 
@@ -16,7 +16,7 @@ namespace dae
 
 		Event scoreEvent(make_sdbm_hash("ChangeScoreEvent"));
 		scoreEvent.nbArgs = 1;
-		scoreEvent.args[0].i = m_scoreValue;
+		scoreEvent.args[0].i = m_ScoreValue;
 		EventManager::GetInstance().BroadcastEvent(scoreEvent, other);
 
 		GetOwner()->MarkForDeletion();

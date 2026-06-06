@@ -32,18 +32,18 @@ namespace dae
 		void UnbindInput();
 		std::pair<float, float> GetCharacterSrcRect(char character) const;
 
-		int m_selectedIndex{ 0 };
-		int m_modeIndex{ 0 };
-		float m_scaleX{ 1.0f };
-		float m_scaleY{ 1.0f };
-		float m_arrowWidth{ 0.0f };
-		float m_arrowHeight{ 0.0f };
+		int m_SelectedIndex{ 0 };
+		int m_ModeIndex{ 0 };
+		float m_ScaleX{ 1.0f };
+		float m_ScaleY{ 1.0f };
+		float m_ArrowWidth{ 0.0f };
+		float m_ArrowHeight{ 0.0f };
 
-		GameObject* m_root{};
-		GameObject* m_menuRoot{};
-		RenderComponent* m_startArrow{};
-		RenderComponent* m_modeArrow{};
-		GameObject* m_modeLabelRoot{};
-		GameObject* m_scoreRoot{};
+		GameObject* m_Root{};
+		GameObject* m_MenuRoot{};
+		RenderComponent* m_StartArrow{};
+		RenderComponent* m_ModeArrow{};
+		GameObject* m_ModeLabelRoot{};
+		GameObject* m_ScoreRoot{};
 	};
 }

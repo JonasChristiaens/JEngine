@@ -15,7 +15,7 @@ namespace dae
 
 	private:
 		GameObject* m_pTarget{};
-		float m_windowWidth{};
-		float m_playfieldWidth{};
+		float m_WindowWidth{};
+		float m_PlayfieldWidth{};
 	};
 }

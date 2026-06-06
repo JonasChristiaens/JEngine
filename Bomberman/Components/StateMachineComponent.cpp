@@ -7,10 +7,10 @@
 
 void dae::StateMachineComponent::Update()
 {
-	m_stateMachine.Update();
+	m_StateMachine.Update();
 }
 
 void dae::StateMachineComponent::Render() const
 {
-	m_stateMachine.Render();
+	m_StateMachine.Render();
 }

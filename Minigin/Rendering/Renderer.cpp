@@ -12,10 +12,10 @@
 
 void dae::Renderer::Init(SDL_Window* window)
 {
-	m_window = window;
+	m_Window = window;
 	SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
-	m_renderer = SDL_CreateRenderer(window, nullptr);
-	if (m_renderer == nullptr)
+	m_Renderer = SDL_CreateRenderer(window, nullptr);
+	if (m_Renderer == nullptr)
 	{
 		std::cout << "Failed to create the renderer: " << SDL_GetError() << "\n";
 		throw std::runtime_error(std::string("SDL_CreateRenderer Error: ") + SDL_GetError());
@@ -32,8 +32,8 @@ void dae::Renderer::Init(SDL_Window* window)
 	io.IniFilename = NULL;
 #endif
 
-	ImGui_ImplSDL3_InitForSDLRenderer(window, m_renderer);
-	ImGui_ImplSDLRenderer3_Init(m_renderer);
+	ImGui_ImplSDL3_InitForSDLRenderer(window, m_Renderer);
+	ImGui_ImplSDLRenderer3_Init(m_Renderer);
 }
 
 void dae::Renderer::Render() const
@@ -43,15 +43,15 @@ void dae::Renderer::Render() const
 	ImGui::NewFrame();*/
 
 	const auto& color = GetBackgroundColor();
-	SDL_SetRenderDrawColor(m_renderer, color.r, color.g, color.b, color.a);
-	SDL_RenderClear(m_renderer);
+	SDL_SetRenderDrawColor(m_Renderer, color.r, color.g, color.b, color.a);
+	SDL_RenderClear(m_Renderer);
 
 	SceneManager::GetInstance().Render();
 
 	//ImGui::Render();
 
-	//ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), m_renderer);
-	SDL_RenderPresent(m_renderer);
+	//ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), m_Renderer);
+	SDL_RenderPresent(m_Renderer);
 
 }
 
@@ -61,10 +61,10 @@ void dae::Renderer::Destroy()
 	ImGui_ImplSDL3_Shutdown();
 	ImGui::DestroyContext();
 
-	if (m_renderer != nullptr)
+	if (m_Renderer != nullptr)
 	{
-		SDL_DestroyRenderer(m_renderer);
-		m_renderer = nullptr;
+		SDL_DestroyRenderer(m_Renderer);
+		m_Renderer = nullptr;
 	}
 
 }
@@ -72,8 +72,8 @@ void dae::Renderer::Destroy()
 void dae::Renderer::RenderTexture(const Texture2D& texture, const float x, const float y) const
 {
 	SDL_FRect dst{};
-	dst.x = x;
-	dst.y = y;
+	dst.x = x + m_CameraOffsetX;
+	dst.y = y + m_CameraOffsetY;
 	SDL_GetTextureSize(texture.GetSDLTexture(), &dst.w, &dst.h);
 	SDL_RenderTexture(GetSDLRenderer(), texture.GetSDLTexture(), nullptr, &dst);
 }
@@ -81,8 +81,8 @@ void dae::Renderer::RenderTexture(const Texture2D& texture, const float x, const
 void dae::Renderer::RenderTexture(const Texture2D& texture, const float x, const float y, const float width, const float height) const
 {
 	SDL_FRect dst{};
-	dst.x = x;
-	dst.y = y;
+	dst.x = x + m_CameraOffsetX;
+	dst.y = y + m_CameraOffsetY;
 	dst.w = width;
 	dst.h = height;
 	SDL_RenderTexture(GetSDLRenderer(), texture.GetSDLTexture(), nullptr, &dst);
@@ -91,21 +91,21 @@ void dae::Renderer::RenderTexture(const Texture2D& texture, const float x, const
 void dae::Renderer::RenderTexture(const Texture2D& texture, const float x, const float y, const float width, const float height, const SDL_FRect& sourceRect) const
 {
 	SDL_FRect dst{};
-	dst.x = x;
-	dst.y = y;
+	dst.x = x + m_CameraOffsetX;
+	dst.y = y + m_CameraOffsetY;
 	dst.w = width;
 	dst.h = height;
 	SDL_RenderTexture(GetSDLRenderer(), texture.GetSDLTexture(), &sourceRect, &dst);
 }
 
-SDL_Renderer* dae::Renderer::GetSDLRenderer() const { return m_renderer; }
+SDL_Renderer* dae::Renderer::GetSDLRenderer() const { return m_Renderer; }
 
 SDL_Point dae::Renderer::GetWindowSize() const
 {
 	SDL_Point size{};
-	if (m_window == nullptr)
+	if (m_Window == nullptr)
 		return size;
 
-	SDL_GetWindowSizeInPixels(m_window, &size.x, &size.y);
+	SDL_GetWindowSizeInPixels(m_Window, &size.x, &size.y);
 	return size;
 }

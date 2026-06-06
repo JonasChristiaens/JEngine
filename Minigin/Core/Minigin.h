@@ -8,8 +8,8 @@ namespace dae
 {
 	class Minigin final
 	{
-		bool m_quit{};
-		std::chrono::high_resolution_clock::time_point m_lastTime{};
+		bool m_Quit{};
+		std::chrono::high_resolution_clock::time_point m_LastTime{};
 
 	public:
 		explicit Minigin(const std::filesystem::path& dataPath);

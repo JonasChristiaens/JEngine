@@ -12,9 +12,9 @@ namespace dae
 		void Update() override;
 		void Render() const override;
 
-		StateMachine& GetStateMachine() { return m_stateMachine; }
+		StateMachine& GetStateMachine() { return m_StateMachine; }
 
 	private:
-		StateMachine m_stateMachine{};
+		StateMachine m_StateMachine{};
 	};
 }

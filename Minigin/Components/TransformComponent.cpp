@@ -9,15 +9,15 @@ dae::TransformComponent::TransformComponent(GameObject* pOwner)
 
 void dae::TransformComponent::SetLocalPosition(float x, float y, float z)
 {
-	m_localPosition.x = x;
-	m_localPosition.y = y;
-	m_localPosition.z = z;
+	m_LocalPosition.x = x;
+	m_LocalPosition.y = y;
+	m_LocalPosition.z = z;
 	SetPositionDirty();
 }
 
 void dae::TransformComponent::SetLocalPosition(const glm::vec3& position)
 {
-	m_localPosition = position;
+	m_LocalPosition = position;
 	SetPositionDirty();
 }
 
@@ -28,15 +28,15 @@ void dae::TransformComponent::Update()
 
 const glm::vec3& dae::TransformComponent::GetWorldPosition()
 {
-	if (m_positionIsDirty)
+	if (m_PositionIsDirty)
 		UpdateWorldPosition();
 
-	return m_worldPosition;
+	return m_WorldPosition;
 }
 
 void dae::TransformComponent::SetPositionDirty()
 {
-	m_positionIsDirty = true;
+	m_PositionIsDirty = true;
 
 	// Mark all children as dirty
 	const auto& children = GetOwner()->GetChildren();
@@ -51,25 +51,25 @@ void dae::TransformComponent::SetPositionDirty()
 
 void dae::TransformComponent::UpdateWorldPosition()
 {
-	if (m_positionIsDirty)
+	if (m_PositionIsDirty)
 	{
 		GameObject* pParent = GetOwner()->GetParent();
 		if (pParent == nullptr)
 		{
-			m_worldPosition = m_localPosition;
+			m_WorldPosition = m_LocalPosition;
 		}
 		else
 		{
 			if (auto* pParentTransform = pParent->GetComponent<TransformComponent>())
 			{
-				m_worldPosition = pParentTransform->GetWorldPosition() + m_localPosition;
+				m_WorldPosition = pParentTransform->GetWorldPosition() + m_LocalPosition;
 			}
 			else
 			{
-				m_worldPosition = m_localPosition;
+				m_WorldPosition = m_LocalPosition;
 			}
 		}
 	}
 
-	m_positionIsDirty = false;
+	m_PositionIsDirty = false;
 }

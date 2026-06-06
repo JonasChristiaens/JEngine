@@ -14,6 +14,6 @@ namespace dae
 
 		void OnCollision(GameObject* other);
 	private:
-		int m_scoreValue;
+		int m_ScoreValue;
 	};
 }

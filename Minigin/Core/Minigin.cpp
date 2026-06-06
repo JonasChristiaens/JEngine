@@ -67,6 +67,9 @@ dae::Minigin::Minigin(const std::filesystem::path& dataPath)
 	}
 
 #ifndef __EMSCRIPTEN__
+#if WIN32 && _DEBUG
+	SDL_SetHint(SDL_HINT_AUDIO_DRIVER, "directsound");
+#endif
 	if (!SDL_InitSubSystem(SDL_INIT_AUDIO))
 	{
 		SDL_Log("Audio error: %s", SDL_GetError());
@@ -94,6 +97,7 @@ dae::Minigin::~Minigin()
 	SceneManager::GetInstance().RemoveAll();
 	ServiceLocator::RegisterSoundService(nullptr);
 
+	ResourceManager::GetInstance().Shutdown();
 	Renderer::GetInstance().Destroy();
 	SDL_DestroyWindow(g_window);
 	g_window = nullptr;
@@ -103,10 +107,10 @@ dae::Minigin::~Minigin()
 void dae::Minigin::Run(const std::function<void()>& load)
 {
 	load();
-	m_lastTime = std::chrono::high_resolution_clock::now();
+	m_LastTime = std::chrono::high_resolution_clock::now();
 
 #ifndef __EMSCRIPTEN__
-	while (!m_quit)
+	while (!m_Quit)
 		RunOneFrame();
 #else
 	emscripten_set_main_loop_arg(&LoopCallback, this, 0, true);
@@ -116,11 +120,12 @@ void dae::Minigin::Run(const std::function<void()>& load)
 void dae::Minigin::RunOneFrame()
 {
 	const auto currentTime = std::chrono::high_resolution_clock::now();
-	const float deltaTime = std::chrono::duration<float>(currentTime - m_lastTime).count();
-	m_lastTime = currentTime;
+	const float deltaTime = std::chrono::duration<float>(currentTime - m_LastTime).count();
+	m_LastTime = currentTime;
 
 	dae::GameTime::GetInstance().SetDeltaTime(deltaTime);
-	m_quit = !InputManager::GetInstance().ProcessInput();
+	Renderer::GetInstance().ResetCameraOffset();
+	m_Quit = !InputManager::GetInstance().ProcessInput();
 	dae::EventManager::GetInstance().ProcessQueuedEvents();
 
 	SceneManager::GetInstance().Update();

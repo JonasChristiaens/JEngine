@@ -6,13 +6,13 @@ namespace dae
 	class GameTime final : public Singleton<GameTime>
 	{
 	public:
-		float GetDeltaTime() const { return m_deltaTime; }
-		void SetDeltaTime(float deltaTime) { m_deltaTime = deltaTime; }
+		float GetDeltaTime() const { return m_DeltaTime; }
+		void SetDeltaTime(float deltaTime) { m_DeltaTime = deltaTime; }
 
 	private:
 		friend class Singleton<GameTime>;
 		GameTime() = default;
 
-		float m_deltaTime{ 0.0f };
+		float m_DeltaTime{ 0.0f };
 	};
 }

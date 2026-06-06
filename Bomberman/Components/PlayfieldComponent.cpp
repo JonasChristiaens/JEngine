@@ -16,17 +16,17 @@ namespace dae
 	PlayfieldComponent::PlayfieldComponent(GameObject* pOwner, Scene& scene, float playfieldWidth, float playfieldHeight, float playfieldScale, PlayfieldConfig config)
 		: BaseComponent(pOwner)
 		, m_pScene(&scene)
-		, m_playfieldWidth(playfieldWidth)
-		, m_playfieldHeight(playfieldHeight)
-		, m_playfieldScale(playfieldScale)
-		, m_config(std::move(config))
+		, m_PlayfieldWidth(playfieldWidth)
+		, m_PlayfieldHeight(playfieldHeight)
+		, m_PlayfieldScale(playfieldScale)
+		, m_Config(std::move(config))
 	{
 		BuildPlayfield();
 	}
 
 	void PlayfieldComponent::Rebuild(const PlayfieldConfig& config)
 	{
-		m_config = config;
+		m_Config = config;
 		BuildPlayfield();
 	}
 
@@ -37,15 +37,15 @@ namespace dae
 
 		ClearSpawnedObjects();
 
-		const float tileSize = m_config.tileSize;
-		const float tileScale = m_playfieldScale;
+		const float tileSize = m_Config.tileSize;
+		const float tileScale = m_PlayfieldScale;
 		const float tileWorldSize = tileSize * tileScale;
 		const float gridOriginX = 0.0f;
 		const float gridOriginY = 0.0f;
-		const int gridColumns = static_cast<int>(std::floor(m_playfieldWidth / tileSize));
-		const int gridRows = static_cast<int>(std::floor(m_playfieldHeight / tileSize));
+		const int gridColumns = static_cast<int>(std::floor(m_PlayfieldWidth / tileSize));
+		const int gridRows = static_cast<int>(std::floor(m_PlayfieldHeight / tileSize));
 
-		m_occupiedTiles.assign(gridRows, std::vector<bool>(gridColumns, false));
+		m_OccupiedTiles.assign(gridRows, std::vector<bool>(gridColumns, false));
 
 		auto createSolidCollider = [&](int column, int row)
 			{
@@ -58,7 +58,7 @@ namespace dae
 				);
 				block->AddComponent<CollisionComponent>(tileWorldSize, tileWorldSize);
 				block->SetParent(GetOwner(), false);
-				m_spawnedBlocks.push_back(block.get());
+				m_SpawnedBlocks.push_back(block.get());
 				m_pScene->Add(std::move(block));
 			};
 
@@ -87,9 +87,9 @@ namespace dae
 		std::random_device randomDevice{};
 		std::mt19937 rng(randomDevice());
 		std::shuffle(brickCandidates.begin(), brickCandidates.end(), rng);
-		const float brickRatio = m_config.softBlockRatio;
-		const size_t brickCount = (m_config.softBlockCount > 0)
-			? std::min(static_cast<size_t>(m_config.softBlockCount), brickCandidates.size())
+		const float brickRatio = m_Config.softBlockRatio;
+		const size_t brickCount = (m_Config.softBlockCount > 0)
+			? std::min(static_cast<size_t>(m_Config.softBlockCount), brickCandidates.size())
 			: static_cast<size_t>(brickCandidates.size() * brickRatio);
 
 		for (size_t i = 0; i < brickCount; ++i)
@@ -103,34 +103,34 @@ namespace dae
 				0.0f
 			);
 			auto* brickRender = brick->AddComponent<RenderComponent>();
-			brickRender->SetTexture(m_config.softBlockTexture);
-			brickRender->SetSourceRectangle(m_config.softBlockSource.x, m_config.softBlockSource.y, m_config.softBlockSource.w, m_config.softBlockSource.h);
+			brickRender->SetTexture(m_Config.softBlockTexture);
+			brickRender->SetSourceRectangle(m_Config.softBlockSource.x, m_Config.softBlockSource.y, m_Config.softBlockSource.w, m_Config.softBlockSource.h);
 			brickRender->SetScale(tileScale);
-			brickRender->SetRenderLayer(m_config.softBlockRenderLayer);
+			brickRender->SetRenderLayer(m_Config.softBlockRenderLayer);
 			brick->AddComponent<CollisionComponent>(tileWorldSize, tileWorldSize);
 			brick->AddComponent<HealthComponent>(1);
 			brick->SetParent(GetOwner(), false);
-			m_spawnedBlocks.push_back(brick.get());
+			m_SpawnedBlocks.push_back(brick.get());
 			m_pScene->Add(std::move(brick));
-			m_occupiedTiles[row][column] = true;
+			m_OccupiedTiles[row][column] = true;
 		}
 	}
 
 	void PlayfieldComponent::ClearSpawnedObjects()
 	{
-		for (auto* block : m_spawnedBlocks)
+		for (auto* block : m_SpawnedBlocks)
 		{
 			if (block && !block->IsMarkedForDeletion())
 			{
 				block->MarkForDeletion();
 			}
 		}
-		m_spawnedBlocks.clear();
+		m_SpawnedBlocks.clear();
 	}
 
 	bool PlayfieldComponent::IsReservedTile(int column, int row) const
 	{
-		for (const auto& tile : m_config.reservedTiles)
+		for (const auto& tile : m_Config.reservedTiles)
 		{
 			if (tile.x == column && tile.y == row)
 			{

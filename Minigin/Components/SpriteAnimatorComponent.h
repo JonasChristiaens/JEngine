@@ -25,13 +25,13 @@ namespace dae
 		void Pause();
 		void Stop();
 
-		bool IsFinished() const { return m_isFinished; }
-		bool IsPlaying() const { return m_isPlaying; }
+		bool IsFinished() const { return m_IsFinished; }
+		bool IsPlaying() const { return m_IsPlaying; }
 
 		template <typename Callback>
 		void SetOnAnimationFinishedCallback(Callback&& callback)
 		{
-			m_onFinishedCallback = std::forward<Callback>(callback);
+			m_OnFinishedCallback = std::forward<Callback>(callback);
 		}
 
 	private:
@@ -39,22 +39,22 @@ namespace dae
 
 		RenderComponent* m_pRenderComponent{ nullptr };
 
-		int m_startColumn{ 0 };
-		int m_startRow{ 0 };
-		int m_columns{ 1 };
-		int m_frameCount{ 1 };
+		int m_StartColumn{ 0 };
+		int m_StartRow{ 0 };
+		int m_Columns{ 1 };
+		int m_FrameCount{ 1 };
 
-		std::vector<SDL_FRect> m_explicitFrames{};
-		bool m_useExplicitFrames{ false };
+		std::vector<SDL_FRect> m_ExplicitFrames{};
+		bool m_UseExplicitFrames{ false };
 
-		int m_currentFrame{ 0 };
-		float m_animationTimer{ 0.0f };
-		float m_frameDuration{ 0.1f };
+		int m_CurrentFrame{ 0 };
+		float m_AnimationTimer{ 0.0f };
+		float m_FrameDuration{ 0.1f };
 
-		bool m_isLooping{ true };
-		bool m_isPlaying{ false };
-		bool m_isFinished{ false };
+		bool m_IsLooping{ true };
+		bool m_IsPlaying{ false };
+		bool m_IsFinished{ false };
 
-		std::function<void()> m_onFinishedCallback{ nullptr };
+		std::function<void()> m_OnFinishedCallback{ nullptr };
 	};
 }

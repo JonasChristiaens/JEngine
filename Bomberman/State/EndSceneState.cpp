@@ -13,12 +13,12 @@ namespace dae
 	void EndSceneState::OnEnter()
 	{
 		auto& scene = SceneManager::GetInstance().CreateScene();
-		m_owner.SetActiveScene(scene);
+		m_Owner.SetActiveScene(scene);
 	}
 
 	void EndSceneState::OnExit()
 	{
-		if (auto* scene = m_owner.GetActiveScene())
+		if (auto* scene = m_Owner.GetActiveScene())
 		{
 			scene->RemoveAll();
 		}

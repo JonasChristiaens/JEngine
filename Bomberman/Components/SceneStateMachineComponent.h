@@ -18,19 +18,19 @@ namespace dae
 		void Update() override;
 		void Render() const override;
 
-		StateMachine& GetStateMachine() { return m_stateMachine; }
+		StateMachine& GetStateMachine() { return m_StateMachine; }
 
 		void SetActiveScene(Scene& scene);
 		Scene* GetActiveScene() const { return m_pActiveScene; }
 
 		void RegisterPlayer(GameObject* player);
-		const std::vector<GameObject*>& GetPlayers() const { return m_players; }
+		const std::vector<GameObject*>& GetPlayers() const { return m_Players; }
 
 		void ClearPlayers();
 
 	private:
-		StateMachine m_stateMachine{};
+		StateMachine m_StateMachine{};
 		Scene* m_pActiveScene{};
-		std::vector<GameObject*> m_players{};
+		std::vector<GameObject*> m_Players{};
 	};
 }

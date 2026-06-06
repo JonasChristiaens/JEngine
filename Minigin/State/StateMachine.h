@@ -21,9 +21,9 @@ namespace dae
 		void Update();
 		void Render() const;
 
-		bool IsEmpty() const { return !m_state; }
+		bool IsEmpty() const { return !m_State; }
 
 	private:
-		std::unique_ptr<State> m_state{};
+		std::unique_ptr<State> m_State{};
 	};
 }
