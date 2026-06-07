@@ -9,6 +9,7 @@
 #include "Components/CollisionComponent.h"
 #include "Components/PlayfieldComponent.h"
 #include "Components/BombRangeComponent.h"
+#include "Components/BombCapacityComponent.h"
 #include "Factories/EnemyFactory.h"
 #include "Commands/MoveCommand.h"
 #include "Commands/SpawnBombCommand.h"
@@ -68,6 +69,7 @@ namespace
 		go->AddComponent<dae::HealthComponent>(4);
 		go->AddComponent<dae::ScoreComponent>(0);
 		go->AddComponent<dae::BombRangeComponent>(4);
+		go->AddComponent<dae::BombCapacityComponent>(1);
 		auto* collider = go->AddComponent<dae::CollisionComponent>(kPlayerCollisionSize, kPlayerCollisionSize);
 		collider->SetOffset({ -kPlayerCollisionSize * 0.5f, -4.0f });
 		auto* player = go.get();

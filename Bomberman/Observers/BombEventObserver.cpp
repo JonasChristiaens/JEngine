@@ -8,7 +8,9 @@
 #include "Components/CollisionComponent.h"
 #include "Components/HealthComponent.h"
 #include "Components/BombComponent.h"
+#include "Components/BombCapacityComponent.h"
 #include "EventQueue/EventManager.h"
+#include <algorithm>
 #include <cmath>
 #include <vector>
 
@@ -83,6 +85,9 @@ void dae::BombEventObserver::Notify(GameObject& actor, Event event)
 		x = snappedX;
 		y = snappedY;
 
+		if (IsBombAtPosition({ x, y }))
+			return;
+
 		dae::Event playAudioEvent(kPlayAudioEventId);
 		playAudioEvent.nbArgs = 1;
 		playAudioEvent.args[0].p = const_cast<char*>(kBombLaySfxPath);
@@ -118,11 +123,18 @@ void dae::BombEventObserver::Notify(GameObject& actor, Event event)
 		bomb->AddComponent<dae::DelayedEventComponent>(detonateEvent, 3.0f);
 		bomb->AddComponent<dae::BombComponent>(&actor, m_TileWorldSize, explosionRange);
 
+		auto* capacity = actor.GetComponent<BombCapacityComponent>();
+		if (capacity)
+		{
+			capacity->RegisterBombPlaced();
+		}
+
 		if (auto* parent = actor.GetParent())
 		{
 			bomb->SetParent(parent, false);
 		}
 		m_pScene->Add(std::move(bomb));
+		m_ActiveBombPositions.emplace_back(x, y);
 	}
 	else if (event.id == kDetonateBombEventId)
 	{
@@ -141,11 +153,29 @@ void dae::BombEventObserver::Notify(GameObject& actor, Event event)
 			y = event.args[1].f;
 		}
 
+		const auto bombPos = glm::vec2{ x, y };
+		auto it = std::find_if(m_ActiveBombPositions.begin(), m_ActiveBombPositions.end(),
+			[&bombPos](const glm::vec2& p) { return p.x == bombPos.x && p.y == bombPos.y; });
+		if (it != m_ActiveBombPositions.end())
+		{
+			m_ActiveBombPositions.erase(it);
+		}
+
 		int explosionRange = kDefaultExplosionRange;
 		auto* bombComp = actor.GetComponent<dae::BombComponent>();
 		if (bombComp)
 		{
 			explosionRange = bombComp->GetExplosionRange();
+
+			auto* owner = bombComp->GetOwnerPlayer();
+			if (owner && !owner->IsMarkedForDeletion())
+			{
+				auto* ownerCapacity = owner->GetComponent<BombCapacityComponent>();
+				if (ownerCapacity)
+				{
+					ownerCapacity->RegisterBombDetonated();
+				}
+			}
 		}
 
 		dae::Event playAudioEvent(kPlayAudioEventId);
@@ -278,4 +308,16 @@ void dae::BombEventObserver::Notify(GameObject& actor, Event event)
 				});
 		}
 	}
+}
+
+bool dae::BombEventObserver::IsBombAtPosition(const glm::vec2& pos) const
+{
+	for (const auto& p : m_ActiveBombPositions)
+	{
+		if (p.x == pos.x && p.y == pos.y)
+		{
+			return true;
+		}
+	}
+	return false;
 }

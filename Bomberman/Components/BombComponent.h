@@ -10,6 +10,7 @@ namespace dae
 
 		void Update() override;
 		int GetExplosionRange() const { return m_ExplosionRange; }
+		GameObject* GetOwnerPlayer() const { return m_pOwnerPlayer; }
 
 	private:
 		GameObject* m_pOwnerPlayer;

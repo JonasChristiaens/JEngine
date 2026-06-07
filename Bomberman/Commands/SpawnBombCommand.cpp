@@ -3,6 +3,7 @@
 #include "Scene/GameObject.h"
 #include "Components/TransformComponent.h"
 #include "Components/BombRangeComponent.h"
+#include "Components/BombCapacityComponent.h"
 
 namespace dae
 {
@@ -13,6 +14,10 @@ namespace dae
 
 		auto* pTransform = m_pGameActor->GetComponent<TransformComponent>();
 		if (pTransform == nullptr)
+			return;
+
+		auto* capacity = m_pGameActor->GetComponent<BombCapacityComponent>();
+		if (capacity && !capacity->CanPlaceBomb())
 			return;
 
 		const auto& pos = pTransform->GetLocalPosition();
