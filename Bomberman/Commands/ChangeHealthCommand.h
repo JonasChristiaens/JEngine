@@ -1,6 +1,5 @@
 #pragma once
 #include "Command.h"
-#include "Components/HealthComponent.h"
 
 namespace dae
 {

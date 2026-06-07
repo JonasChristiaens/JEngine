@@ -1,6 +1,5 @@
 #pragma once
 #include "Command.h"
-#include "Components/ScoreComponent.h"
 
 namespace dae
 {

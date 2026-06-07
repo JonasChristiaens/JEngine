@@ -11,7 +11,10 @@ dae::ScoreComponent::ScoreComponent(GameObject* pOwner, int score)
 
 dae::ScoreComponent::~ScoreComponent()
 {
-	EventManager::GetInstance().RemoveObserver(*this);
+	if (EventManager::IsAlive())
+	{
+		EventManager::GetInstance().RemoveObserver(*this);
+	}
 }
 
 void dae::ScoreComponent::ChangeCurrentScore(int amount)

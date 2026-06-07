@@ -1,7 +1,6 @@
 #pragma once
 #include "BaseComponent.h"
 #include "State/StateMachine.h"
-#include <memory>
 #include <vector>
 
 namespace dae

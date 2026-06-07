@@ -11,8 +11,7 @@ namespace
 namespace dae
 {
 	EntityDeathObserver::EntityDeathObserver(Scene& scene)
-		: IObserver()
-		, m_pScene(&scene)
+		: m_pScene(&scene)
 	{
 		EventManager::GetInstance().AddObserver(*this);
 	}

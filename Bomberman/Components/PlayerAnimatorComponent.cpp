@@ -93,12 +93,15 @@ void dae::PlayerAnimatorComponent::Render() const
 		return;
 
 	const auto& pos = m_pTransform->GetWorldPosition();
+	float cameraX = 0.0f, cameraY = 0.0f;
+	Renderer::GetInstance().GetCameraOffset(cameraX, cameraY);
+
 	SDL_Renderer* renderer = Renderer::GetInstance().GetSDLRenderer();
 	SDL_SetRenderDrawColor(renderer, 0, 120, 255, 255);
 	SDL_FRect rect{};
 	constexpr float markerSize = 6.0f;
-	rect.x = pos.x - markerSize * 0.5f;
-	rect.y = pos.y - markerSize * 0.5f;
+	rect.x = pos.x - markerSize * 0.5f + cameraX;
+	rect.y = pos.y - markerSize * 0.5f + cameraY;
 	rect.w = markerSize;
 	rect.h = markerSize;
 	SDL_RenderFillRect(renderer, &rect);

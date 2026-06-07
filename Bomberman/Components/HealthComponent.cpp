@@ -11,7 +11,10 @@ dae::HealthComponent::HealthComponent(GameObject* pOwner, int health)
 
 dae::HealthComponent::~HealthComponent()
 {
-	EventManager::GetInstance().RemoveObserver(*this);
+	if (EventManager::IsAlive())
+	{
+		EventManager::GetInstance().RemoveObserver(*this);
+	}
 }
 
 void dae::HealthComponent::ChangeCurrentHealth(int amount)
@@ -21,7 +24,7 @@ void dae::HealthComponent::ChangeCurrentHealth(int amount)
 
 	if (m_CurrentHealth <= 0)
 	{
-      Event diedEvent(make_sdbm_hash("EntityDied"));
+		Event diedEvent(make_sdbm_hash("EntityDied"));
 		EventManager::GetInstance().BroadcastEvent(diedEvent, GetOwner());
 	}
 
