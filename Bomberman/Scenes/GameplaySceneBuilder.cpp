@@ -10,9 +10,11 @@
 #include "Components/PlayfieldComponent.h"
 #include "Components/BombRangeComponent.h"
 #include "Components/BombCapacityComponent.h"
+#include "Components/DetonatorComponent.h"
 #include "Factories/EnemyFactory.h"
 #include "Commands/MoveCommand.h"
 #include "Commands/SpawnBombCommand.h"
+#include "Commands/DetonateBombsCommand.h"
 #include "Observers/BombEventObserver.h"
 #include "Observers/EntityDeathObserver.h"
 #include "Audio/AudioEventObserver.h"
@@ -70,6 +72,7 @@ namespace
 		go->AddComponent<dae::ScoreComponent>(0);
 		go->AddComponent<dae::BombRangeComponent>(4);
 		go->AddComponent<dae::BombCapacityComponent>(1);
+		go->AddComponent<dae::DetonatorComponent>();
 		auto* collider = go->AddComponent<dae::CollisionComponent>(kPlayerCollisionSize, kPlayerCollisionSize);
 		collider->SetOffset({ -kPlayerCollisionSize * 0.5f, -4.0f });
 		auto* player = go.get();
@@ -95,6 +98,10 @@ namespace
 		auto bomb = std::make_unique<dae::SpawnBombCommand>();
 		bomb->SetGameActor(&player);
 		input.BindKeyboardInput(dae::KeyCode::R, dae::KeyState::Down, std::move(bomb));
+
+		auto detonate = std::make_unique<dae::DetonateBombsCommand>();
+		detonate->SetGameActor(&player);
+		input.BindKeyboardInput(dae::KeyCode::B, dae::KeyState::Down, std::move(detonate));
 	}
 
 	void BindControllerMovement(dae::GameObject& player, unsigned int controllerIndex)
@@ -118,6 +125,10 @@ namespace
 		auto bomb = std::make_unique<dae::SpawnBombCommand>();
 		bomb->SetGameActor(&player);
 		input.BindControllerInput(controllerIndex, ControllerButton::kY, dae::KeyState::Down, std::move(bomb));
+
+		auto detonate = std::make_unique<dae::DetonateBombsCommand>();
+		detonate->SetGameActor(&player);
+		input.BindControllerInput(controllerIndex, ControllerButton::kB, dae::KeyState::Down, std::move(detonate));
 	}
 
 	void BindPlayerControls(dae::GameObject& player, bool keyboard, unsigned int controllerIndex)

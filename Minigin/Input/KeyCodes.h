@@ -10,6 +10,7 @@ namespace dae
 		S,
 		D,
 		R,
+		B,
 		Up,
 		Down,
 		Return,

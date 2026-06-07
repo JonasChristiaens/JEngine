@@ -1,6 +1,7 @@
 #pragma once
 #include "EventQueue/IObserver.h"
 #include <glm/vec2.hpp>
+#include <unordered_map>
 #include <vector>
 
 namespace dae
@@ -21,7 +22,9 @@ namespace dae
 		Scene* m_pScene{};
 		float m_TileWorldSize{ 0.0f };
 		std::vector<glm::vec2> m_ActiveBombPositions{};
+		std::unordered_map<GameObject*, std::vector<GameObject*>> m_PlayerBombs{};
 
 		bool IsBombAtPosition(const glm::vec2& pos) const;
+		void DetonateBomb(GameObject& bomb);
 	};
 }

@@ -14,6 +14,7 @@ namespace
 		case dae::KeyCode::S:      return SDL_SCANCODE_S;
 		case dae::KeyCode::D:      return SDL_SCANCODE_D;
 		case dae::KeyCode::R:      return SDL_SCANCODE_R;
+		case dae::KeyCode::B:      return SDL_SCANCODE_B;
 		case dae::KeyCode::Up:     return SDL_SCANCODE_UP;
 		case dae::KeyCode::Down:   return SDL_SCANCODE_DOWN;
 		case dae::KeyCode::Return: return SDL_SCANCODE_RETURN;

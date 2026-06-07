@@ -9,6 +9,7 @@
 #include "Components/BombRangeComponent.h"
 #include "Powerups/FlamesEffect.h"
 #include "Powerups/ExtraBombEffect.h"
+#include "Powerups/DetonatorEffect.h"
 #include <algorithm>
 #include <cmath>
 #include <random>
@@ -20,6 +21,7 @@ namespace
 	constexpr const char* kPowerupTexture = "BombermanSprites_Items.png";
 	constexpr SDL_FRect kFlamesSourceRect{ 17.0f, 0.0f, 16.0f, 16.0f };
 	constexpr SDL_FRect kExtraBombSourceRect{ 0.0f, 0.0f, 16.0f, 16.0f };
+	constexpr SDL_FRect kDetonatorSourceRect{ 64.0f, 0.0f, 16.0f, 16.0f };
 	constexpr int kPowerupScoreValue = 0;
 	constexpr int kHiddenRenderLayer = 1;
 	constexpr int kActiveRenderLayer = 3;
@@ -214,6 +216,9 @@ namespace dae
 		case PickupType::Bomb:
 			sourceRect = kExtraBombSourceRect;
 			break;
+		case PickupType::RemoteControl:
+			sourceRect = kDetonatorSourceRect;
+			break;
 		default:
 			return;
 		}
@@ -248,6 +253,9 @@ namespace dae
 			break;
 		case PickupType::Bomb:
 			pEffect = std::make_unique<ExtraBombEffect>();
+			break;
+		case PickupType::RemoteControl:
+			pEffect = std::make_unique<DetonatorEffect>();
 			break;
 		default:
 			return;
