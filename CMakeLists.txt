@@ -234,7 +234,9 @@ add_executable(${GAME_TARGET} ${GAME_TARGET_PARAM}
   Bomberman/Components/EnemyComponent.cpp
   Bomberman/Components/EnemyMovementComponent.cpp
   Bomberman/Components/BombComponent.cpp
+  Bomberman/Components/BombRangeComponent.cpp
   Bomberman/Factories/EnemyFactory.cpp
+  Bomberman/Powerups/FlamesEffect.cpp
   Bomberman/State/BalloomIdleState.cpp
   Bomberman/State/TitleSceneState.cpp
   Bomberman/State/GameSceneState.cpp

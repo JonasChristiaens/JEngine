@@ -3,13 +3,26 @@
 #include "Scene/GameObject.h"
 #include "Components/CollisionComponent.h"
 #include "Components/HealthComponent.h"
-#include <limits>
 #include "Components/RenderComponent.h"
 #include "Components/TransformComponent.h"
+#include "Components/PickupComponent.h"
+#include "Components/BombRangeComponent.h"
+#include "Powerups/FlamesEffect.h"
 #include <algorithm>
 #include <cmath>
 #include <random>
+#include <utility>
 #include <vector>
+
+namespace
+{
+	constexpr const char* kPowerupTexture = "BombermanSprites_Items.png";
+	constexpr SDL_FRect kFlamesSourceRect{ 17.0f, 0.0f, 16.0f, 16.0f };
+	constexpr int kPowerupScoreValue = 0;
+	constexpr int kHiddenRenderLayer = 1;
+	constexpr int kActiveRenderLayer = 3;
+	constexpr int kVulnerabilityFrameDelay = 30;
+}
 
 namespace dae
 {
@@ -30,12 +43,38 @@ namespace dae
 		BuildPlayfield();
 	}
 
+	void PlayfieldComponent::Update()
+	{
+		if (m_pPowerupBrick == nullptr)
+			return;
+
+		if (!m_PowerupActivated && m_pPowerupBrick->IsMarkedForDeletion())
+		{
+			ActivatePowerup();
+			m_PowerupActivated = true;
+			m_VulnerabilityDelay = kVulnerabilityFrameDelay;
+		}
+
+		if (m_VulnerabilityDelay > 0)
+		{
+			--m_VulnerabilityDelay;
+			if (m_VulnerabilityDelay == 0 && m_pPowerupObject && !m_pPowerupObject->IsMarkedForDeletion())
+			{
+				m_pPowerupObject->AddComponent<HealthComponent>(1);
+			}
+		}
+	}
+
 	void PlayfieldComponent::BuildPlayfield()
 	{
 		if (m_pScene == nullptr)
 			return;
 
 		ClearSpawnedObjects();
+		m_pPowerupBrick = nullptr;
+		m_pPowerupObject = nullptr;
+		m_PowerupActivated = false;
+		m_VulnerabilityDelay = 0;
 
 		const float tileSize = m_Config.tileSize;
 		const float tileScale = m_PlayfieldScale;
@@ -114,6 +153,23 @@ namespace dae
 			m_pScene->Add(std::move(brick));
 			m_OccupiedTiles[row][column] = true;
 		}
+
+		if (m_Config.pickupType != PickupType::None && brickCount > 0)
+		{
+			std::uniform_int_distribution<size_t> dist(0, brickCount - 1);
+			const size_t powerupIndex = dist(rng);
+			const size_t firstBrickIndex = m_SpawnedBlocks.size() - brickCount;
+			m_pPowerupBrick = m_SpawnedBlocks[powerupIndex + firstBrickIndex];
+
+			auto* brickTransform = m_pPowerupBrick->GetComponent<TransformComponent>();
+			if (brickTransform)
+			{
+				const float halfTile = tileWorldSize * 0.5f;
+				const auto& pos = brickTransform->GetLocalPosition();
+				m_PowerupWorldPos = { pos.x + halfTile, pos.y + halfTile };
+				CreateHiddenPowerup();
+			}
+		}
 	}
 
 	void PlayfieldComponent::ClearSpawnedObjects()
@@ -126,6 +182,11 @@ namespace dae
 			}
 		}
 		m_SpawnedBlocks.clear();
+
+		if (m_pPowerupObject && !m_pPowerupObject->IsMarkedForDeletion())
+		{
+			m_pPowerupObject->MarkForDeletion();
+		}
 	}
 
 	bool PlayfieldComponent::IsReservedTile(int column, int row) const
@@ -138,5 +199,69 @@ namespace dae
 			}
 		}
 		return false;
+	}
+
+	void PlayfieldComponent::CreateHiddenPowerup()
+	{
+		SDL_FRect sourceRect{};
+		switch (m_Config.pickupType)
+		{
+		case PickupType::Flames:
+			sourceRect = kFlamesSourceRect;
+			break;
+		default:
+			return;
+		}
+
+		auto powerup = std::make_unique<GameObject>();
+		auto* transform = powerup->AddComponent<TransformComponent>();
+		transform->SetLocalPosition(m_PowerupWorldPos.x, m_PowerupWorldPos.y, 0.0f);
+
+		auto* render = powerup->AddComponent<RenderComponent>();
+		render->SetTexture(kPowerupTexture);
+		render->SetSourceRectangle(sourceRect.x, sourceRect.y, sourceRect.w, sourceRect.h);
+		render->SetScale(m_PlayfieldScale);
+		render->SetPivot({ 0.5f, 0.5f });
+		render->SetRenderLayer(kHiddenRenderLayer);
+
+		powerup->SetParent(GetOwner(), false);
+
+		m_pPowerupObject = powerup.get();
+		m_pScene->Add(std::move(powerup));
+	}
+
+	void PlayfieldComponent::ActivatePowerup()
+	{
+		if (m_pPowerupObject == nullptr)
+			return;
+
+		std::unique_ptr<PowerupEffect> pEffect;
+		switch (m_Config.pickupType)
+		{
+		case PickupType::Flames:
+			pEffect = std::make_unique<FlamesEffect>();
+			break;
+		default:
+			return;
+		}
+
+		auto* render = m_pPowerupObject->GetComponent<RenderComponent>();
+		if (render)
+		{
+			render->SetRenderLayer(kActiveRenderLayer);
+		}
+
+		const float tileWorldSize = m_Config.tileSize * m_PlayfieldScale;
+		auto* collider = m_pPowerupObject->AddComponent<CollisionComponent>(tileWorldSize, tileWorldSize, true);
+		collider->SetOffset({ -tileWorldSize * 0.5f, -tileWorldSize * 0.5f });
+
+		auto* pickup = m_pPowerupObject->AddComponent<PickupComponent>(kPowerupScoreValue, std::move(pEffect));
+		collider->SetOnCollisionCallback([pickup](GameObject* other)
+			{
+				if (other && other->HasComponent<BombRangeComponent>())
+				{
+					pickup->OnCollision(other);
+				}
+			});
 	}
 }

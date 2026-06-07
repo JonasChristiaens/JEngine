@@ -8,6 +8,7 @@
 #include "Components/ScoreComponent.h"
 #include "Components/CollisionComponent.h"
 #include "Components/PlayfieldComponent.h"
+#include "Components/BombRangeComponent.h"
 #include "Factories/EnemyFactory.h"
 #include "Commands/MoveCommand.h"
 #include "Commands/SpawnBombCommand.h"
@@ -40,6 +41,7 @@ namespace
 		dae::PlayfieldComponent::PlayfieldConfig config{};
 		config.softBlockCount = levelData.softBlockCount;
 		config.reservedTiles = levelData.reservedTiles;
+		config.pickupType = levelData.pickupType;
 		return config;
 	}
 
@@ -65,6 +67,7 @@ namespace
 		go->AddComponent<dae::PlayerAnimatorComponent>();
 		go->AddComponent<dae::HealthComponent>(4);
 		go->AddComponent<dae::ScoreComponent>(0);
+		go->AddComponent<dae::BombRangeComponent>(4);
 		auto* collider = go->AddComponent<dae::CollisionComponent>(kPlayerCollisionSize, kPlayerCollisionSize);
 		collider->SetOffset({ -kPlayerCollisionSize * 0.5f, -4.0f });
 		auto* player = go.get();

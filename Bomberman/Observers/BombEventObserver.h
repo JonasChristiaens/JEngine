@@ -14,8 +14,9 @@ namespace dae
 		void Notify(GameObject& actor, Event event) override;
 
 	private:
+		static constexpr int kDefaultExplosionRange{ 1 };
+
 		Scene* m_pScene{};
 		float m_TileWorldSize{ 0.0f };
-		int m_ExplosionRange{ 1 };
 	};
 }

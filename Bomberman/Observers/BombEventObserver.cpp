@@ -67,6 +67,12 @@ void dae::BombEventObserver::Notify(GameObject& actor, Event event)
 			y = event.args[1].f;
 		}
 
+		int explosionRange = kDefaultExplosionRange;
+		if (event.nbArgs >= 3)
+		{
+			explosionRange = event.args[2].i;
+		}
+
 		const float tileCoordX = (x / m_TileWorldSize) - 0.5f;
 		const float tileCoordY = (y / m_TileWorldSize) - 0.5f;
 		const int column = std::max(0, static_cast<int>(std::lround(tileCoordX)));
@@ -87,7 +93,7 @@ void dae::BombEventObserver::Notify(GameObject& actor, Event event)
 		transform->SetLocalPosition(x, y, 0.0f);
 
 		auto* render = bomb->AddComponent<dae::RenderComponent>();
-		render->SetTexture("Resources/BombermanSprites_General.png");
+		render->SetTexture("BombermanSprites_General.png");
 		render->SetScale(kBombScale + 0.5f);
 		render->SetRenderLayer(1);
 		render->SetSourceRectangle(0.f, 49.f, 16.f, 16.f);
@@ -110,7 +116,7 @@ void dae::BombEventObserver::Notify(GameObject& actor, Event event)
 		detonateEvent.args[1].f = y;
 
 		bomb->AddComponent<dae::DelayedEventComponent>(detonateEvent, 3.0f);
-		bomb->AddComponent<dae::BombComponent>(&actor, m_TileWorldSize);
+		bomb->AddComponent<dae::BombComponent>(&actor, m_TileWorldSize, explosionRange);
 
 		if (auto* parent = actor.GetParent())
 		{
@@ -135,6 +141,13 @@ void dae::BombEventObserver::Notify(GameObject& actor, Event event)
 			y = event.args[1].f;
 		}
 
+		int explosionRange = kDefaultExplosionRange;
+		auto* bombComp = actor.GetComponent<dae::BombComponent>();
+		if (bombComp)
+		{
+			explosionRange = bombComp->GetExplosionRange();
+		}
+
 		dae::Event playAudioEvent(kPlayAudioEventId);
 		playAudioEvent.nbArgs = 1;
 		playAudioEvent.args[0].p = const_cast<char*>(kBombExplosionSfxPath);
@@ -142,7 +155,6 @@ void dae::BombEventObserver::Notify(GameObject& actor, Event event)
 
 		const float bombCenterX = x;
 		const float bombCenterY = y;
-		const int explosionRange = m_ExplosionRange;
 
 		std::vector<dae::GameObject*> damageTiles{};
 		damageTiles.reserve(static_cast<size_t>(1 + explosionRange * 4));
@@ -177,7 +189,7 @@ void dae::BombEventObserver::Notify(GameObject& actor, Event event)
 				transform->SetLocalPosition(centerX, centerY, 0.0f);
 
 				auto* render = tile->AddComponent<dae::RenderComponent>();
-				render->SetTexture("Resources/BombermanSprites_General.png");
+				render->SetTexture("BombermanSprites_General.png");
 				render->SetScale(m_TileWorldSize / kExplosionTileSize);
 				render->SetPivot({ 0.5f, 0.5f });
 				render->SetRenderLayer(2);
@@ -248,21 +260,21 @@ void dae::BombEventObserver::Notify(GameObject& actor, Event event)
 		{
 			centerAnimator->SetOnAnimationFinishedCallback(
 				[tiles = std::move(damageTiles), visuals = std::move(explosionTiles)]() mutable
-			{
-					for (auto* visual : visuals)
 				{
+					for (auto* visual : visuals)
+					{
 						if (visual)
 						{
 							visual->MarkForDeletion();
 						}
-				}
-				for (auto* tile : tiles)
-				{
-					if (tile)
-					{
-						tile->MarkForDeletion();
 					}
-				}
+					for (auto* tile : tiles)
+					{
+						if (tile)
+						{
+							tile->MarkForDeletion();
+						}
+					}
 				});
 		}
 	}

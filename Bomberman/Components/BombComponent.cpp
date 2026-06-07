@@ -3,10 +3,11 @@
 #include "Components/TransformComponent.h"
 #include "Components/CollisionComponent.h"
 
-dae::BombComponent::BombComponent(GameObject* pOwnerBomb, GameObject* pOwnerPlayer, float tileSize)
+dae::BombComponent::BombComponent(GameObject* pOwnerBomb, GameObject* pOwnerPlayer, float tileSize, int explosionRange)
 	: BaseComponent(pOwnerBomb)
 	, m_pOwnerPlayer(pOwnerPlayer)
 	, m_TileSize(tileSize)
+	, m_ExplosionRange(explosionRange)
 {
 }
 
