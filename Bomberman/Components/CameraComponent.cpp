@@ -18,8 +18,9 @@ namespace dae
 		if (m_pTarget == nullptr)
 			return;
 
-		auto* cameraTransform = GetOwner()->GetComponent<TransformComponent>();
-		if (cameraTransform == nullptr)
+		if (m_pTransform == nullptr)
+			m_pTransform = GetOwner()->GetComponent<TransformComponent>();
+		if (m_pTransform == nullptr)
 			return;
 
 		const auto& targetPosition = m_pTarget->GetLocalPosition();
@@ -29,7 +30,7 @@ namespace dae
 		const float desiredX = targetPosition.x - halfWindowWidth;
 		const float clampedX = std::clamp(desiredX, minX, maxX);
 
-		cameraTransform->SetLocalPosition(-clampedX, 0.0f, 0.0f);
+		m_pTransform->SetLocalPosition(-clampedX, 0.0f, 0.0f);
 		Renderer::GetInstance().SetCameraOffset(-clampedX, 0.0f);
 	}
 }

@@ -3,10 +3,12 @@
 #include <glm/vec2.hpp>
 #include <unordered_map>
 #include <vector>
+#include <memory>
 
 namespace dae
 {
 	class Scene;
+	class ExplosionEffectManager;
 
 	class BombEventObserver final : public IObserver
 	{
@@ -23,6 +25,7 @@ namespace dae
 		float m_TileWorldSize{ 0.0f };
 		std::vector<glm::vec2> m_ActiveBombPositions{};
 		std::unordered_map<GameObject*, std::vector<GameObject*>> m_PlayerBombs{};
+		std::unique_ptr<ExplosionEffectManager> m_pExplosionManager{};
 
 		bool IsBombAtPosition(const glm::vec2& pos) const;
 		void DetonateBomb(GameObject& bomb);

@@ -1,5 +1,6 @@
 #include "SceneManager.h"
 #include "Scene.h"
+#include <algorithm>
 
 void dae::SceneManager::Update()
 {
@@ -12,6 +13,12 @@ void dae::SceneManager::Update()
 	{
 		m_Scenes[i]->LateUpdate();
 	}
+
+	m_Scenes.erase(
+		std::remove_if(m_Scenes.begin(), m_Scenes.end(),
+			[](const auto& scene) { return scene->IsEmpty(); }),
+		m_Scenes.end()
+	);
 }
 
 void dae::SceneManager::Render()

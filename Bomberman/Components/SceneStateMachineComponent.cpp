@@ -1,11 +1,18 @@
 #include "SceneStateMachineComponent.h"
+#include "StateMachineComponent.h"
 #include "Scene/Scene.h"
+#include "State/StateMachine.h"
 
 namespace dae
 {
 	SceneStateMachineComponent::SceneStateMachineComponent(GameObject* pOwner)
 		: BaseComponent(pOwner)
 	{
+		m_pStateMachineComponent = pOwner->GetComponent<StateMachineComponent>();
+		if (!m_pStateMachineComponent)
+		{
+			m_pStateMachineComponent = pOwner->AddComponent<StateMachineComponent>();
+		}
 	}
 
 	SceneStateMachineComponent::~SceneStateMachineComponent()
@@ -18,13 +25,18 @@ namespace dae
 
 	void SceneStateMachineComponent::Update()
 	{
-		m_StateMachine.HandleInput();
-		m_StateMachine.Update();
+		m_pStateMachineComponent->GetStateMachine().HandleInput();
+		m_pStateMachineComponent->Update();
 	}
 
 	void SceneStateMachineComponent::Render() const
 	{
-		m_StateMachine.Render();
+		m_pStateMachineComponent->Render();
+	}
+
+	StateMachine& SceneStateMachineComponent::GetStateMachine()
+	{
+		return m_pStateMachineComponent->GetStateMachine();
 	}
 
 	void SceneStateMachineComponent::SetActiveScene(Scene& scene)

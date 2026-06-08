@@ -7,6 +7,7 @@ namespace dae
 {
 	class Scene;
 	class GameObject;
+	class StateMachineComponent;
 
 	class SceneStateMachineComponent final : public BaseComponent
 	{
@@ -17,7 +18,7 @@ namespace dae
 		void Update() override;
 		void Render() const override;
 
-		StateMachine& GetStateMachine() { return m_StateMachine; }
+		StateMachine& GetStateMachine();
 
 		void SetActiveScene(Scene& scene);
 		Scene* GetActiveScene() const { return m_pActiveScene; }
@@ -28,7 +29,7 @@ namespace dae
 		void ClearPlayers();
 
 	private:
-		StateMachine m_StateMachine{};
+		StateMachineComponent* m_pStateMachineComponent{};
 		Scene* m_pActiveScene{};
 		std::vector<GameObject*> m_Players{};
 	};

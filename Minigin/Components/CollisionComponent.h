@@ -7,6 +7,8 @@
 
 namespace dae
 {
+	class TransformComponent;
+
 	class CollisionComponent final : public BaseComponent
 	{
 	public:
@@ -31,6 +33,7 @@ namespace dae
 		bool m_IsTrigger;
 		glm::vec2 m_Offset{ 0.0f, 0.0f };
 		std::function<void(GameObject*)> m_OnCollision{ nullptr };
+		mutable TransformComponent* m_pTransform{};
 
 		static std::vector<CollisionComponent*> m_AllColliders;
 	};

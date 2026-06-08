@@ -5,13 +5,10 @@
 #include "Components/RenderComponent.h"
 #include "Components/SpriteAnimatorComponent.h"
 #include "Components/DelayedEventComponent.h"
-#include "Components/CollisionComponent.h"
-#include "Components/HealthComponent.h"
 #include "Components/BombComponent.h"
 #include "Components/BombCapacityComponent.h"
 #include "Components/DetonatorComponent.h"
-#include "Components/EnemyComponent.h"
-#include "Components/ScoreComponent.h"
+#include "Managers/ExplosionEffectManager.h"
 #include "EventQueue/EventManager.h"
 #include <algorithm>
 #include <cmath>
@@ -29,19 +26,12 @@ namespace
 	constexpr const char* kBombExplosionSfxPath = "bomb_explosion.wav";
 
 	constexpr float kBombScale = 2.0f;
-	constexpr float kExplosionFrameSize = 80.0f;
-	constexpr float kExplosionTileSize = 16.0f;
-	constexpr float kExplosionStartX = 0.0f;
-	constexpr float kExplosionStartY = 65.0f;
-	constexpr int kExplosionFrameColumns = 2;
-	constexpr int kExplosionFrameCount = 4;
-	constexpr float kExplosionFramesPerSecond = 12.0f;
-	constexpr float kDamageColliderScale = 0.7f;
 }
 
 dae::BombEventObserver::BombEventObserver(Scene& scene, float tileWorldSize)
 	: m_pScene(&scene)
 	, m_TileWorldSize(tileWorldSize)
+	, m_pExplosionManager(std::make_unique<ExplosionEffectManager>(scene, tileWorldSize))
 {
 	dae::EventManager::GetInstance().AddObserver(*this);
 }
@@ -237,254 +227,15 @@ void dae::BombEventObserver::DetonateBomb(GameObject& bomb)
 	playAudioEvent.args[0].p = const_cast<char*>(kBombExplosionSfxPath);
 	EventManager::GetInstance().BroadcastEvent(playAudioEvent, &bomb);
 
-	const float bombCenterX = x;
-	const float bombCenterY = y;
-
-	std::vector<GameObject*> damageTiles{};
-	damageTiles.reserve(static_cast<size_t>(1 + explosionRange * 4));
-
-	std::vector<GameObject*> explosionTiles{};
-	explosionTiles.reserve(static_cast<size_t>(1 + explosionRange * 4));
-
-	auto buildExplosionFrames = [](int tileColumn, int tileRow)
-		{
-			std::vector<SDL_FRect> frames{};
-			frames.reserve(kExplosionFrameCount);
-			for (int frameIndex = 0; frameIndex < kExplosionFrameCount; ++frameIndex)
-			{
-				const int frameColumn = frameIndex % kExplosionFrameColumns;
-				const int frameRow = frameIndex / kExplosionFrameColumns;
-				const float originX = kExplosionStartX + static_cast<float>(frameColumn) * kExplosionFrameSize;
-				const float originY = kExplosionStartY + static_cast<float>(frameRow) * kExplosionFrameSize;
-				frames.push_back(SDL_FRect{
-					originX + static_cast<float>(tileColumn) * kExplosionTileSize,
-					originY + static_cast<float>(tileRow) * kExplosionTileSize,
-					kExplosionTileSize,
-					kExplosionTileSize
-					});
-			}
-			return frames;
-		};
-
-	auto addExplosionTile = [&](float centerX, float centerY, int tileColumn, int tileRow)
-		{
-			auto tile = std::make_unique<GameObject>();
-			auto* transform = tile->AddComponent<TransformComponent>();
-			transform->SetLocalPosition(centerX, centerY, 0.0f);
-
-			auto* render = tile->AddComponent<RenderComponent>();
-			render->SetTexture("BombermanSprites_General.png");
-			render->SetScale(m_TileWorldSize / kExplosionTileSize);
-			render->SetPivot({ 0.5f, 0.5f });
-			render->SetRenderLayer(2);
-
-			auto* animator = tile->AddComponent<SpriteAnimatorComponent>();
-			animator->SetAnimation(buildExplosionFrames(tileColumn, tileRow), kExplosionFramesPerSecond, false);
-
-			if (bombParent)
-			{
-				tile->SetParent(bombParent, false);
-			}
-
-			auto* tilePtr = tile.get();
-			explosionTiles.push_back(tilePtr);
-			m_pScene->Add(std::move(tile));
-			return animator;
-		};
-
-	auto addDamageTile = [&](float centerX, float centerY)
-		{
-			auto damageTile = std::make_unique<GameObject>();
-			auto* transform = damageTile->AddComponent<TransformComponent>();
-			transform->SetLocalPosition(centerX, centerY, 0.0f);
-
-			const float damageSize = m_TileWorldSize * kDamageColliderScale;
-			auto* collider = damageTile->AddComponent<CollisionComponent>(damageSize, damageSize, true);
-			collider->SetOffset({ -damageSize * 0.5f, -damageSize * 0.5f });
-			collider->SetOnCollisionCallback([](GameObject* other)
-				{
-					if (!other || other->IsMarkedForDeletion())
-						return;
-
-					auto* health = other->GetComponent<HealthComponent>();
-					if (!health)
-						return;
-
-					Event damageEvent(make_sdbm_hash("ChangeHealthEvent"));
-					damageEvent.nbArgs = 1;
-					damageEvent.args[0].i = -1;
-					EventManager::GetInstance().BroadcastEvent(damageEvent, other);
-				});
-
-			if (bombParent)
-			{
-				damageTile->SetParent(bombParent, false);
-			}
-			damageTiles.push_back(damageTile.get());
-			m_pScene->Add(std::move(damageTile));
-		};
-
-	addDamageTile(bombCenterX, bombCenterY);
-	auto* centerAnimator = addExplosionTile(bombCenterX, bombCenterY, 2, 2);
-
-	auto classifyTile = [bombParent](float centerX, float centerY) -> int
-		{
-			if (!bombParent)
-				return 0;
-
-			for (auto* child : bombParent->GetChildren())
-			{
-				if (!child || child->IsMarkedForDeletion())
-					continue;
-
-				auto* col = child->GetComponent<CollisionComponent>();
-				if (!col || col->IsTrigger())
-					continue;
-
-				if (child->HasComponent<EnemyComponent>())
-					continue;
-
-				if (child->HasComponent<ScoreComponent>())
-					continue;
-
-				auto* tx = child->GetComponent<TransformComponent>();
-				if (!tx)
-					continue;
-
-			const glm::vec3 pos = tx->GetWorldPosition();
-			const float left = pos.x + col->GetOffset().x;
-			const float right = left + col->GetWidth();
-			const float top = pos.y + col->GetOffset().y;
-			const float bottom = top + col->GetHeight();
-
-			if (centerX >= left && centerX < right && centerY >= top && centerY < bottom)
-			{
-				return (child->GetComponent<HealthComponent>() != nullptr) ? 1 : 2;
-			}
-			}
-
-			return 0;
-		};
-
-	bool leftOpen = true, rightOpen = true, upOpen = true, downOpen = true;
-
-	for (int step = 1; step <= explosionRange; ++step)
-	{
-		const float offset = static_cast<float>(step) * m_TileWorldSize;
-
-		if (leftOpen)
-		{
-			const float posX = bombCenterX - offset;
-			const int blockType = classifyTile(posX, bombCenterY);
-			if (blockType == 2)
-			{
-				leftOpen = false;
-			}
-			else if (blockType == 1)
-			{
-				addDamageTile(posX, bombCenterY);
-				leftOpen = false;
-			}
-			else
-			{
-				addDamageTile(posX, bombCenterY);
-				const bool isEnd = (step == explosionRange) || (classifyTile(posX - m_TileWorldSize, bombCenterY) != 0);
-				addExplosionTile(posX, bombCenterY, isEnd ? 0 : 1, 2);
-			}
-		}
-
-		if (rightOpen)
-		{
-			const float posX = bombCenterX + offset;
-			const int blockType = classifyTile(posX, bombCenterY);
-			if (blockType == 2)
-			{
-				rightOpen = false;
-			}
-			else if (blockType == 1)
-			{
-				addDamageTile(posX, bombCenterY);
-				rightOpen = false;
-			}
-			else
-			{
-				addDamageTile(posX, bombCenterY);
-				const bool isEnd = (step == explosionRange) || (classifyTile(posX + m_TileWorldSize, bombCenterY) != 0);
-				addExplosionTile(posX, bombCenterY, isEnd ? 4 : 3, 2);
-			}
-		}
-
-		if (upOpen)
-		{
-			const float posY = bombCenterY - offset;
-			const int blockType = classifyTile(bombCenterX, posY);
-			if (blockType == 2)
-			{
-				upOpen = false;
-			}
-			else if (blockType == 1)
-			{
-				addDamageTile(bombCenterX, posY);
-				upOpen = false;
-			}
-			else
-			{
-				addDamageTile(bombCenterX, posY);
-				const bool isEnd = (step == explosionRange) || (classifyTile(bombCenterX, posY - m_TileWorldSize) != 0);
-				addExplosionTile(bombCenterX, posY, 2, isEnd ? 0 : 1);
-			}
-		}
-
-		if (downOpen)
-		{
-			const float posY = bombCenterY + offset;
-			const int blockType = classifyTile(bombCenterX, posY);
-			if (blockType == 2)
-			{
-				downOpen = false;
-			}
-			else if (blockType == 1)
-			{
-				addDamageTile(bombCenterX, posY);
-				downOpen = false;
-			}
-			else
-			{
-				addDamageTile(bombCenterX, posY);
-				const bool isEnd = (step == explosionRange) || (classifyTile(bombCenterX, posY + m_TileWorldSize) != 0);
-				addExplosionTile(bombCenterX, posY, 2, isEnd ? 4 : 3);
-			}
-		}
-	}
-
-	if (centerAnimator)
-	{
-		centerAnimator->SetOnAnimationFinishedCallback(
-			[tiles = std::move(damageTiles), visuals = std::move(explosionTiles)]() mutable
-			{
-				for (auto* visual : visuals)
-				{
-					if (visual)
-					{
-						visual->MarkForDeletion();
-					}
-				}
-				for (auto* tile : tiles)
-				{
-					if (tile)
-					{
-						tile->MarkForDeletion();
-					}
-				}
-			});
-	}
+	m_pExplosionManager->SpawnExplosion(x, y, explosionRange, bombParent);
 }
 
 bool dae::BombEventObserver::IsBombAtPosition(const glm::vec2& pos) const
 {
+	constexpr float kEpsilon = 0.001f;
 	for (const auto& p : m_ActiveBombPositions)
 	{
-		if (p.x == pos.x && p.y == pos.y)
+		if (std::abs(p.x - pos.x) < kEpsilon && std::abs(p.y - pos.y) < kEpsilon)
 		{
 			return true;
 		}

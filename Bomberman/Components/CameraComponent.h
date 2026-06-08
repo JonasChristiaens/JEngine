@@ -4,6 +4,7 @@
 namespace dae
 {
 	class GameObject;
+	class TransformComponent;
 
 	class CameraComponent final : public BaseComponent
 	{
@@ -17,5 +18,6 @@ namespace dae
 		GameObject* m_pTarget{};
 		float m_WindowWidth{};
 		float m_PlayfieldWidth{};
+		TransformComponent* m_pTransform{};
 	};
 }

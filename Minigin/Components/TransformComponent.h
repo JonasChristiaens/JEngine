@@ -12,18 +12,18 @@ namespace dae
 
 		void Update() override;
 
-		const glm::vec3& GetWorldPosition();
+		const glm::vec3& GetWorldPosition() const;
 		const glm::vec3& GetLocalPosition() const { return m_LocalPosition; }
 
 		void SetLocalPosition(float x, float y, float z = 0.0f);
 		void SetLocalPosition(const glm::vec3& position);
 
 		void SetPositionDirty();
-		void UpdateWorldPosition();
+		void UpdateWorldPosition() const;
 
 	private:
 		glm::vec3 m_LocalPosition{ 0.0f, 0.0f, 0.0f };
-		glm::vec3 m_WorldPosition{ 0.0f, 0.0f, 0.0f };
-		bool m_PositionIsDirty{ false };
+		mutable glm::vec3 m_WorldPosition{ 0.0f, 0.0f, 0.0f };
+		mutable bool m_PositionIsDirty{ false };
 	};
 }

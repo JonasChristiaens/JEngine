@@ -1,6 +1,7 @@
 #include "CollisionComponent.h"
 #include "../Scene/GameObject.h"
 #include "TransformComponent.h"
+#include "RectBounds.h"
 #include <algorithm>
 #include "Renderer.h"
 
@@ -29,10 +30,7 @@ namespace dae
 
 	bool CollisionComponent::WouldCollide(const glm::vec3& worldPosition) const
 	{
-		const float left1 = worldPosition.x + m_Offset.x;
-		const float right1 = left1 + m_Width;
-		const float top1 = worldPosition.y + m_Offset.y;
-		const float bottom1 = top1 + m_Height;
+		const RectBounds self = RectBounds::FromOffset(worldPosition.x, worldPosition.y, m_Width, m_Height, m_Offset.x, m_Offset.y);
 
 		for (auto* other : m_AllColliders)
 		{
@@ -43,17 +41,14 @@ namespace dae
 			if (other->IsTrigger())
 				continue;
 
-			auto otherTransform = other->GetOwner()->GetComponent<TransformComponent>();
+			auto* otherTransform = other->GetOwner()->GetComponent<TransformComponent>();
 			if (!otherTransform)
 				continue;
 
-			const auto otherPos = otherTransform->GetWorldPosition();
-			const float left2 = otherPos.x + other->m_Offset.x;
-			const float right2 = left2 + other->GetWidth();
-			const float top2 = otherPos.y + other->m_Offset.y;
-			const float bottom2 = top2 + other->GetHeight();
+			const auto& otherPos = otherTransform->GetWorldPosition();
+			const RectBounds otherBox = RectBounds::FromOffset(otherPos.x, otherPos.y, other->GetWidth(), other->GetHeight(), other->m_Offset.x, other->m_Offset.y);
 
-			if (left1 < right2 && right1 > left2 && top1 < bottom2 && bottom1 > top2)
+			if (self.Overlaps(otherBox))
 			{
 				return true;
 			}
@@ -64,11 +59,12 @@ namespace dae
 
 	void CollisionComponent::Render() const
 	{
-		auto transform = GetOwner()->GetComponent<TransformComponent>();
-		if (!transform)
+		if (m_pTransform == nullptr)
+			m_pTransform = GetOwner()->GetComponent<TransformComponent>();
+		if (!m_pTransform)
 			return;
 
-		const auto pos = transform->GetWorldPosition();
+		const auto pos = m_pTransform->GetWorldPosition();
 		float cameraX = 0.0f, cameraY = 0.0f;
 		Renderer::GetInstance().GetCameraOffset(cameraX, cameraY);
 
@@ -87,30 +83,25 @@ namespace dae
 	{
 		if (!m_OnCollision) return;
 
-		auto transform = GetOwner()->GetComponent<TransformComponent>();
-		if (!transform) return;
+		if (m_pTransform == nullptr)
+			m_pTransform = GetOwner()->GetComponent<TransformComponent>();
+		if (!m_pTransform) return;
 
-		const auto pos = transform->GetWorldPosition();
-		const float left1 = pos.x + m_Offset.x;
-		const float right1 = left1 + m_Width;
-		const float top1 = pos.y + m_Offset.y;
-		const float bottom1 = top1 + m_Height;
+		const auto pos = m_pTransform->GetWorldPosition();
+		const RectBounds self = RectBounds::FromOffset(pos.x, pos.y, m_Width, m_Height, m_Offset.x, m_Offset.y);
 
 		for (auto* other : m_AllColliders)
 		{
 			if (other == this) continue;
 			if (other->GetOwner()->IsMarkedForDeletion()) continue;
 
-			auto otherTransform = other->GetOwner()->GetComponent<TransformComponent>();
+			auto* otherTransform = other->GetOwner()->GetComponent<TransformComponent>();
 			if (!otherTransform) continue;
 
-			const auto otherPos = otherTransform->GetWorldPosition();
-			const float left2 = otherPos.x + other->m_Offset.x;
-			const float right2 = left2 + other->GetWidth();
-			const float top2 = otherPos.y + other->m_Offset.y;
-			const float bottom2 = top2 + other->GetHeight();
+			const auto& otherPos = otherTransform->GetWorldPosition();
+			const RectBounds otherBox = RectBounds::FromOffset(otherPos.x, otherPos.y, other->GetWidth(), other->GetHeight(), other->m_Offset.x, other->m_Offset.y);
 
-			if (left1 < right2 && right1 > left2 && top1 < bottom2 && bottom1 > top2)
+			if (self.Overlaps(otherBox))
 			{
 				m_OnCollision(other->GetOwner());
 			}

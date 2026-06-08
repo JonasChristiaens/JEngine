@@ -14,11 +14,12 @@ void dae::RenderComponent::Render() const
 	if (m_Texture == nullptr)
 		return;
 
-	auto transform = GetOwner()->GetComponent<TransformComponent>();
-	if (transform == nullptr)
+	if (m_pTransform == nullptr)
+		m_pTransform = GetOwner()->GetComponent<TransformComponent>();
+	if (m_pTransform == nullptr)
 		return;
 
-	const auto& pos = transform->GetWorldPosition();
+	const auto& pos = m_pTransform->GetWorldPosition();
 
 	if (m_UseSourceRect)
 	{

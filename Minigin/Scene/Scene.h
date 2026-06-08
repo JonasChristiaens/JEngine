@@ -11,6 +11,7 @@ namespace dae
 		void Add(std::unique_ptr<GameObject> object);
 		void RemoveAll();
 		bool Contains(const GameObject* object) const;
+		bool IsEmpty() const;
 
 		void Update();
 		void LateUpdate();
@@ -27,6 +28,10 @@ namespace dae
 		explicit Scene() = default;
 
 		std::vector < std::unique_ptr<GameObject>> m_Objects{};
+
+		size_t m_ObjectVersion{ 0 };
+		mutable size_t m_LastSortedVersion{ 0 };
+		mutable std::vector<GameObject*> m_SortedRoots{};
 	};
 
 }

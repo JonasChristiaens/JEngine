@@ -38,7 +38,7 @@ namespace dae
 			m_previousState = m_currentState;
 			if (m_previousState.empty())
 			{
-				m_previousState.resize(numKeys, false);
+				m_previousState.assign(state, state + numKeys);
 			}
 			m_currentState.assign(state, state + numKeys);
 		}

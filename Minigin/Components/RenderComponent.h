@@ -54,5 +54,7 @@ namespace dae
 		int m_RenderLayer{ 0 };
 		glm::vec2 m_Pivot{ 0.0f, 0.0f };
 		bool m_UseDestinationSize{ false };
+
+		mutable TransformComponent* m_pTransform{};
 	};
 }

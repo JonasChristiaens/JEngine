@@ -63,6 +63,10 @@ namespace dae
 		GameObject* m_pParent{ nullptr };
 		std::vector<GameObject*> m_Children{};
 
+		size_t m_ChildrenVersion{ 0 };
+		mutable size_t m_LastSortedVersion{ 0 };
+		mutable std::vector<GameObject*> m_SortedChildren{};
+
 		// Helper functions
 		void AddChild(GameObject* pChild);
 		void RemoveChild(GameObject* pChild);

@@ -2,6 +2,7 @@
 #include "Scene/GameObject.h"
 #include "Components/TransformComponent.h"
 #include "Components/CollisionComponent.h"
+#include "Components/RectBounds.h"
 
 dae::BombComponent::BombComponent(GameObject* pOwnerBomb, GameObject* pOwnerPlayer, float tileSize, int explosionRange)
 	: BaseComponent(pOwnerBomb)
@@ -29,37 +30,27 @@ bool dae::BombComponent::OwnerOverlapsBomb() const
 
 	auto* ownerTransform = m_pOwnerPlayer->GetComponent<TransformComponent>();
 	auto* bombTransform = GetOwner()->GetComponent<TransformComponent>();
-	auto* ownerCollider = m_pOwnerPlayer->GetComponent<CollisionComponent>();
 	if (!ownerTransform || !bombTransform)
 		return false;
 
 	const auto& ownerWorldPos = ownerTransform->GetWorldPosition();
 	const auto& bombWorldPos = bombTransform->GetWorldPosition();
 
-	float ownerLeft, ownerRight, ownerTop, ownerBottom;
-	if (ownerCollider)
+	const RectBounds ownerBox = [&]()
 	{
-		ownerLeft   = ownerWorldPos.x + ownerCollider->GetOffset().x;
-		ownerRight  = ownerLeft + ownerCollider->GetWidth();
-		ownerTop    = ownerWorldPos.y + ownerCollider->GetOffset().y;
-		ownerBottom = ownerTop + ownerCollider->GetHeight();
-	}
-	else
-	{
-		ownerLeft   = ownerWorldPos.x;
-		ownerRight  = ownerWorldPos.x;
-		ownerTop    = ownerWorldPos.y;
-		ownerBottom = ownerWorldPos.y;
-	}
+		auto* ownerCollider = m_pOwnerPlayer->GetComponent<CollisionComponent>();
+		if (ownerCollider)
+		{
+			return RectBounds::FromOffset(ownerWorldPos.x, ownerWorldPos.y,
+				ownerCollider->GetWidth(), ownerCollider->GetHeight(),
+				ownerCollider->GetOffset().x, ownerCollider->GetOffset().y);
+		}
+		return RectBounds::FromOffset(ownerWorldPos.x, ownerWorldPos.y, 0.0f, 0.0f, 0.0f, 0.0f);
+	}();
 
-	const float bombHalf = m_TileSize * 0.5f;
-	const float bombLeft   = bombWorldPos.x - bombHalf;
-	const float bombRight  = bombWorldPos.x + bombHalf;
-	const float bombTop    = bombWorldPos.y - bombHalf;
-	const float bombBottom = bombWorldPos.y + bombHalf;
+	const RectBounds bombBox = RectBounds::FromCenterSize(bombWorldPos.x, bombWorldPos.y, m_TileSize, m_TileSize);
 
-	return ownerLeft < bombRight && ownerRight > bombLeft &&
-	       ownerTop < bombBottom && ownerBottom > bombTop;
+	return ownerBox.Overlaps(bombBox);
 }
 
 void dae::BombComponent::AddSolidCollider()

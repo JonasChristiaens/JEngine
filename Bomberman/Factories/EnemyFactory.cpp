@@ -11,6 +11,7 @@
 #include "Components/StateMachineComponent.h"
 #include "Components/DeathAnimatorComponent.h"
 #include "State/EnemyIdleState.h"
+#include "Components/RectBounds.h"
 #include <random>
 #include <glm/vec3.hpp>
 
@@ -25,10 +26,7 @@ namespace
 
 	bool IsBlockedAtPosition(const dae::GameObject& parent, const glm::vec3& spawnPos, float colliderSize)
 	{
-		const float left1 = spawnPos.x - colliderSize * 0.5f;
-		const float right1 = left1 + colliderSize;
-		const float top1 = spawnPos.y - colliderSize * 0.5f;
-		const float bottom1 = top1 + colliderSize;
+		const dae::RectBounds spawnBox = dae::RectBounds::FromCenterSize(spawnPos.x, spawnPos.y, colliderSize, colliderSize);
 
 		for (const auto* child : parent.GetChildren())
 		{
@@ -44,12 +42,11 @@ namespace
 				continue;
 
 			const auto otherPos = transform->GetWorldPosition();
-			const float left2 = otherPos.x + collider->GetOffset().x;
-			const float right2 = left2 + collider->GetWidth();
-			const float top2 = otherPos.y + collider->GetOffset().y;
-			const float bottom2 = top2 + collider->GetHeight();
+			const dae::RectBounds otherBox = dae::RectBounds::FromOffset(otherPos.x, otherPos.y,
+				collider->GetWidth(), collider->GetHeight(),
+				collider->GetOffset().x, collider->GetOffset().y);
 
-			if (left1 < right2 && right1 > left2 && top1 < bottom2 && bottom1 > top2)
+			if (spawnBox.Overlaps(otherBox))
 			{
 				return true;
 			}

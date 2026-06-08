@@ -58,6 +58,7 @@ namespace dae
 		{
 			ActivatePowerup();
 			m_PowerupActivated = true;
+			m_pPowerupBrick = nullptr;
 			m_VulnerabilityDelay = kVulnerabilityFrameDelay;
 		}
 
@@ -194,6 +195,7 @@ namespace dae
 		{
 			m_pPowerupObject->MarkForDeletion();
 		}
+		m_pPowerupObject = nullptr;
 	}
 
 	bool PlayfieldComponent::IsReservedTile(int column, int row) const

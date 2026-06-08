@@ -37,18 +37,22 @@ void dae::GameObject::Render() const
 		component->Render();
 	}
 
-	auto children = m_Children;
-	std::stable_sort(children.begin(), children.end(),
-		[](const GameObject* a, const GameObject* b)
-		{
-			const auto* ra = a->GetComponent<RenderComponent>();
-			const auto* rb = b->GetComponent<RenderComponent>();
-			const int la = ra ? ra->GetRenderLayer() : 0;
-			const int lb = rb ? rb->GetRenderLayer() : 0;
-			return la < lb;
-		});
+	if (m_ChildrenVersion != m_LastSortedVersion)
+	{
+		m_SortedChildren = m_Children;
+		std::stable_sort(m_SortedChildren.begin(), m_SortedChildren.end(),
+			[](const GameObject* a, const GameObject* b)
+			{
+				const auto* ra = a->GetComponent<RenderComponent>();
+				const auto* rb = b->GetComponent<RenderComponent>();
+				const int la = ra ? ra->GetRenderLayer() : 0;
+				const int lb = rb ? rb->GetRenderLayer() : 0;
+				return la < lb;
+			});
+		m_LastSortedVersion = m_ChildrenVersion;
+	}
 
-	for (const auto* pChild : children)
+	for (const auto* pChild : m_SortedChildren)
 	{
 		if (pChild)
 		{
@@ -110,6 +114,7 @@ void dae::GameObject::AddChild(GameObject* pChild)
 		return;
 
 	m_Children.push_back(pChild);
+	++m_ChildrenVersion;
 }
 
 void dae::GameObject::RemoveChild(GameObject* pChild)
@@ -118,6 +123,7 @@ void dae::GameObject::RemoveChild(GameObject* pChild)
 		return;
 
 	m_Children.erase(std::find(m_Children.begin(), m_Children.end(), pChild));
+	++m_ChildrenVersion;
 }
 
 bool dae::GameObject::IsChild(GameObject* pChild) const
@@ -125,7 +131,16 @@ bool dae::GameObject::IsChild(GameObject* pChild) const
 	if (pChild == nullptr)
 		return false;
 
-	return std::find(m_Children.begin(), m_Children.end(), pChild) != m_Children.end();
+	if (std::find(m_Children.begin(), m_Children.end(), pChild) != m_Children.end())
+		return true;
+
+	for (const auto* child : m_Children)
+	{
+		if (child->IsChild(pChild))
+			return true;
+	}
+
+	return false;
 }
 
 void dae::GameObject::SetLocalPosition(const glm::vec3& pos)
