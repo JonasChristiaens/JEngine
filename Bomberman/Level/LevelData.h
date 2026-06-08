@@ -12,10 +12,6 @@ namespace dae
 		Flames,
 		Skate,
 		RemoteControl,
-		WallPass,
-		BombPass,
-		FireBarrier,
-		Invincibility
 	};
 
 	struct LevelData

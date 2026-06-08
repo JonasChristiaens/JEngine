@@ -242,7 +242,7 @@ add_executable(${GAME_TARGET} ${GAME_TARGET_PARAM}
   Bomberman/Powerups/FlamesEffect.cpp
   Bomberman/Powerups/ExtraBombEffect.cpp
   Bomberman/Powerups/DetonatorEffect.cpp
-  Bomberman/State/BalloomIdleState.cpp
+  Bomberman/State/EnemyIdleState.cpp
   Bomberman/State/TitleSceneState.cpp
   Bomberman/State/GameSceneState.cpp
   Bomberman/State/EndSceneState.cpp

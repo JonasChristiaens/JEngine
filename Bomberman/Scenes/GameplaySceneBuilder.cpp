@@ -11,6 +11,7 @@
 #include "Components/BombRangeComponent.h"
 #include "Components/BombCapacityComponent.h"
 #include "Components/DetonatorComponent.h"
+#include "EnemyConfig.h"
 #include "Factories/EnemyFactory.h"
 #include "Commands/MoveCommand.h"
 #include "Commands/SpawnBombCommand.h"
@@ -34,10 +35,27 @@ namespace
 	constexpr float kPlayfieldWidth{ 496.0f };
 	constexpr float kPlayfieldHeight{ 208.0f };
 	constexpr float kBalloomSpeed{ 110.0f };
+	constexpr float kOnealSpeed{ 150.0f };
 	constexpr float kPlayerMoveSpeed{ 150.0f };
 	constexpr float kPlayerSpriteSize{ 16.0f };
 	constexpr float kPlayerSpriteScale{ 3.0f };
 	constexpr float kPlayerCollisionSize{ (kPlayerSpriteSize * kPlayerSpriteScale) - 20.0f };
+
+	constexpr dae::EnemyConfig kBalloomConfig{
+		0.0f, 241.0f, 16.0f, 16.0f,
+		3.0f, 0.8f,
+		2.0f, 4.0f,
+		dae::EnemyChaseAxis::None,
+		100
+	};
+
+	constexpr dae::EnemyConfig kOnealConfig{
+		0.0f, 257.0f, 16.0f, 16.0f,
+		3.0f, 0.8f,
+		0.8f, 3.2f,
+		dae::EnemyChaseAxis::Y,
+		200
+	};
 
 	dae::PlayfieldComponent::PlayfieldConfig ToPlayfieldConfig(const dae::LevelData& levelData)
 	{
@@ -144,11 +162,12 @@ namespace
 		return input.HasController(1) ? 1u : 0u;
 	}
 
-	dae::GameObject* SpawnBalloom(dae::Scene& scene, dae::GameObject& parent, float tileWorldSize, const glm::vec3& reservedWorldPosition, bool useAiMovement)
+	dae::GameObject* SpawnEnemy(dae::Scene& scene, dae::GameObject& parent, float tileWorldSize, const dae::EnemyConfig& config, float moveSpeed,
+		dae::GameObject* pChaseTarget, const glm::vec3& reservedWorldPosition, bool useAiMovement)
 	{
 		const int gridColumns = static_cast<int>(kPlayfieldWidth / 16.0f);
 		const int gridRows = static_cast<int>(kPlayfieldHeight / 16.0f);
-		return dae::EnemyFactory::CreateBalloom(scene, parent, gridColumns, gridRows, tileWorldSize, kBalloomSpeed, { reservedWorldPosition }, useAiMovement);
+		return dae::EnemyFactory::CreateEnemy(scene, parent, gridColumns, gridRows, tileWorldSize, moveSpeed, config, pChaseTarget, { reservedWorldPosition }, useAiMovement);
 	}
 }
 
@@ -186,11 +205,13 @@ namespace dae
 		scene.Add(std::move(playfield));
 
 		const auto levels = LoadLevels();
-		worldRootPtr->AddComponent<PlayfieldComponent>(scene, kPlayfieldWidth, kPlayfieldHeight, playfieldScale, ToPlayfieldConfig(levels.at(0)));
+		constexpr int levelIndex = 0;
+		worldRootPtr->AddComponent<PlayfieldComponent>(scene, kPlayfieldWidth, kPlayfieldHeight, playfieldScale, ToPlayfieldConfig(levels.at(levelIndex)));
 
 		const glm::vec3 player1Pos{ tileWorldSize * 1.5f, tileWorldSize * 2.0f, 0.0f };
 		const glm::vec3 player2Pos{ tileWorldSize * 3.5f, tileWorldSize * 2.0f, 0.0f };
-		const int enemyCount = std::max(0, levels.at(0).balloomCount);
+		const int balloomCount = std::max(0, levels.at(levelIndex).balloomCount);
+		const int onealCount = std::max(0, levels.at(levelIndex).onealCount);
 
 		GameObject* player1 = nullptr;
 		GameObject* player2 = nullptr;
@@ -201,9 +222,13 @@ namespace dae
 			player1 = CreatePlayer(scene, player1Pos);
 			player1->SetParent(worldRootPtr, false);
 			BindPlayerControls(*player1, true, 0);
-			for (int i = 0; i < enemyCount; ++i)
+			for (int i = 0; i < balloomCount; ++i)
 			{
-				SpawnBalloom(scene, *worldRootPtr, tileWorldSize, player1Pos, true);
+				SpawnEnemy(scene, *worldRootPtr, tileWorldSize, kBalloomConfig, kBalloomSpeed, nullptr, player1Pos, true);
+			}
+			for (int i = 0; i < onealCount; ++i)
+			{
+				SpawnEnemy(scene, *worldRootPtr, tileWorldSize, kOnealConfig, kOnealSpeed, player1, player1Pos, true);
 			}
 			break;
 		case GameMode::Coop:
@@ -213,20 +238,28 @@ namespace dae
 			player2->SetParent(worldRootPtr, false);
 			BindPlayerControls(*player1, true, 0);
 			BindPlayerControls(*player2, false, GetSecondaryControllerIndex());
-			for (int i = 0; i < enemyCount; ++i)
+			for (int i = 0; i < balloomCount; ++i)
 			{
-				SpawnBalloom(scene, *worldRootPtr, tileWorldSize, (i == 0) ? player1Pos : player2Pos, true);
+				SpawnEnemy(scene, *worldRootPtr, tileWorldSize, kBalloomConfig, kBalloomSpeed, nullptr, (i == 0) ? player1Pos : player2Pos, true);
+			}
+			for (int i = 0; i < onealCount; ++i)
+			{
+				SpawnEnemy(scene, *worldRootPtr, tileWorldSize, kOnealConfig, kOnealSpeed, (i == 0) ? player1 : player2, (i == 0) ? player1Pos : player2Pos, true);
 			}
 			break;
 		case GameMode::Versus:
 			player1 = CreatePlayer(scene, player1Pos);
 			player1->SetParent(worldRootPtr, false);
-			player2 = SpawnBalloom(scene, *worldRootPtr, tileWorldSize, player1Pos, false);
+			player2 = SpawnEnemy(scene, *worldRootPtr, tileWorldSize, kBalloomConfig, kBalloomSpeed, nullptr, player1Pos, false);
 			BindPlayerControls(*player1, true, 0);
 			BindControllerMovement(*player2, GetSecondaryControllerIndex());
-			for (int i = 0; i < std::max(0, enemyCount - 1); ++i)
+			for (int i = 0; i < std::max(0, balloomCount - 1); ++i)
 			{
-				SpawnBalloom(scene, *worldRootPtr, tileWorldSize, player2Pos, true);
+				SpawnEnemy(scene, *worldRootPtr, tileWorldSize, kBalloomConfig, kBalloomSpeed, nullptr, player2Pos, true);
+			}
+			for (int i = 0; i < onealCount; ++i)
+			{
+				SpawnEnemy(scene, *worldRootPtr, tileWorldSize, kOnealConfig, kOnealSpeed, player1, player2Pos, true);
 			}
 			break;
 		}

@@ -73,6 +73,68 @@ namespace dae
 
 	void EnemyMovementComponent::ChooseNewDirection()
 	{
+		if (m_pChaseTarget && m_ChaseAxis != EnemyChaseAxis::None)
+		{
+			auto* targetTransform = m_pChaseTarget->GetComponent<TransformComponent>();
+			if (m_pTransform && targetTransform)
+			{
+				const glm::vec3 targetPos = targetTransform->GetWorldPosition();
+				const glm::vec3 myPos = m_pTransform->GetWorldPosition();
+
+				const bool alignedX = std::abs(myPos.x - targetPos.x) <= m_ChaseAlignmentThreshold;
+				const bool alignedY = std::abs(myPos.y - targetPos.y) <= m_ChaseAlignmentThreshold;
+
+				if (m_ChaseAxis == EnemyChaseAxis::Y && alignedX)
+				{
+					m_Direction = glm::vec2(0.0f, (targetPos.y > myPos.y) ? 1.0f : -1.0f);
+				}
+				else if (m_ChaseAxis == EnemyChaseAxis::X && alignedY)
+				{
+					m_Direction = glm::vec2((targetPos.x > myPos.x) ? 1.0f : -1.0f, 0.0f);
+				}
+				else if (m_ChaseAxis == EnemyChaseAxis::Both && (alignedX || alignedY))
+				{
+					if (alignedX && alignedY)
+					{
+						std::uniform_int_distribution<int> axisDist(0, 1);
+						if (axisDist(GetRng()) == 0)
+						{
+							m_Direction = glm::vec2(0.0f, (targetPos.y > myPos.y) ? 1.0f : -1.0f);
+						}
+						else
+						{
+							m_Direction = glm::vec2((targetPos.x > myPos.x) ? 1.0f : -1.0f, 0.0f);
+						}
+					}
+					else if (alignedX)
+					{
+						m_Direction = glm::vec2(0.0f, (targetPos.y > myPos.y) ? 1.0f : -1.0f);
+					}
+					else
+					{
+						m_Direction = glm::vec2((targetPos.x > myPos.x) ? 1.0f : -1.0f, 0.0f);
+					}
+				}
+				else
+				{
+					PickRandomDirection();
+				}
+			}
+			else
+			{
+				PickRandomDirection();
+			}
+		}
+		else
+		{
+			PickRandomDirection();
+		}
+
+		m_TimeUntilDirectionChange = RandomRange(m_MinDirectionTime, m_MaxDirectionTime);
+	}
+
+	void EnemyMovementComponent::PickRandomDirection()
+	{
 		static const std::array<glm::vec2, 4> directions{
 			glm::vec2{ 1.0f, 0.0f },
 			glm::vec2{ -1.0f, 0.0f },
@@ -82,7 +144,6 @@ namespace dae
 
 		std::uniform_int_distribution<int> directionDist(0, static_cast<int>(directions.size()) - 1);
 		m_Direction = directions[directionDist(GetRng())];
-		m_TimeUntilDirectionChange = RandomRange(m_MinDirectionTime, m_MaxDirectionTime);
 	}
 
 	float EnemyMovementComponent::RandomRange(float min, float max) const

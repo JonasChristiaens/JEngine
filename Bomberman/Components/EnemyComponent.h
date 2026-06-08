@@ -3,18 +3,16 @@
 
 namespace dae
 {
-	class StateMachineComponent;
-
 	class EnemyComponent final : public BaseComponent
 	{
 	public:
-		explicit EnemyComponent(GameObject* pOwner);
+		EnemyComponent(GameObject* pOwner, int points);
 
 		void Update() override {}
 
-		StateMachineComponent* GetStateMachineComponent() const { return m_pStateMachine; }
+		int GetPoints() const { return m_Points; }
 
 	private:
-		StateMachineComponent* m_pStateMachine{};
+		int m_Points{};
 	};
 }

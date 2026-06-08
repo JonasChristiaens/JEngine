@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <glm/vec3.hpp>
+#include "EnemyConfig.h"
 
 namespace dae
 {
@@ -9,6 +10,6 @@ namespace dae
 
 	namespace EnemyFactory
 	{
-		GameObject* CreateBalloom(Scene& scene, GameObject& parent, int gridColumns, int gridRows, float tileWorldSize, float moveSpeed, const std::vector<glm::vec3>& reservedWorldPositions = {}, bool useAiMovement = true);
+		GameObject* CreateEnemy(Scene& scene, GameObject& parent, int gridColumns, int gridRows, float tileWorldSize, float moveSpeed, const EnemyConfig& config, GameObject* pChaseTarget = nullptr, const std::vector<glm::vec3>& reservedWorldPositions = {}, bool useAiMovement = true);
 	}
 }

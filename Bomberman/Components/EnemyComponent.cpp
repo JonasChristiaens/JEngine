@@ -1,16 +1,10 @@
 #include "EnemyComponent.h"
-#include "StateMachineComponent.h"
-#include "GameObject.h"
 
 namespace dae
 {
-	EnemyComponent::EnemyComponent(GameObject* pOwner)
+	EnemyComponent::EnemyComponent(GameObject* pOwner, int points)
 		: BaseComponent(pOwner)
+		, m_Points(points)
 	{
-		m_pStateMachine = pOwner->GetComponent<StateMachineComponent>();
-		if (!m_pStateMachine)
-		{
-			m_pStateMachine = pOwner->AddComponent<StateMachineComponent>();
-		}
 	}
 }

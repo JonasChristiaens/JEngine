@@ -145,22 +145,6 @@ namespace dae
 			{
 				return PickupType::RemoteControl;
 			}
-			if (value == "wallPass")
-			{
-				return PickupType::WallPass;
-			}
-			if (value == "bombPass")
-			{
-				return PickupType::BombPass;
-			}
-			if (value == "fireBarrier")
-			{
-				return PickupType::FireBarrier;
-			}
-			if (value == "invincibility")
-			{
-				return PickupType::Invincibility;
-			}
 			throw std::runtime_error("Unknown pickup type");
 		}
 

@@ -6,6 +6,15 @@ namespace dae
 {
 	class TransformComponent;
 	class CollisionComponent;
+	class GameObject;
+
+	enum class EnemyChaseAxis
+	{
+		None,
+		X,
+		Y,
+		Both
+	};
 
 	class EnemyMovementComponent final : public BaseComponent
 	{
@@ -13,6 +22,10 @@ namespace dae
 		EnemyMovementComponent(GameObject* pOwner, float moveSpeed, float minDirectionTime, float maxDirectionTime);
 
 		void Update() override;
+
+		void SetChaseTarget(GameObject* pTarget) { m_pChaseTarget = pTarget; }
+		void SetChaseAxis(EnemyChaseAxis axis) { m_ChaseAxis = axis; }
+		void SetChaseAlignmentThreshold(float threshold) { m_ChaseAlignmentThreshold = threshold; }
 
 	private:
 		TransformComponent* m_pTransform{};
@@ -23,8 +36,13 @@ namespace dae
 		float m_MaxDirectionTime{};
 		float m_TimeUntilDirectionChange{};
 
+		GameObject* m_pChaseTarget{};
+		EnemyChaseAxis m_ChaseAxis{ EnemyChaseAxis::None };
+		float m_ChaseAlignmentThreshold{ 24.0f };
+
 		void RefreshComponents();
 		void ChooseNewDirection();
+		void PickRandomDirection();
 		float RandomRange(float min, float max) const;
 	};
 }

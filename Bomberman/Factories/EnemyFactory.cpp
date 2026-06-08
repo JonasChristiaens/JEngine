@@ -9,21 +9,9 @@
 #include "Components/EnemyComponent.h"
 #include "Components/EnemyMovementComponent.h"
 #include "Components/StateMachineComponent.h"
-#include "State/BalloomIdleState.h"
+#include "State/EnemyIdleState.h"
 #include <random>
 #include <glm/vec3.hpp>
-
-namespace
-{
-	constexpr float kBalloomScale{ 3.0f };
-	constexpr float kBalloomColliderScale{ 0.8f };
-	constexpr float kBalloomMinDirectionTime{ 2.0f };
-	constexpr float kBalloomMaxDirectionTime{ 4.0f };
-	constexpr float kBalloomSpriteSheetX{ 0.0f };
-	constexpr float kBalloomSpriteSheetY{ 241.0f };
-	constexpr float kBalloomSpriteWidth{ 16.0f };
-	constexpr float kBalloomSpriteHeight{ 16.0f };
-}
 
 namespace
 {
@@ -69,7 +57,6 @@ namespace
 		return false;
 	}
 
-	// Convert world pos to tile
 	std::pair<int, int> WorldToTile(const glm::vec3& worldPos, float tileWorldSize)
 	{
 		return {
@@ -86,7 +73,6 @@ namespace
 		std::uniform_int_distribution<int> rowDist(0, gridRows - 1);
 		std::uniform_real_distribution<float> fallbackOffset(0.0f, tileWorldSize * 0.5f);
 
-		// store reserved tiles
 		std::vector<std::pair<int, int>> reservedTiles{};
 		reservedTiles.reserve(reservedWorldPositions.size());
 		for (const auto& pos : reservedWorldPositions)
@@ -98,7 +84,6 @@ namespace
 			const int column = columnDist(GetRng());
 			const int row = rowDist(GetRng());
 
-			// check for overlap
 			bool isReserved = false;
 			for (const auto& [reservedCol, reservedRow] : reservedTiles)
 			{
@@ -125,38 +110,41 @@ namespace
 
 namespace dae::EnemyFactory
 {
-	GameObject* CreateBalloom(Scene& scene, GameObject& parent, int gridColumns, int gridRows, float tileWorldSize, float moveSpeed,
-		const std::vector<glm::vec3>& reservedWorldPositions, bool useAiMovement)
+	GameObject* CreateEnemy(Scene& scene, GameObject& parent, int gridColumns, int gridRows, float tileWorldSize, float moveSpeed,
+		const EnemyConfig& config, GameObject* pChaseTarget, const std::vector<glm::vec3>& reservedWorldPositions, bool useAiMovement)
 	{
 		auto enemy = std::make_unique<GameObject>();
 		auto* transform = enemy->AddComponent<TransformComponent>();
-		const float colliderSize = tileWorldSize * kBalloomColliderScale;
+		const float colliderSize = tileWorldSize * config.colliderScale;
 		transform->SetLocalPosition(SelectSpawnPosition(parent, gridColumns, gridRows, tileWorldSize, colliderSize, reservedWorldPositions));
 
 		auto* render = enemy->AddComponent<RenderComponent>();
 		render->SetTexture("BombermanSprites_General.png");
-		render->SetSourceRectangle(kBalloomSpriteSheetX, kBalloomSpriteSheetY, kBalloomSpriteWidth, kBalloomSpriteHeight);
-		render->SetScale(kBalloomScale);
+		render->SetSourceRectangle(config.spriteX, config.spriteY, config.spriteWidth, config.spriteHeight);
+		render->SetScale(config.scale);
 		render->SetPivot({ 0.5f, 0.5f });
 		render->SetRenderLayer(4);
 
 		enemy->AddComponent<SpriteAnimatorComponent>();
-		auto* enemyComp = enemy->AddComponent<EnemyComponent>();
-		auto* stateMachine = enemyComp->GetStateMachineComponent();
+		auto* stateMachine = enemy->AddComponent<StateMachineComponent>();
+		enemy->AddComponent<EnemyComponent>(config.points);
 
 		if (useAiMovement)
 		{
-			enemy->AddComponent<EnemyMovementComponent>(moveSpeed, kBalloomMinDirectionTime, kBalloomMaxDirectionTime);
+			auto* movement = enemy->AddComponent<EnemyMovementComponent>(moveSpeed, config.minDirectionTime, config.maxDirectionTime);
+			if (pChaseTarget && config.chaseAxis != EnemyChaseAxis::None)
+			{
+				movement->SetChaseTarget(pChaseTarget);
+				movement->SetChaseAxis(config.chaseAxis);
+				movement->SetChaseAlignmentThreshold(tileWorldSize);
+			}
 		}
 		enemy->AddComponent<HealthComponent>(1);
 
 		auto* collider = enemy->AddComponent<CollisionComponent>(colliderSize, colliderSize);
 		collider->SetOffset({ -colliderSize * 0.5f, -colliderSize * 0.5f });
 
-		if (stateMachine)
-		{
-			stateMachine->GetStateMachine().SetState(std::make_unique<BalloomIdleState>(enemy.get()));
-		}
+		stateMachine->GetStateMachine().SetState(std::make_unique<EnemyIdleState>(enemy.get(), config.spriteX, config.spriteY, config.spriteWidth, config.spriteHeight, config.scale));
 
 		enemy->SetParent(&parent, false);
 		auto* enemyPtr = enemy.get();
