@@ -1,6 +1,7 @@
 #include "HealthComponent.h"
 #include "EventQueue/EventManager.h"
 #include "Scene/GameObject.h"
+#include "Components/DeathAnimatorComponent.h"
 
 dae::HealthComponent::HealthComponent(GameObject* pOwner, int health)
 	: BaseComponent(pOwner)
@@ -19,13 +20,26 @@ dae::HealthComponent::~HealthComponent()
 
 void dae::HealthComponent::ChangeCurrentHealth(int amount)
 {
+	if (m_IsDead)
+		return;
+
 	m_CurrentHealth += amount;
 	NotifyObservers(Event(make_sdbm_hash("HealthChanged")), GetOwner());
 
 	if (m_CurrentHealth <= 0)
 	{
-		Event diedEvent(make_sdbm_hash("EntityDied"));
-		EventManager::GetInstance().BroadcastEvent(diedEvent, GetOwner());
+		m_IsDead = true;
+
+		auto* deathAnim = GetOwner()->GetComponent<DeathAnimatorComponent>();
+		if (deathAnim)
+		{
+			deathAnim->Play();
+		}
+		else
+		{
+			Event diedEvent(make_sdbm_hash("EntityDied"));
+			EventManager::GetInstance().BroadcastEvent(diedEvent, GetOwner());
+		}
 	}
 
 	if (amount < 0)

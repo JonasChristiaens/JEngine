@@ -26,6 +26,7 @@ namespace dae
 		void SetChaseTarget(GameObject* pTarget) { m_pChaseTarget = pTarget; }
 		void SetChaseAxis(EnemyChaseAxis axis) { m_ChaseAxis = axis; }
 		void SetChaseAlignmentThreshold(float threshold) { m_ChaseAlignmentThreshold = threshold; }
+		void SetEnabled(bool enabled) { m_Enabled = enabled; }
 
 	private:
 		TransformComponent* m_pTransform{};
@@ -39,6 +40,7 @@ namespace dae
 		GameObject* m_pChaseTarget{};
 		EnemyChaseAxis m_ChaseAxis{ EnemyChaseAxis::None };
 		float m_ChaseAlignmentThreshold{ 24.0f };
+		bool m_Enabled{ true };
 
 		void RefreshComponents();
 		void ChooseNewDirection();

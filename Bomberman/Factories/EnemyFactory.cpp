@@ -9,6 +9,7 @@
 #include "Components/EnemyComponent.h"
 #include "Components/EnemyMovementComponent.h"
 #include "Components/StateMachineComponent.h"
+#include "Components/DeathAnimatorComponent.h"
 #include "State/EnemyIdleState.h"
 #include <random>
 #include <glm/vec3.hpp>
@@ -145,6 +146,11 @@ namespace dae::EnemyFactory
 		collider->SetOffset({ -colliderSize * 0.5f, -colliderSize * 0.5f });
 
 		stateMachine->GetStateMachine().SetState(std::make_unique<EnemyIdleState>(enemy.get(), config.spriteX, config.spriteY, config.spriteWidth, config.spriteHeight, config.scale));
+
+		if (!config.deathFrames.empty())
+		{
+			enemy->AddComponent<DeathAnimatorComponent>("BombermanSprites_General.png", config.deathFrames, config.deathFps, config.scale);
+		}
 
 		enemy->SetParent(&parent, false);
 		auto* enemyPtr = enemy.get();

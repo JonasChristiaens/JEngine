@@ -2,6 +2,7 @@
 #include "GameObject.h"
 #include "Components/TransformComponent.h"
 #include "Components/CollisionComponent.h"
+#include "Components/HealthComponent.h"
 #include "GameTime.h"
 #include <glm/geometric.hpp>
 
@@ -14,10 +15,14 @@ namespace dae
 
 	void MoveCommand::Execute()
 	{
-		const float deltaTime = dae::GameTime::GetInstance().GetDeltaTime();
-
 		if (m_pGameActor == nullptr)
 			return;
+
+		auto* health = m_pGameActor->GetComponent<HealthComponent>();
+		if (health && health->IsDead())
+			return;
+
+		const float deltaTime = dae::GameTime::GetInstance().GetDeltaTime();
 
 		auto transform = m_pGameActor->GetComponent<dae::TransformComponent>();
 		if (transform == nullptr)

@@ -7,6 +7,8 @@
 #include "Components/TransformComponent.h"
 #include "Components/PickupComponent.h"
 #include "Components/BombRangeComponent.h"
+#include "Components/DeathAnimatorComponent.h"
+#include "EnemyConfig.h"
 #include "Powerups/FlamesEffect.h"
 #include "Powerups/ExtraBombEffect.h"
 #include "Powerups/DetonatorEffect.h"
@@ -152,6 +154,7 @@ namespace dae
 			brickRender->SetRenderLayer(m_Config.softBlockRenderLayer);
 			brick->AddComponent<CollisionComponent>(tileWorldSize, tileWorldSize);
 			brick->AddComponent<HealthComponent>(1);
+			brick->AddComponent<DeathAnimatorComponent>("BombermanSprites_General.png", BuildHorizontalFrames(81.0f, 49.0f, 6, 16.0f, 16.0f), 10.0f, tileScale);
 			brick->SetParent(GetOwner(), false);
 			m_SpawnedBlocks.push_back(brick.get());
 			m_pScene->Add(std::move(brick));

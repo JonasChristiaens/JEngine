@@ -20,10 +20,12 @@ namespace dae
 		void ChangeCurrentHealth(int amount);
 
 		int GetHealth() const { return m_CurrentHealth; }
+		bool IsDead() const { return m_IsDead; }
 
 		void Notify(GameObject& actor, Event event) override;
 
 	private:
 		int m_CurrentHealth;
+		bool m_IsDead{ false };
 	};
 }

@@ -31,6 +31,9 @@ namespace dae
 
 	void EnemyMovementComponent::Update()
 	{
+		if (!m_Enabled)
+			return;
+
 		RefreshComponents();
 		if (!m_pTransform)
 			return;

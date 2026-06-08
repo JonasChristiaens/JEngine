@@ -11,6 +11,7 @@
 #include "Components/BombRangeComponent.h"
 #include "Components/BombCapacityComponent.h"
 #include "Components/DetonatorComponent.h"
+#include "Components/DeathAnimatorComponent.h"
 #include "EnemyConfig.h"
 #include "Factories/EnemyFactory.h"
 #include "Commands/MoveCommand.h"
@@ -41,21 +42,37 @@ namespace
 	constexpr float kPlayerSpriteScale{ 3.0f };
 	constexpr float kPlayerCollisionSize{ (kPlayerSpriteSize * kPlayerSpriteScale) - 20.0f };
 
-	constexpr dae::EnemyConfig kBalloomConfig{
-		0.0f, 241.0f, 16.0f, 16.0f,
-		3.0f, 0.8f,
-		2.0f, 4.0f,
-		dae::EnemyChaseAxis::None,
-		100
-	};
+	const dae::EnemyConfig kBalloomConfig = []()
+	{
+		dae::EnemyConfig config{
+			0.0f, 241.0f, 16.0f, 16.0f,
+			3.0f, 0.8f,
+			2.0f, 4.0f,
+			dae::EnemyChaseAxis::None,
+			100
+		};
+		config.deathFrames = dae::BuildHorizontalFrames(97.0f, 241.0f, 1, 16.0f, 16.0f);
+		auto orangeDeath = dae::BuildHorizontalFrames(113.0f, 241.0f, 4, 16.0f, 16.0f);
+		config.deathFrames.insert(config.deathFrames.end(), orangeDeath.begin(), orangeDeath.end());
+		config.deathFps = 10.0f;
+		return config;
+	}();
 
-	constexpr dae::EnemyConfig kOnealConfig{
-		0.0f, 257.0f, 16.0f, 16.0f,
-		3.0f, 0.8f,
-		0.8f, 3.2f,
-		dae::EnemyChaseAxis::Y,
-		200
-	};
+	const dae::EnemyConfig kOnealConfig = []()
+	{
+		dae::EnemyConfig config{
+			0.0f, 257.0f, 16.0f, 16.0f,
+			3.0f, 0.8f,
+			0.8f, 3.2f,
+			dae::EnemyChaseAxis::Y,
+			200
+		};
+		config.deathFrames = dae::BuildHorizontalFrames(97.0f, 257.0f, 1, 16.0f, 16.0f);
+		auto blueDeath = dae::BuildHorizontalFrames(113.0f, 289.0f, 4, 16.0f, 16.0f);
+		config.deathFrames.insert(config.deathFrames.end(), blueDeath.begin(), blueDeath.end());
+		config.deathFps = 10.0f;
+		return config;
+	}();
 
 	dae::PlayfieldComponent::PlayfieldConfig ToPlayfieldConfig(const dae::LevelData& levelData)
 	{
@@ -91,6 +108,7 @@ namespace
 		go->AddComponent<dae::BombRangeComponent>(4);
 		go->AddComponent<dae::BombCapacityComponent>(1);
 		go->AddComponent<dae::DetonatorComponent>();
+		go->AddComponent<dae::DeathAnimatorComponent>("BombermanSprites_General.png", dae::BuildHorizontalFrames(0.0f, 33.0f, 7, 16.0f, 16.0f), 10.0f, kPlayerSpriteScale, false);
 		auto* collider = go->AddComponent<dae::CollisionComponent>(kPlayerCollisionSize, kPlayerCollisionSize);
 		collider->SetOffset({ -kPlayerCollisionSize * 0.5f, -4.0f });
 		auto* player = go.get();

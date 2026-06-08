@@ -1,10 +1,11 @@
 #include "GameSceneState.h"
 #include "Components/SceneStateMachineComponent.h"
+#include "Components/HealthComponent.h"
+#include "Components/DeathAnimatorComponent.h"
 #include "EventQueue/EventManager.h"
 #include "Input/InputManager.h"
 #include "Scene/SceneManager.h"
 #include "Scene/Scene.h"
-#include "Components/HealthComponent.h"
 #include "State/EndSceneState.h"
 #include "Scenes/GameplaySceneBuilder.h"
 
@@ -60,6 +61,10 @@ namespace dae
 
 			auto* health = player->GetComponent<HealthComponent>();
 			if (health && health->GetHealth() > 0)
+				return false;
+
+			auto* deathAnim = player->GetComponent<DeathAnimatorComponent>();
+			if (deathAnim && deathAnim->IsPlaying())
 				return false;
 		}
 

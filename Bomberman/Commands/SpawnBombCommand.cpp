@@ -4,12 +4,17 @@
 #include "Components/TransformComponent.h"
 #include "Components/BombRangeComponent.h"
 #include "Components/BombCapacityComponent.h"
+#include "Components/HealthComponent.h"
 
 namespace dae
 {
 	void SpawnBombCommand::Execute()
 	{
 		if (m_pGameActor == nullptr)
+			return;
+
+		auto* health = m_pGameActor->GetComponent<HealthComponent>();
+		if (health && health->IsDead())
 			return;
 
 		auto* pTransform = m_pGameActor->GetComponent<TransformComponent>();
