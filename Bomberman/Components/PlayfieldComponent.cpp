@@ -23,10 +23,10 @@
 namespace
 {
 	constexpr const char* kPowerupTexture = "BombermanSprites_Items.png";
-	constexpr SDL_FRect kFlamesSourceRect{ 17.0f, 0.0f, 16.0f, 16.0f };
+	constexpr SDL_FRect kFlamesSourceRect{ 16.0f, 0.0f, 16.0f, 16.0f };
 	constexpr SDL_FRect kExtraBombSourceRect{ 0.0f, 0.0f, 16.0f, 16.0f };
 	constexpr SDL_FRect kDetonatorSourceRect{ 64.0f, 0.0f, 16.0f, 16.0f };
-	constexpr SDL_FRect kDoorSourceRect{ 177.0f, 49.0f, 15.0f, 16.0f };
+	constexpr SDL_FRect kDoorSourceRect{ 176.0f, 48.0f, 16.0f, 16.0f };
 	constexpr const char* kDoorTexture = "BombermanSprites_General.png";
 	constexpr int kPowerupScoreValue = 0;
 	constexpr int kHiddenRenderLayer = 1;
@@ -34,6 +34,7 @@ namespace
 	constexpr int kVulnerabilityFrameDelay = 30;
 	constexpr dae::EventId kLevelCompletedEventId = dae::make_sdbm_hash("LevelCompleted");
 	constexpr dae::EventId kEntityDiedEventId = dae::make_sdbm_hash("EntityDied");
+	constexpr dae::EventId kTookDamageEventId = dae::make_sdbm_hash("TookDamageEvent");
 }
 
 namespace dae
@@ -161,7 +162,7 @@ namespace dae
 			brickRender->SetRenderLayer(m_Config.softBlockRenderLayer);
 			brick->AddComponent<CollisionComponent>(tileWorldSize, tileWorldSize);
 			brick->AddComponent<HealthComponent>(1);
-			brick->AddComponent<DeathAnimatorComponent>("BombermanSprites_General.png", BuildHorizontalFrames(81.0f, 49.0f, 6, 16.0f, 16.0f), 10.0f, tileScale);
+			brick->AddComponent<DeathAnimatorComponent>("BombermanSprites_General.png", BuildHorizontalFrames(80.0f, 48.0f, 6, 16.0f, 16.0f), 10.0f, tileScale);
 			brick->SetParent(GetOwner(), false);
 			m_SpawnedBlocks.push_back(brick.get());
 			m_pScene->Add(std::move(brick));
@@ -381,6 +382,24 @@ namespace dae
 
 			if (actor.HasComponent<EnemyComponent>())
 				--m_AliveEnemyCount;
+		}
+
+		if (event.id == kEntityDiedEventId || event.id == kTookDamageEventId)
+		{
+			auto* collider = actor.GetComponent<CollisionComponent>();
+			auto* health = actor.GetComponent<HealthComponent>();
+			auto* tx = actor.GetComponent<TransformComponent>();
+			if (collider && !collider->IsTrigger() && health && health->GetHealth() <= 0 && tx)
+			{
+				const float tileWorldSize = m_Config.tileSize * m_PlayfieldScale;
+				const int col = static_cast<int>(tx->GetLocalPosition().x / tileWorldSize);
+				const int row = static_cast<int>(tx->GetLocalPosition().y / tileWorldSize);
+				if (row >= 0 && static_cast<size_t>(row) < m_OccupiedTiles.size() &&
+					col >= 0 && static_cast<size_t>(col) < m_OccupiedTiles[row].size())
+				{
+					m_OccupiedTiles[row][col] = false;
+				}
+			}
 		}
 	}
 }

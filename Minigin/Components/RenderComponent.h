@@ -14,13 +14,13 @@ namespace dae
 	{
 	public:
 		RenderComponent(GameObject* pOwner);
-		virtual ~RenderComponent() = default;
+		~RenderComponent();
 
 		void Update() override {}
 		void Render() const override;
 
 		void SetTexture(const std::string& filename);
-		void SetTexture(std::shared_ptr<Texture2D> texture);
+		void SetTexture(std::unique_ptr<Texture2D> texture);
 
 		void SetSourceRectangle(float x, float y, float width, float height);
 		void SetSourceRectangle(const SDL_FRect& rect);
@@ -39,7 +39,7 @@ namespace dae
 		int GetRenderLayer() const { return m_RenderLayer; }
 
 	private:
-		std::shared_ptr<Texture2D> m_Texture{};
+		std::unique_ptr<Texture2D> m_Texture{};
 		SDL_FRect m_SourceRect{};
 		bool m_UseSourceRect{ false };
 

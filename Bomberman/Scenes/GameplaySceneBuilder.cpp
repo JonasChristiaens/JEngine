@@ -4,6 +4,7 @@
 #include "Components/SpriteAnimatorComponent.h"
 #include "Components/PlayerAnimatorComponent.h"
 #include "Components/CameraComponent.h"
+#include "Components/HudComponent.h"
 #include "Components/HealthComponent.h"
 #include "Components/ScoreComponent.h"
 #include "Components/CollisionComponent.h"
@@ -35,6 +36,7 @@ namespace
 {
 	constexpr float kPlayfieldWidth{ 496.0f };
 	constexpr float kPlayfieldHeight{ 208.0f };
+	constexpr float kHudHeightRatio{ 0.12f };
 	constexpr float kBalloomSpeed{ 90.0f };
 	constexpr float kOnealSpeed{ 120.0f };
 	constexpr float kDollSpeed{ 120.0f };
@@ -43,6 +45,7 @@ namespace
 	constexpr float kPlayerSpriteSize{ 16.0f };
 	constexpr float kPlayerSpriteScale{ 3.0f };
 	constexpr float kPlayerCollisionSize{ (kPlayerSpriteSize * kPlayerSpriteScale) - 20.0f };
+	constexpr float kPlayerPivotY{ 1.0f - (kPlayerCollisionSize * 0.5f) / (kPlayerSpriteSize * kPlayerSpriteScale) };
 
 	const dae::EnemyConfig kBalloomConfig = []()
 	{
@@ -53,8 +56,8 @@ namespace
 			dae::EnemyChaseAxis::None,
 			100
 		};
-		config.deathFrames = dae::BuildHorizontalFrames(97.0f, 241.0f, 1, 16.0f, 16.0f);
-		auto orangeDeath = dae::BuildHorizontalFrames(113.0f, 241.0f, 4, 16.0f, 16.0f);
+		config.deathFrames = dae::BuildHorizontalFrames(96.0f, 240.0f, 1, 16.0f, 16.0f);
+		auto orangeDeath = dae::BuildHorizontalFrames(112.0f, 240.0f, 4, 16.0f, 16.0f);
 		config.deathFrames.insert(config.deathFrames.end(), orangeDeath.begin(), orangeDeath.end());
 		config.deathFps = 10.0f;
 		return config;
@@ -69,8 +72,8 @@ namespace
 			dae::EnemyChaseAxis::Y,
 			200
 		};
-		config.deathFrames = dae::BuildHorizontalFrames(97.0f, 257.0f, 1, 16.0f, 16.0f);
-		auto blueDeath = dae::BuildHorizontalFrames(113.0f, 289.0f, 4, 16.0f, 16.0f);
+		config.deathFrames = dae::BuildHorizontalFrames(96.0f, 256.0f, 1, 16.0f, 16.0f);
+		auto blueDeath = dae::BuildHorizontalFrames(112.0f, 288.0f, 4, 16.0f, 16.0f);
 		config.deathFrames.insert(config.deathFrames.end(), blueDeath.begin(), blueDeath.end());
 		config.deathFps = 10.0f;
 		return config;
@@ -85,8 +88,8 @@ namespace
 			dae::EnemyChaseAxis::X,
 			400
 		};
-		config.deathFrames = dae::BuildHorizontalFrames(97.0f, 273.0f, 1, 16.0f, 16.0f);
-		auto deathRest = dae::BuildHorizontalFrames(113.0f, 273.0f, 4, 16.0f, 16.0f);
+		config.deathFrames = dae::BuildHorizontalFrames(96.0f, 272.0f, 1, 16.0f, 16.0f);
+		auto deathRest = dae::BuildHorizontalFrames(112.0f, 272.0f, 4, 16.0f, 16.0f);
 		config.deathFrames.insert(config.deathFrames.end(), deathRest.begin(), deathRest.end());
 		config.deathFps = 10.0f;
 		return config;
@@ -101,9 +104,9 @@ namespace
 			dae::EnemyChaseAxis::Both,
 			800
 		};
-		config.deathFrames = dae::BuildHorizontalFrames(97.0f, 289.0f, 1, 16.0f, 16.0f);
-		auto orangeDeath = dae::BuildHorizontalFrames(113.0f, 241.0f, 4, 16.0f, 16.0f);
-		config.deathFrames.insert(config.deathFrames.end(), orangeDeath.begin(), orangeDeath.end());
+		config.deathFrames = dae::BuildHorizontalFrames(96.0f, 288.0f, 1, 16.0f, 16.0f);
+		auto orangeDeath2 = dae::BuildHorizontalFrames(112.0f, 240.0f, 4, 16.0f, 16.0f);
+		config.deathFrames.insert(config.deathFrames.end(), orangeDeath2.begin(), orangeDeath2.end());
 		config.deathFps = 10.0f;
 		return config;
 	}();
@@ -133,7 +136,7 @@ namespace
 		render->SetSpriteSheet(16, 16, 6, 2);
 		render->SetSprite(4, 0);
 		render->SetScale(kPlayerSpriteScale);
-		render->SetPivot({ 0.5f, 0.5f });
+		render->SetPivot({ 0.5f, kPlayerPivotY });
 		render->SetRenderLayer(4);
 		go->AddComponent<dae::SpriteAnimatorComponent>();
 		go->AddComponent<dae::PlayerAnimatorComponent>();
@@ -144,9 +147,9 @@ namespace
 		auto* detonator = go->AddComponent<dae::DetonatorComponent>();
 		if (carryOver.hasDetonator)
 			detonator->SetHasDetonator(true);
-		go->AddComponent<dae::DeathAnimatorComponent>("BombermanSprites_General.png", dae::BuildHorizontalFrames(0.0f, 33.0f, 7, 16.0f, 16.0f), 10.0f, kPlayerSpriteScale, true);
+		go->AddComponent<dae::DeathAnimatorComponent>("BombermanSprites_General.png", dae::BuildHorizontalFrames(0.0f, 32.0f, 7, 16.0f, 16.0f), 10.0f, kPlayerSpriteScale, true);
 		auto* collider = go->AddComponent<dae::CollisionComponent>(kPlayerCollisionSize, kPlayerCollisionSize);
-		collider->SetOffset({ -kPlayerCollisionSize * 0.5f, -4.0f });
+		collider->SetOffset({ -kPlayerCollisionSize * 0.5f, -kPlayerCollisionSize * 0.5f });
 
 		auto* rangeComp = go->GetComponent<dae::BombRangeComponent>();
 		for (int i = 1; i < carryOver.bombRange; ++i)
@@ -246,15 +249,24 @@ namespace dae
 	{		const auto windowSize = Renderer::GetInstance().GetWindowSize();
 		const float windowWidth = static_cast<float>(windowSize.x);
 		const float windowHeight = static_cast<float>(windowSize.y);
-		const float playfieldScale = windowHeight / kPlayfieldHeight;
+		const float hudHeight = windowHeight * kHudHeightRatio;
+		const float playfieldAreaHeight = windowHeight - hudHeight;
+		const float playfieldScale = playfieldAreaHeight / kPlayfieldHeight;
 		const float playfieldScaledWidth = kPlayfieldWidth * playfieldScale;
 		const float tileWorldSize = 16.0f * playfieldScale;
 
+		auto hudObj = std::make_unique<GameObject>();
+		hudObj->AddComponent<TransformComponent>();
+		GameObject* hudRoot = hudObj.get();
+		scene.Add(std::move(hudObj));
+
 		auto cameraRoot = std::make_unique<GameObject>();
 		cameraRoot->AddComponent<TransformComponent>();
+		cameraRoot->GetComponent<TransformComponent>()->SetLocalPosition(0.0f, hudHeight, 0.0f);
 
 		auto worldRoot = std::make_unique<GameObject>();
 		worldRoot->AddComponent<TransformComponent>();
+		worldRoot->GetComponent<TransformComponent>()->SetLocalPosition(0.0f, hudHeight, 0.0f);
 		auto* worldRootPtr = worldRoot.get();
 		scene.Add(std::move(worldRoot));
 
@@ -363,6 +375,11 @@ namespace dae
 			g_EntityDeathObserver = std::make_unique<EntityDeathObserver>(scene);
 		if (!g_AudioObserver)
 			g_AudioObserver = std::make_unique<AudioEventObserver>();
+
+		std::vector<GameObject*> hudPlayers{};
+		if (player1) hudPlayers.push_back(player1);
+		if (player2) hudPlayers.push_back(player2);
+		hudRoot->AddComponent<HudComponent>(windowWidth, hudHeight, hudPlayers);
 
 		return { player1, player2, tileWorldSize };
 	}

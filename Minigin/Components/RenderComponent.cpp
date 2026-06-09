@@ -9,6 +9,8 @@ dae::RenderComponent::RenderComponent(GameObject* pOwner)
 	: BaseComponent(pOwner)
 {}
 
+dae::RenderComponent::~RenderComponent() = default;
+
 void dae::RenderComponent::Render() const
 {
 	if (m_Texture == nullptr)
@@ -52,7 +54,7 @@ void dae::RenderComponent::SetTexture(const std::string& filename)
 	m_Texture = ResourceManager::GetInstance().LoadTexture(filename);
 }
 
-void dae::RenderComponent::SetTexture(std::shared_ptr<Texture2D> texture)
+void dae::RenderComponent::SetTexture(std::unique_ptr<Texture2D> texture)
 {
 	m_Texture = std::move(texture);
 }

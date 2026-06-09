@@ -97,15 +97,15 @@ void dae::BombEventObserver::Notify(GameObject& actor, Event event)
 		render->SetTexture("BombermanSprites_General.png");
 		render->SetScale(kBombScale + 0.5f);
 		render->SetRenderLayer(1);
-		render->SetSourceRectangle(0.f, 49.f, 16.f, 16.f);
+		render->SetSourceRectangle(0.f, 48.f, 16.f, 16.f);
 		render->SetPivot({ 0.5f, 0.5f });
 
 		auto* animator = bomb->AddComponent<dae::SpriteAnimatorComponent>();
 		animator->SetAnimation(
 			{
-				SDL_FRect{ 0.f, 49.f, 16.f, 16.f },
-				SDL_FRect{ 16.f, 49.f, 16.f, 16.f },
-				SDL_FRect{ 32.f, 49.f, 16.f, 16.f }
+			SDL_FRect{ 0.f, 48.f, 16.f, 16.f },
+			SDL_FRect{ 16.f, 48.f, 16.f, 16.f },
+			SDL_FRect{ 32.f, 48.f, 16.f, 16.f }
 			},
 			8.0f,
 			true
@@ -198,6 +198,8 @@ void dae::BombEventObserver::Notify(GameObject& actor, Event event)
 void dae::BombEventObserver::DetonateBomb(GameObject& bomb)
 {
 	auto* bombParent = bomb.GetParent();
+	auto* bombComp = bomb.GetComponent<BombComponent>();
+	GameObject* pBombOwner = bombComp ? bombComp->GetOwnerPlayer() : nullptr;
 	bomb.MarkForDeletion();
 
 	auto* bombTransform = bomb.GetComponent<TransformComponent>();
@@ -216,7 +218,6 @@ void dae::BombEventObserver::DetonateBomb(GameObject& bomb)
 	}
 
 	int explosionRange = kDefaultExplosionRange;
-	auto* bombComp = bomb.GetComponent<BombComponent>();
 	if (bombComp)
 	{
 		explosionRange = bombComp->GetExplosionRange();
@@ -227,7 +228,7 @@ void dae::BombEventObserver::DetonateBomb(GameObject& bomb)
 	playAudioEvent.args[0].p = const_cast<char*>(kBombExplosionSfxPath);
 	EventManager::GetInstance().BroadcastEvent(playAudioEvent, &bomb);
 
-	m_pExplosionManager->SpawnExplosion(x, y, explosionRange, bombParent);
+	m_pExplosionManager->SpawnExplosion(x, y, explosionRange, bombParent, pBombOwner);
 }
 
 bool dae::BombEventObserver::IsBombAtPosition(const glm::vec2& pos) const

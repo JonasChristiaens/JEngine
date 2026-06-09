@@ -13,8 +13,8 @@ namespace dae
 	class TextComponent final : public BaseComponent
 	{
 	public:
-		TextComponent(GameObject* pOwner, const std::string& text, std::shared_ptr<Font> font);
-		virtual ~TextComponent() = default;
+		TextComponent(GameObject* pOwner, const std::string& text, std::unique_ptr<Font> font);
+		~TextComponent() override;
 
 		void Update() override;
 		void Render() const override;
@@ -26,7 +26,7 @@ namespace dae
 		bool m_NeedsUpdate{};
 		std::string m_Text{};
 		SDL_Color m_Color{ 255, 255, 255, 255 };
-		std::shared_ptr<Font> m_Font{};
+		std::unique_ptr<Font> m_Font{};
 		RenderComponent* m_pRenderComponent{};
 	};
 }

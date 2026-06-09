@@ -41,7 +41,7 @@ namespace
 			if (!transform)
 				continue;
 
-			const auto otherPos = transform->GetWorldPosition();
+			const auto otherPos = transform->GetLocalPosition();
 			const dae::RectBounds otherBox = dae::RectBounds::FromOffset(otherPos.x, otherPos.y,
 				collider->GetWidth(), collider->GetHeight(),
 				collider->GetOffset().x, collider->GetOffset().y);

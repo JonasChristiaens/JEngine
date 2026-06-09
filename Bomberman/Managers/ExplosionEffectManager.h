@@ -6,19 +6,20 @@ namespace dae
 {
 	class Scene;
 	class GameObject;
+	class PlayfieldComponent;
 
 	class ExplosionEffectManager final
 	{
 	public:
 		ExplosionEffectManager(Scene& scene, float tileWorldSize);
 
-		void SpawnExplosion(float centerX, float centerY, int explosionRange, GameObject* bombParent);
+		void SpawnExplosion(float centerX, float centerY, int explosionRange, GameObject* bombParent, GameObject* pBombOwner = nullptr);
 
 	private:
 		Scene* m_pScene{};
 		float m_TileWorldSize{};
 
-		int ClassifyTile(GameObject* bombParent, float centerX, float centerY);
+		static int ClassifyTile(const PlayfieldComponent& playfield, float tileWorldSize, float x, float y);
 		std::vector<SDL_FRect> BuildExplosionFrames(int tileColumn, int tileRow) const;
 	};
 }

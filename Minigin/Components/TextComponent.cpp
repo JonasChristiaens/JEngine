@@ -7,7 +7,7 @@
 #include <stdexcept>
 #include <SDL3_ttf/SDL_ttf.h>
 
-dae::TextComponent::TextComponent(GameObject* pOwner, const std::string& text, std::shared_ptr<Font> font)
+dae::TextComponent::TextComponent(GameObject* pOwner, const std::string& text, std::unique_ptr<Font> font)
 	: BaseComponent(pOwner)
 	, m_NeedsUpdate(true)
 	, m_Text(text)
@@ -19,6 +19,8 @@ dae::TextComponent::TextComponent(GameObject* pOwner, const std::string& text, s
 		m_pRenderComponent = GetOwner()->AddComponent<RenderComponent>();
 	}
 }
+
+dae::TextComponent::~TextComponent() = default;
 
 void dae::TextComponent::Update()
 {
@@ -37,8 +39,7 @@ void dae::TextComponent::Update()
 		}
 
 		SDL_DestroySurface(surf);
-		auto textTexture = std::make_shared<Texture2D>(texture);
-		m_pRenderComponent->SetTexture(textTexture);
+		m_pRenderComponent->SetTexture(std::make_unique<Texture2D>(texture));
 		m_NeedsUpdate = false;
 	}
 }

@@ -2,6 +2,7 @@
 #include "Scene/GameObject.h"
 #include "Components/TransformComponent.h"
 #include "Components/CollisionComponent.h"
+#include "Components/PlayfieldComponent.h"
 #include "Core/GameTime.h"
 #include <glm/glm.hpp>
 #include <random>
@@ -213,6 +214,15 @@ namespace dae
 		if (!pParent)
 			return true;
 
+		auto* playfield = pParent->GetComponent<PlayfieldComponent>();
+		if (!playfield)
+			return true;
+
+		const auto& occupied = playfield->GetOccupiedTiles();
+		const int gridRows = static_cast<int>(occupied.size());
+		if (gridRows == 0) return true;
+		const int gridCols = static_cast<int>(occupied[0].size());
+
 		int fromCell{ 0 }, toCell{ 0 }, fixedAxis{ 0 };
 		if (horizontal)
 		{
@@ -232,35 +242,16 @@ namespace dae
 
 		for (int c = fromCell + 1; c < toCell; ++c)
 		{
-			for (const auto* child : pParent->GetChildren())
-			{
-				if (!child || child->IsMarkedForDeletion())
-					continue;
+			const int col = horizontal ? c : fixedAxis;
+			const int row = horizontal ? fixedAxis : c;
 
-				auto* collider = child->GetComponent<CollisionComponent>();
-				if (!collider || collider->IsTrigger())
-					continue;
+			if (row < 0 || row >= gridRows || col < 0 || col >= gridCols)
+				continue;
 
-				auto* transform = child->GetComponent<TransformComponent>();
-				if (!transform)
-					continue;
-
-				const auto& pos = transform->GetWorldPosition();
-				int childCell, childFixed;
-				if (horizontal)
-				{
-					childCell = static_cast<int>(pos.x / tileSize);
-					childFixed = static_cast<int>(pos.y / tileSize);
-				}
-				else
-				{
-					childCell = static_cast<int>(pos.y / tileSize);
-					childFixed = static_cast<int>(pos.x / tileSize);
-				}
-
-				if (childCell == c && childFixed == fixedAxis)
-					return false;
-			}
+			const bool isBorder = row == 0 || col == 0 || row == gridRows - 1 || col == gridCols - 1;
+			const bool isPillar = (row % 2 == 0) && (col % 2 == 0);
+			if (isBorder || isPillar || occupied[row][col])
+				return false;
 		}
 
 		return true;

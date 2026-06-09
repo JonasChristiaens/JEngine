@@ -239,6 +239,7 @@ add_executable(${GAME_TARGET} ${GAME_TARGET_PARAM}
   Bomberman/Components/BombCapacityComponent.cpp
   Bomberman/Components/DetonatorComponent.cpp
   Bomberman/Components/DeathAnimatorComponent.cpp
+  Bomberman/Components/HudComponent.cpp
   Bomberman/Factories/EnemyFactory.cpp
   Bomberman/Managers/ExplosionEffectManager.cpp
   Bomberman/Powerups/FlamesEffect.cpp

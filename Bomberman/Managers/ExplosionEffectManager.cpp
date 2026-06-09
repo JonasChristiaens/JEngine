@@ -7,8 +7,7 @@
 #include "Components/CollisionComponent.h"
 #include "Components/HealthComponent.h"
 #include "Components/EnemyComponent.h"
-#include "Components/ScoreComponent.h"
-#include "Components/RectBounds.h"
+#include "Components/PlayfieldComponent.h"
 #include "EventQueue/EventManager.h"
 
 namespace
@@ -16,7 +15,7 @@ namespace
 	constexpr float kExplosionFrameSize = 80.0f;
 	constexpr float kExplosionTileSize = 16.0f;
 	constexpr float kExplosionStartX = 0.0f;
-	constexpr float kExplosionStartY = 65.0f;
+	constexpr float kExplosionStartY = 64.0f;
 	constexpr int kExplosionFrameColumns = 2;
 	constexpr int kExplosionFrameCount = 4;
 	constexpr float kExplosionFramesPerSecond = 12.0f;
@@ -31,39 +30,26 @@ namespace dae
 	{
 	}
 
-	int ExplosionEffectManager::ClassifyTile(GameObject* bombParent, float centerX, float centerY)
+	int ExplosionEffectManager::ClassifyTile(const PlayfieldComponent& playfield, float tileWorldSize, float x, float y)
 	{
-		if (!bombParent)
-			return 0;
+		const int col = static_cast<int>(x / tileWorldSize);
+		const int row = static_cast<int>(y / tileWorldSize);
+		const int gridCols = static_cast<int>(496.0f / 16.0f);
+		const int gridRows = static_cast<int>(208.0f / 16.0f);
 
-		for (auto* child : bombParent->GetChildren())
+		if (row < 0 || row >= gridRows || col < 0 || col >= gridCols)
+			return 2;
+
+		const bool isBorder = row == 0 || col == 0 || row == gridRows - 1 || col == gridCols - 1;
+		const bool isPillar = (row % 2 == 0) && (col % 2 == 0);
+		if (isBorder || isPillar)
+			return 2;
+
+		const auto& occupied = playfield.GetOccupiedTiles();
+		if (static_cast<size_t>(row) < occupied.size() && static_cast<size_t>(col) < occupied[row].size())
 		{
-			if (!child || child->IsMarkedForDeletion())
-				continue;
-
-			auto* col = child->GetComponent<CollisionComponent>();
-			if (!col || col->IsTrigger())
-				continue;
-
-			if (child->HasComponent<EnemyComponent>())
-				continue;
-
-			if (child->HasComponent<ScoreComponent>())
-				continue;
-
-			auto* tx = child->GetComponent<TransformComponent>();
-			if (!tx)
-				continue;
-
-			const glm::vec3 pos = tx->GetWorldPosition();
-			const RectBounds blockBox = RectBounds::FromOffset(pos.x, pos.y,
-				col->GetWidth(), col->GetHeight(),
-				col->GetOffset().x, col->GetOffset().y);
-
-			if (blockBox.Contains(centerX, centerY))
-			{
-				return (child->GetComponent<HealthComponent>() != nullptr) ? 1 : 2;
-			}
+			if (occupied[row][col])
+				return 1;
 		}
 
 		return 0;
@@ -89,8 +75,10 @@ namespace dae
 		return frames;
 	}
 
-	void ExplosionEffectManager::SpawnExplosion(float centerX, float centerY, int explosionRange, GameObject* bombParent)
+	void ExplosionEffectManager::SpawnExplosion(float centerX, float centerY, int explosionRange, GameObject* bombParent, GameObject* pBombOwner)
 	{
+		PlayfieldComponent* playfield = bombParent ? bombParent->GetComponent<PlayfieldComponent>() : nullptr;
+
 		std::vector<GameObject*> damageTiles{};
 		damageTiles.reserve(static_cast<size_t>(1 + explosionRange * 4));
 
@@ -106,7 +94,7 @@ namespace dae
 			const float damageSize = m_TileWorldSize * kDamageColliderScale;
 			auto* collider = damageTile->AddComponent<CollisionComponent>(damageSize, damageSize, true);
 			collider->SetOffset({ -damageSize * 0.5f, -damageSize * 0.5f });
-			collider->SetOnCollisionCallback([](GameObject* other)
+			collider->SetOnCollisionCallback([pBombOwner](GameObject* other)
 			{
 				if (!other || other->IsMarkedForDeletion())
 					return;
@@ -119,6 +107,18 @@ namespace dae
 				damageEvent.nbArgs = 1;
 				damageEvent.args[0].i = -1;
 				EventManager::GetInstance().BroadcastEvent(damageEvent, other);
+
+				if (health->GetHealth() > 0 && health->GetHealth() <= 1 && pBombOwner && other->HasComponent<EnemyComponent>())
+				{
+					auto* enemyComp = other->GetComponent<EnemyComponent>();
+					if (enemyComp)
+					{
+						Event scoreEvent(make_sdbm_hash("ChangeScoreEvent"));
+						scoreEvent.nbArgs = 1;
+						scoreEvent.args[0].i = enemyComp->GetPoints();
+						EventManager::GetInstance().BroadcastEvent(scoreEvent, pBombOwner);
+					}
+				}
 			});
 
 			if (bombParent)
@@ -155,6 +155,11 @@ namespace dae
 			return animator;
 		};
 
+		auto classify = [&](float x, float y)
+		{
+			return playfield ? ClassifyTile(*playfield, m_TileWorldSize, x, y) : 0;
+		};
+
 		addDamageTile(centerX, centerY);
 		auto* centerAnimator = addExplosionTile(centerX, centerY, 2, 2);
 
@@ -167,11 +172,8 @@ namespace dae
 			if (leftOpen)
 			{
 				const float posX = centerX - offset;
-				const int blockType = ClassifyTile(bombParent, posX, centerY);
-				if (blockType == 2)
-				{
-					leftOpen = false;
-				}
+				const int blockType = classify(posX, centerY);
+				if (blockType == 2) { leftOpen = false; }
 				else if (blockType == 1)
 				{
 					addDamageTile(posX, centerY);
@@ -180,7 +182,7 @@ namespace dae
 				else
 				{
 					addDamageTile(posX, centerY);
-					const bool isEnd = (step == explosionRange) || (ClassifyTile(bombParent, posX - m_TileWorldSize, centerY) != 0);
+					const bool isEnd = (step == explosionRange) || (classify(posX - m_TileWorldSize, centerY) != 0);
 					addExplosionTile(posX, centerY, isEnd ? 0 : 1, 2);
 				}
 			}
@@ -188,11 +190,8 @@ namespace dae
 			if (rightOpen)
 			{
 				const float posX = centerX + offset;
-				const int blockType = ClassifyTile(bombParent, posX, centerY);
-				if (blockType == 2)
-				{
-					rightOpen = false;
-				}
+				const int blockType = classify(posX, centerY);
+				if (blockType == 2) { rightOpen = false; }
 				else if (blockType == 1)
 				{
 					addDamageTile(posX, centerY);
@@ -201,7 +200,7 @@ namespace dae
 				else
 				{
 					addDamageTile(posX, centerY);
-					const bool isEnd = (step == explosionRange) || (ClassifyTile(bombParent, posX + m_TileWorldSize, centerY) != 0);
+					const bool isEnd = (step == explosionRange) || (classify(posX + m_TileWorldSize, centerY) != 0);
 					addExplosionTile(posX, centerY, isEnd ? 4 : 3, 2);
 				}
 			}
@@ -209,11 +208,8 @@ namespace dae
 			if (upOpen)
 			{
 				const float posY = centerY - offset;
-				const int blockType = ClassifyTile(bombParent, centerX, posY);
-				if (blockType == 2)
-				{
-					upOpen = false;
-				}
+				const int blockType = classify(centerX, posY);
+				if (blockType == 2) { upOpen = false; }
 				else if (blockType == 1)
 				{
 					addDamageTile(centerX, posY);
@@ -222,7 +218,7 @@ namespace dae
 				else
 				{
 					addDamageTile(centerX, posY);
-					const bool isEnd = (step == explosionRange) || (ClassifyTile(bombParent, centerX, posY - m_TileWorldSize) != 0);
+					const bool isEnd = (step == explosionRange) || (classify(centerX, posY - m_TileWorldSize) != 0);
 					addExplosionTile(centerX, posY, 2, isEnd ? 0 : 1);
 				}
 			}
@@ -230,11 +226,8 @@ namespace dae
 			if (downOpen)
 			{
 				const float posY = centerY + offset;
-				const int blockType = ClassifyTile(bombParent, centerX, posY);
-				if (blockType == 2)
-				{
-					downOpen = false;
-				}
+				const int blockType = classify(centerX, posY);
+				if (blockType == 2) { downOpen = false; }
 				else if (blockType == 1)
 				{
 					addDamageTile(centerX, posY);
@@ -243,7 +236,7 @@ namespace dae
 				else
 				{
 					addDamageTile(centerX, posY);
-					const bool isEnd = (step == explosionRange) || (ClassifyTile(bombParent, centerX, posY + m_TileWorldSize) != 0);
+					const bool isEnd = (step == explosionRange) || (classify(centerX, posY + m_TileWorldSize) != 0);
 					addExplosionTile(centerX, posY, 2, isEnd ? 4 : 3);
 				}
 			}
