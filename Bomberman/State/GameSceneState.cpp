@@ -36,6 +36,7 @@ namespace dae
 		const auto data = BuildGameplayScene(scene, GetGameMode(), m_CurrentLevelIndex, { m_CarriedBombCapacity, m_CarriedBombRange, m_CarriedDetonator });
 		m_Owner.RegisterPlayer(data.player1);
 		m_Owner.RegisterPlayer(data.player2);
+		m_AlivePlayerCount = (data.player1 ? 1 : 0) + (data.player2 ? 1 : 0);
 	}
 
 	void GameSceneState::OnExit()
@@ -64,17 +65,29 @@ namespace dae
 			return;
 		}
 
-		if (AreAllPlayersDead())
+		if (m_AlivePlayerCount <= 0)
 		{
 			m_Owner.GetStateMachine().SetState(std::make_unique<EndSceneState>(m_Owner));
 		}
 	}
 
-	void GameSceneState::Notify(GameObject&, Event event)
+	void GameSceneState::Notify(GameObject& actor, Event event)
 	{
 		if (event.id == kLevelCompletedEventId)
 		{
 			m_LevelCompleted = true;
+		}
+		else if (event.id == make_sdbm_hash("EntityDied"))
+		{
+			const auto& players = m_Owner.GetPlayers();
+			for (const auto* player : players)
+			{
+				if (player == &actor)
+				{
+					--m_AlivePlayerCount;
+					break;
+				}
+			}
 		}
 	}
 
@@ -102,28 +115,5 @@ namespace dae
 		auto* detonator = players[0]->GetComponent<DetonatorComponent>();
 		if (detonator)
 			m_CarriedDetonator = detonator->HasDetonator();
-	}
-
-	bool GameSceneState::AreAllPlayersDead() const
-	{
-		const auto& players = m_Owner.GetPlayers();
-		if (players.empty())
-			return false;
-
-		for (const auto* player : players)
-		{
-			if (!player)
-				continue;
-
-			auto* health = player->GetComponent<HealthComponent>();
-			if (health && health->GetHealth() > 0)
-				return false;
-
-			auto* deathAnim = player->GetComponent<DeathAnimatorComponent>();
-			if (deathAnim && deathAnim->IsPlaying())
-				return false;
-		}
-
-		return true;
 	}
 }

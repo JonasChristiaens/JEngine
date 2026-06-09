@@ -2,6 +2,7 @@
 #include "EventQueue/EventManager.h"
 #include "Scene/GameObject.h"
 #include "Components/DeathAnimatorComponent.h"
+#include "Components/BombRangeComponent.h"
 
 dae::HealthComponent::HealthComponent(GameObject* pOwner, int health)
 	: BaseComponent(pOwner)
@@ -26,11 +27,19 @@ void dae::HealthComponent::ChangeCurrentHealth(int amount)
 	m_CurrentHealth += amount;
 	NotifyObservers(Event(make_sdbm_hash("HealthChanged")), GetOwner());
 
-	if (m_CurrentHealth <= 0)
-	{
-		m_IsDead = true;
+		if (m_CurrentHealth <= 0)
+		{
+			m_IsDead = true;
 
-		auto* deathAnim = GetOwner()->GetComponent<DeathAnimatorComponent>();
+			if (GetOwner()->HasComponent<BombRangeComponent>())
+			{
+				Event playAudioEvent(make_sdbm_hash("PlayAudioEvent"));
+				playAudioEvent.nbArgs = 1;
+				playAudioEvent.args[0].p = const_cast<char*>("bomberman_killed.wav");
+				EventManager::GetInstance().BroadcastEvent(playAudioEvent, GetOwner());
+			}
+
+			auto* deathAnim = GetOwner()->GetComponent<DeathAnimatorComponent>();
 		if (deathAnim)
 		{
 			deathAnim->Play();

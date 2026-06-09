@@ -64,14 +64,6 @@ namespace dae
 
 	void PlayfieldComponent::Update()
 	{
-		if (!m_PowerupActivated && m_pPowerupBrick && m_pPowerupBrick->IsMarkedForDeletion())
-		{
-			ActivatePowerup();
-			m_PowerupActivated = true;
-			m_pPowerupBrick = nullptr;
-			m_VulnerabilityDelay = kVulnerabilityFrameDelay;
-		}
-
 		if (m_VulnerabilityDelay > 0)
 		{
 			--m_VulnerabilityDelay;
@@ -79,13 +71,6 @@ namespace dae
 			{
 				m_pPowerupObject->AddComponent<HealthComponent>(1);
 			}
-		}
-
-		if (!m_DoorActivated && m_pDoorBrick && m_pDoorBrick->IsMarkedForDeletion())
-		{
-			ActivateDoor();
-			m_DoorActivated = true;
-			m_pDoorBrick = nullptr;
 		}
 	}
 
@@ -377,7 +362,25 @@ namespace dae
 
 	void PlayfieldComponent::Notify(GameObject& actor, Event event)
 	{
-		if (event.id == kEntityDiedEventId && actor.HasComponent<EnemyComponent>())
-			--m_AliveEnemyCount;
+		if (event.id == kEntityDiedEventId)
+		{
+			if (!m_PowerupActivated && &actor == m_pPowerupBrick)
+			{
+				ActivatePowerup();
+				m_PowerupActivated = true;
+				m_pPowerupBrick = nullptr;
+				m_VulnerabilityDelay = kVulnerabilityFrameDelay;
+			}
+
+			if (!m_DoorActivated && &actor == m_pDoorBrick)
+			{
+				ActivateDoor();
+				m_DoorActivated = true;
+				m_pDoorBrick = nullptr;
+			}
+
+			if (actor.HasComponent<EnemyComponent>())
+				--m_AliveEnemyCount;
+		}
 	}
 }

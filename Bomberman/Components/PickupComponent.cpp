@@ -29,6 +29,11 @@ namespace dae
 		scoreEvent.args[0].i = m_ScoreValue;
 		EventManager::GetInstance().BroadcastEvent(scoreEvent, other);
 
+		Event playAudioEvent(make_sdbm_hash("PlayAudioEvent"));
+		playAudioEvent.nbArgs = 1;
+		playAudioEvent.args[0].p = const_cast<char*>("powerup.wav");
+		EventManager::GetInstance().BroadcastEvent(playAudioEvent, other);
+
 		GetOwner()->MarkForDeletion();
 	}
 }

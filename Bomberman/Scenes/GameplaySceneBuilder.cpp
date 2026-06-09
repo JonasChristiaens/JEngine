@@ -144,7 +144,7 @@ namespace
 		auto* detonator = go->AddComponent<dae::DetonatorComponent>();
 		if (carryOver.hasDetonator)
 			detonator->SetHasDetonator(true);
-		go->AddComponent<dae::DeathAnimatorComponent>("BombermanSprites_General.png", dae::BuildHorizontalFrames(0.0f, 33.0f, 7, 16.0f, 16.0f), 10.0f, kPlayerSpriteScale, false);
+		go->AddComponent<dae::DeathAnimatorComponent>("BombermanSprites_General.png", dae::BuildHorizontalFrames(0.0f, 33.0f, 7, 16.0f, 16.0f), 10.0f, kPlayerSpriteScale, true);
 		auto* collider = go->AddComponent<dae::CollisionComponent>(kPlayerCollisionSize, kPlayerCollisionSize);
 		collider->SetOffset({ -kPlayerCollisionSize * 0.5f, -4.0f });
 

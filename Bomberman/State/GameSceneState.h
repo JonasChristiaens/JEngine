@@ -20,8 +20,8 @@ namespace dae
 		int m_CarriedBombCapacity{ 1 };
 		int m_CarriedBombRange{ 1 };
 		bool m_CarriedDetonator{ false };
+		int m_AlivePlayerCount{ 0 };
 
-		bool AreAllPlayersDead() const;
 		void SavePlayerState();
 		void ReloadScene();
 	};
