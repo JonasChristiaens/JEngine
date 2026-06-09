@@ -12,5 +12,13 @@ namespace dae
 		float tileWorldSize{};
 	};
 
-	GameplaySceneData BuildGameplayScene(Scene& scene, GameMode gameMode);
+	struct PlayerCarryOver
+	{
+		int bombCapacity{ 1 };
+		int bombRange{ 1 };
+		bool hasDetonator{ false };
+	};
+
+	GameplaySceneData BuildGameplayScene(Scene& scene, GameMode gameMode, int levelIndex = 0, const PlayerCarryOver& carryOver = {});
+	void ResetGameplayObservers();
 }

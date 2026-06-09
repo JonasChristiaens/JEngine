@@ -123,7 +123,7 @@ namespace
 		return dae::LevelDataLoader::LoadFromText(jsonText);
 	}
 
-	dae::GameObject* CreatePlayer(dae::Scene& scene, const glm::vec3& startPos)
+	dae::GameObject* CreatePlayer(dae::Scene& scene, const glm::vec3& startPos, const dae::PlayerCarryOver& carryOver = {})
 	{
 		auto go = std::make_unique<dae::GameObject>();
 		auto* transform = go->AddComponent<dae::TransformComponent>();
@@ -140,11 +140,18 @@ namespace
 		go->AddComponent<dae::HealthComponent>(4);
 		go->AddComponent<dae::ScoreComponent>(0);
 		go->AddComponent<dae::BombRangeComponent>(4);
-		go->AddComponent<dae::BombCapacityComponent>(1);
-		go->AddComponent<dae::DetonatorComponent>();
+		go->AddComponent<dae::BombCapacityComponent>(carryOver.bombCapacity);
+		auto* detonator = go->AddComponent<dae::DetonatorComponent>();
+		if (carryOver.hasDetonator)
+			detonator->SetHasDetonator(true);
 		go->AddComponent<dae::DeathAnimatorComponent>("BombermanSprites_General.png", dae::BuildHorizontalFrames(0.0f, 33.0f, 7, 16.0f, 16.0f), 10.0f, kPlayerSpriteScale, false);
 		auto* collider = go->AddComponent<dae::CollisionComponent>(kPlayerCollisionSize, kPlayerCollisionSize);
 		collider->SetOffset({ -kPlayerCollisionSize * 0.5f, -4.0f });
+
+		auto* rangeComp = go->GetComponent<dae::BombRangeComponent>();
+		for (int i = 1; i < carryOver.bombRange; ++i)
+			rangeComp->IncreaseRange();
+
 		auto* player = go.get();
 		scene.Add(std::move(go));
 		return player;
@@ -219,19 +226,24 @@ namespace
 	{
 		const int gridColumns = static_cast<int>(kPlayfieldWidth / 16.0f);
 		const int gridRows = static_cast<int>(kPlayfieldHeight / 16.0f);
-		return dae::EnemyFactory::CreateEnemy(scene, parent, gridColumns, gridRows, tileWorldSize, moveSpeed, config, pChaseTarget, { reservedWorldPosition }, useAiMovement);
+		auto* enemy = dae::EnemyFactory::CreateEnemy(scene, parent, gridColumns, gridRows, tileWorldSize, moveSpeed, config, pChaseTarget, { reservedWorldPosition }, useAiMovement);
+		if (enemy)
+		{
+			if (auto* playfield = parent.GetComponent<dae::PlayfieldComponent>())
+				playfield->RegisterEnemySpawned();
+		}
+		return enemy;
 	}
+
+	std::unique_ptr<dae::BombEventObserver> g_BombObserver{};
+	std::unique_ptr<dae::EntityDeathObserver> g_EntityDeathObserver{};
+	std::unique_ptr<dae::AudioEventObserver> g_AudioObserver{};
 }
 
 namespace dae
 {
-	GameplaySceneData BuildGameplayScene(Scene& scene, GameMode gameMode)
-	{
-		static std::unique_ptr<BombEventObserver> g_BombObserver{};
-		static std::unique_ptr<EntityDeathObserver> g_EntityDeathObserver{};
-		static std::unique_ptr<AudioEventObserver> g_AudioObserver{};
-
-		const auto windowSize = Renderer::GetInstance().GetWindowSize();
+	GameplaySceneData BuildGameplayScene(Scene& scene, GameMode gameMode, int levelIndex, const PlayerCarryOver& carryOver)
+	{		const auto windowSize = Renderer::GetInstance().GetWindowSize();
 		const float windowWidth = static_cast<float>(windowSize.x);
 		const float windowHeight = static_cast<float>(windowSize.y);
 		const float playfieldScale = windowHeight / kPlayfieldHeight;
@@ -257,15 +269,15 @@ namespace dae
 		scene.Add(std::move(playfield));
 
 		const auto levels = LoadLevels();
-		constexpr int levelIndex = 0;
-		worldRootPtr->AddComponent<PlayfieldComponent>(scene, kPlayfieldWidth, kPlayfieldHeight, playfieldScale, ToPlayfieldConfig(levels.at(levelIndex)));
+		const int idx = levelIndex < static_cast<int>(levels.size()) ? levelIndex : 0;
+		worldRootPtr->AddComponent<PlayfieldComponent>(scene, kPlayfieldWidth, kPlayfieldHeight, playfieldScale, ToPlayfieldConfig(levels.at(idx)));
 
 		const glm::vec3 player1Pos{ tileWorldSize * 1.5f, tileWorldSize * 2.5f, 0.0f };
 		const glm::vec3 player2Pos{ tileWorldSize * 3.5f, tileWorldSize * 2.5f, 0.0f };
-		const int balloomCount = std::max(0, levels.at(levelIndex).balloomCount);
-		const int onealCount = std::max(0, levels.at(levelIndex).onealCount);
-		const int dollCount = std::max(0, levels.at(levelIndex).dollCount);
-		const int minvoCount = std::max(0, levels.at(levelIndex).minvoCount);
+		const int balloomCount = std::max(0, levels.at(idx).balloomCount);
+		const int onealCount = std::max(0, levels.at(idx).onealCount);
+		const int dollCount = std::max(0, levels.at(idx).dollCount);
+		const int minvoCount = std::max(0, levels.at(idx).minvoCount);
 
 		GameObject* player1 = nullptr;
 		GameObject* player2 = nullptr;
@@ -273,7 +285,7 @@ namespace dae
 		switch (gameMode)
 		{
 		case GameMode::Solo:
-			player1 = CreatePlayer(scene, player1Pos);
+			player1 = CreatePlayer(scene, player1Pos, carryOver);
 			player1->SetParent(worldRootPtr, false);
 			BindPlayerControls(*player1, true, 0);
 			for (int i = 0; i < balloomCount; ++i)
@@ -294,7 +306,7 @@ namespace dae
 			}
 			break;
 		case GameMode::Coop:
-			player1 = CreatePlayer(scene, player1Pos);
+			player1 = CreatePlayer(scene, player1Pos, carryOver);
 			player2 = CreatePlayer(scene, player2Pos);
 			player1->SetParent(worldRootPtr, false);
 			player2->SetParent(worldRootPtr, false);
@@ -318,7 +330,7 @@ namespace dae
 			}
 			break;
 		case GameMode::Versus:
-			player1 = CreatePlayer(scene, player1Pos);
+			player1 = CreatePlayer(scene, player1Pos, carryOver);
 			player1->SetParent(worldRootPtr, false);
 			player2 = SpawnEnemy(scene, *worldRootPtr, tileWorldSize, kBalloomConfig, kBalloomSpeed, nullptr, player1Pos, false);
 			BindPlayerControls(*player1, true, 0);
@@ -353,5 +365,12 @@ namespace dae
 			g_AudioObserver = std::make_unique<AudioEventObserver>();
 
 		return { player1, player2, tileWorldSize };
+	}
+
+	void ResetGameplayObservers()
+	{
+		g_BombObserver.reset();
+		g_EntityDeathObserver.reset();
+		g_AudioObserver.reset();
 	}
 }

@@ -1,5 +1,6 @@
 #pragma once
 #include "BaseComponent.h"
+#include "EventQueue/IObserver.h"
 #include "Level/LevelData.h"
 #include <SDL3/SDL.h>
 #include <glm/vec2.hpp>
@@ -10,7 +11,7 @@ namespace dae
 {
 	class Scene;
 
-	class PlayfieldComponent final : public BaseComponent
+	class PlayfieldComponent final : public BaseComponent, public IObserver
 	{
 	public:
 		struct PlayfieldConfig
@@ -38,11 +39,14 @@ namespace dae
 		};
 
 		PlayfieldComponent(GameObject* pOwner, Scene& scene, float playfieldWidth, float playfieldHeight, float playfieldScale, PlayfieldConfig config = {});
-		virtual ~PlayfieldComponent() = default;
+		~PlayfieldComponent() override;
 
 		void Update() override;
 		const std::vector<std::vector<bool>>& GetOccupiedTiles() const { return m_OccupiedTiles; }
 		void Rebuild(const PlayfieldConfig& config);
+		void RegisterEnemySpawned();
+		void Notify(GameObject& actor, Event event) override;
+		bool AreAllEnemiesDead() const { return m_AliveEnemyCount <= 0; }
 
 	private:
 		Scene* m_pScene{};
@@ -58,10 +62,19 @@ namespace dae
 		bool m_PowerupActivated{ false };
 		int m_VulnerabilityDelay{ 0 };
 
+		GameObject* m_pDoorBrick{ nullptr };
+		GameObject* m_pDoorObject{ nullptr };
+		glm::vec2 m_DoorWorldPos{};
+		bool m_DoorActivated{ false };
+
+		int m_AliveEnemyCount{ 0 };
+
 		void BuildPlayfield();
 		void ClearSpawnedObjects();
 		bool IsReservedTile(int column, int row) const;
 		void CreateHiddenPowerup();
 		void ActivatePowerup();
+		void CreateDoor();
+		void ActivateDoor();
 	};
 }

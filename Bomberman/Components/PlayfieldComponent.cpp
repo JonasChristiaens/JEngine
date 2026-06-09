@@ -8,6 +8,8 @@
 #include "Components/PickupComponent.h"
 #include "Components/BombRangeComponent.h"
 #include "Components/DeathAnimatorComponent.h"
+#include "Components/EnemyComponent.h"
+#include "EventQueue/EventManager.h"
 #include "EnemyConfig.h"
 #include "Powerups/FlamesEffect.h"
 #include "Powerups/ExtraBombEffect.h"
@@ -24,10 +26,14 @@ namespace
 	constexpr SDL_FRect kFlamesSourceRect{ 17.0f, 0.0f, 16.0f, 16.0f };
 	constexpr SDL_FRect kExtraBombSourceRect{ 0.0f, 0.0f, 16.0f, 16.0f };
 	constexpr SDL_FRect kDetonatorSourceRect{ 64.0f, 0.0f, 16.0f, 16.0f };
+	constexpr SDL_FRect kDoorSourceRect{ 177.0f, 49.0f, 15.0f, 16.0f };
+	constexpr const char* kDoorTexture = "BombermanSprites_General.png";
 	constexpr int kPowerupScoreValue = 0;
 	constexpr int kHiddenRenderLayer = 1;
 	constexpr int kActiveRenderLayer = 3;
 	constexpr int kVulnerabilityFrameDelay = 30;
+	constexpr dae::EventId kLevelCompletedEventId = dae::make_sdbm_hash("LevelCompleted");
+	constexpr dae::EventId kEntityDiedEventId = dae::make_sdbm_hash("EntityDied");
 }
 
 namespace dae
@@ -40,7 +46,14 @@ namespace dae
 		, m_PlayfieldScale(playfieldScale)
 		, m_Config(std::move(config))
 	{
+		EventManager::GetInstance().AddObserver(*this);
 		BuildPlayfield();
+	}
+
+	PlayfieldComponent::~PlayfieldComponent()
+	{
+		if (EventManager::IsAlive())
+			EventManager::GetInstance().RemoveObserver(*this);
 	}
 
 	void PlayfieldComponent::Rebuild(const PlayfieldConfig& config)
@@ -51,10 +64,7 @@ namespace dae
 
 	void PlayfieldComponent::Update()
 	{
-		if (m_pPowerupBrick == nullptr)
-			return;
-
-		if (!m_PowerupActivated && m_pPowerupBrick->IsMarkedForDeletion())
+		if (!m_PowerupActivated && m_pPowerupBrick && m_pPowerupBrick->IsMarkedForDeletion())
 		{
 			ActivatePowerup();
 			m_PowerupActivated = true;
@@ -70,6 +80,13 @@ namespace dae
 				m_pPowerupObject->AddComponent<HealthComponent>(1);
 			}
 		}
+
+		if (!m_DoorActivated && m_pDoorBrick && m_pDoorBrick->IsMarkedForDeletion())
+		{
+			ActivateDoor();
+			m_DoorActivated = true;
+			m_pDoorBrick = nullptr;
+		}
 	}
 
 	void PlayfieldComponent::BuildPlayfield()
@@ -82,6 +99,10 @@ namespace dae
 		m_pPowerupObject = nullptr;
 		m_PowerupActivated = false;
 		m_VulnerabilityDelay = 0;
+		m_pDoorBrick = nullptr;
+		m_pDoorObject = nullptr;
+		m_DoorActivated = false;
+		m_AliveEnemyCount = 0;
 
 		const float tileSize = m_Config.tileSize;
 		const float tileScale = m_PlayfieldScale;
@@ -177,6 +198,23 @@ namespace dae
 				m_PowerupWorldPos = { pos.x + halfTile, pos.y + halfTile };
 				CreateHiddenPowerup();
 			}
+
+			if (brickCount > 1)
+			{
+				size_t doorIndex = powerupIndex;
+				while (doorIndex == powerupIndex)
+					doorIndex = dist(rng);
+				m_pDoorBrick = m_SpawnedBlocks[doorIndex + firstBrickIndex];
+
+				auto* doorBrickTransform = m_pDoorBrick->GetComponent<TransformComponent>();
+				if (doorBrickTransform)
+				{
+					const float halfTile = tileWorldSize * 0.5f;
+					const auto& pos = doorBrickTransform->GetLocalPosition();
+					m_DoorWorldPos = { pos.x + halfTile, pos.y + halfTile };
+					CreateDoor();
+				}
+			}
 		}
 	}
 
@@ -196,6 +234,12 @@ namespace dae
 			m_pPowerupObject->MarkForDeletion();
 		}
 		m_pPowerupObject = nullptr;
+
+		if (m_pDoorObject && !m_pDoorObject->IsMarkedForDeletion())
+		{
+			m_pDoorObject->MarkForDeletion();
+		}
+		m_pDoorObject = nullptr;
 	}
 
 	bool PlayfieldComponent::IsReservedTile(int column, int row) const
@@ -284,5 +328,56 @@ namespace dae
 					pickup->OnCollision(other);
 				}
 			});
+	}
+
+	void PlayfieldComponent::CreateDoor()
+	{
+		auto door = std::make_unique<GameObject>();
+		auto* transform = door->AddComponent<TransformComponent>();
+		transform->SetLocalPosition(m_DoorWorldPos.x, m_DoorWorldPos.y, 0.0f);
+
+		auto* render = door->AddComponent<RenderComponent>();
+		render->SetTexture(kDoorTexture);
+		render->SetSourceRectangle(kDoorSourceRect.x, kDoorSourceRect.y, kDoorSourceRect.w, kDoorSourceRect.h);
+		render->SetScale(m_PlayfieldScale);
+		render->SetPivot({ 0.5f, 0.5f });
+		render->SetRenderLayer(kHiddenRenderLayer);
+
+		door->SetParent(GetOwner(), false);
+		m_pDoorObject = door.get();
+		m_pScene->Add(std::move(door));
+	}
+
+	void PlayfieldComponent::ActivateDoor()
+	{
+		if (m_pDoorObject == nullptr)
+			return;
+
+		auto* render = m_pDoorObject->GetComponent<RenderComponent>();
+		if (render)
+			render->SetRenderLayer(kActiveRenderLayer);
+
+		const float tileWorldSize = m_Config.tileSize * m_PlayfieldScale;
+		auto* collider = m_pDoorObject->AddComponent<CollisionComponent>(tileWorldSize, tileWorldSize, true);
+		collider->SetOffset({ -tileWorldSize * 0.5f, -tileWorldSize * 0.5f });
+		collider->SetOnCollisionCallback([this](GameObject* other)
+			{
+				if (other && other->HasComponent<BombRangeComponent>() && AreAllEnemiesDead())
+				{
+					Event levelCompleteEvent(kLevelCompletedEventId);
+					EventManager::GetInstance().BroadcastEvent(levelCompleteEvent, other);
+				}
+			});
+	}
+
+	void PlayfieldComponent::RegisterEnemySpawned()
+	{
+		++m_AliveEnemyCount;
+	}
+
+	void PlayfieldComponent::Notify(GameObject& actor, Event event)
+	{
+		if (event.id == kEntityDiedEventId && actor.HasComponent<EnemyComponent>())
+			--m_AliveEnemyCount;
 	}
 }

@@ -2,12 +2,20 @@
 #include "Components/SceneStateMachineComponent.h"
 #include "Components/HealthComponent.h"
 #include "Components/DeathAnimatorComponent.h"
+#include "Components/BombCapacityComponent.h"
+#include "Components/BombRangeComponent.h"
+#include "Components/DetonatorComponent.h"
 #include "EventQueue/EventManager.h"
 #include "Input/InputManager.h"
 #include "Scene/SceneManager.h"
 #include "Scene/Scene.h"
 #include "State/EndSceneState.h"
 #include "Scenes/GameplaySceneBuilder.h"
+
+namespace
+{
+	constexpr dae::EventId kLevelCompletedEventId = dae::make_sdbm_hash("LevelCompleted");
+}
 
 namespace dae
 {
@@ -19,17 +27,22 @@ namespace dae
 
 	void GameSceneState::OnEnter()
 	{
+		EventManager::GetInstance().AddObserver(*this);
+
 		auto& scene = SceneManager::GetInstance().CreateScene();
 		m_Owner.SetActiveScene(scene);
 		m_Owner.ClearPlayers();
 
-		const auto data = BuildGameplayScene(scene, GetGameMode());
+		const auto data = BuildGameplayScene(scene, GetGameMode(), m_CurrentLevelIndex, { m_CarriedBombCapacity, m_CarriedBombRange, m_CarriedDetonator });
 		m_Owner.RegisterPlayer(data.player1);
 		m_Owner.RegisterPlayer(data.player2);
 	}
 
 	void GameSceneState::OnExit()
 	{
+		if (EventManager::IsAlive())
+			EventManager::GetInstance().RemoveObserver(*this);
+
 		InputManager::GetInstance().ClearAllBindings();
 		EventManager::GetInstance().ClearQueue();
 
@@ -42,10 +55,53 @@ namespace dae
 
 	void GameSceneState::Update()
 	{
+		if (m_LevelCompleted)
+		{
+			m_LevelCompleted = false;
+			SavePlayerState();
+			++m_CurrentLevelIndex;
+			ReloadScene();
+			return;
+		}
+
 		if (AreAllPlayersDead())
 		{
 			m_Owner.GetStateMachine().SetState(std::make_unique<EndSceneState>(m_Owner));
 		}
+	}
+
+	void GameSceneState::Notify(GameObject&, Event event)
+	{
+		if (event.id == kLevelCompletedEventId)
+		{
+			m_LevelCompleted = true;
+		}
+	}
+
+	void GameSceneState::ReloadScene()
+	{
+		OnExit();
+		ResetGameplayObservers();
+		OnEnter();
+	}
+
+	void GameSceneState::SavePlayerState()
+	{
+		const auto& players = m_Owner.GetPlayers();
+		if (players.empty() || !players[0])
+			return;
+
+		auto* capacity = players[0]->GetComponent<BombCapacityComponent>();
+		if (capacity)
+			m_CarriedBombCapacity = capacity->GetMaxBombs();
+
+		auto* range = players[0]->GetComponent<BombRangeComponent>();
+		if (range)
+			m_CarriedBombRange = range->GetRange();
+
+		auto* detonator = players[0]->GetComponent<DetonatorComponent>();
+		if (detonator)
+			m_CarriedDetonator = detonator->HasDetonator();
 	}
 
 	bool GameSceneState::AreAllPlayersDead() const
