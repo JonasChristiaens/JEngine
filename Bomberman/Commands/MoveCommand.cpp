@@ -1,9 +1,9 @@
 #include "MoveCommand.h"
-#include "GameObject.h"
+#include "Scene/GameObject.h"
 #include "Components/TransformComponent.h"
 #include "Components/CollisionComponent.h"
 #include "Components/HealthComponent.h"
-#include "GameTime.h"
+#include "Core/GameTime.h"
 #include <glm/geometric.hpp>
 
 namespace dae

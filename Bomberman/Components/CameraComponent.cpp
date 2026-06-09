@@ -1,6 +1,6 @@
 #include "CameraComponent.h"
-#include "GameObject.h"
-#include "TransformComponent.h"
+#include "Scene/GameObject.h"
+#include "Components/TransformComponent.h"
 #include "Rendering/Renderer.h"
 #include <algorithm>
 

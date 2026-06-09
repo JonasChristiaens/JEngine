@@ -10,8 +10,8 @@
         [3, 2],
         [2, 2]
       ],
-      "balloomCount": 3,
-      "onealCount": 3,
+      "balloomCount": 6,
+      "onealCount": 0,
       "dollCount": 0,
       "minvoCount": 0,
       "pickupType": "flames"

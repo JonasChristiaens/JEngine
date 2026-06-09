@@ -1,6 +1,7 @@
 #pragma once
 #include "BaseComponent.h"
 #include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
 
 namespace dae
 {
@@ -27,6 +28,7 @@ namespace dae
 		void SetChaseAxis(EnemyChaseAxis axis) { m_ChaseAxis = axis; }
 		void SetChaseAlignmentThreshold(float threshold) { m_ChaseAlignmentThreshold = threshold; }
 		void SetEnabled(bool enabled) { m_Enabled = enabled; }
+		void OnBlocked();
 
 	private:
 		TransformComponent* m_pTransform{};
@@ -41,10 +43,12 @@ namespace dae
 		EnemyChaseAxis m_ChaseAxis{ EnemyChaseAxis::None };
 		float m_ChaseAlignmentThreshold{ 24.0f };
 		bool m_Enabled{ true };
+		bool m_WasChasing{ false };
 
 		void RefreshComponents();
 		void ChooseNewDirection();
 		void PickRandomDirection();
 		float RandomRange(float min, float max) const;
+		bool IsLineOfSightClear(const glm::vec3& from, const glm::vec3& to, float tileSize, bool horizontal) const;
 	};
 }

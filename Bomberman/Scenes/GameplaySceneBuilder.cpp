@@ -35,9 +35,11 @@ namespace
 {
 	constexpr float kPlayfieldWidth{ 496.0f };
 	constexpr float kPlayfieldHeight{ 208.0f };
-	constexpr float kBalloomSpeed{ 110.0f };
-	constexpr float kOnealSpeed{ 150.0f };
-	constexpr float kPlayerMoveSpeed{ 150.0f };
+	constexpr float kBalloomSpeed{ 90.0f };
+	constexpr float kOnealSpeed{ 120.0f };
+	constexpr float kDollSpeed{ 120.0f };
+	constexpr float kMinvoSpeed{ 180.0f };
+	constexpr float kPlayerMoveSpeed{ 120.0f };
 	constexpr float kPlayerSpriteSize{ 16.0f };
 	constexpr float kPlayerSpriteScale{ 3.0f };
 	constexpr float kPlayerCollisionSize{ (kPlayerSpriteSize * kPlayerSpriteScale) - 20.0f };
@@ -70,6 +72,38 @@ namespace
 		config.deathFrames = dae::BuildHorizontalFrames(97.0f, 257.0f, 1, 16.0f, 16.0f);
 		auto blueDeath = dae::BuildHorizontalFrames(113.0f, 289.0f, 4, 16.0f, 16.0f);
 		config.deathFrames.insert(config.deathFrames.end(), blueDeath.begin(), blueDeath.end());
+		config.deathFps = 10.0f;
+		return config;
+	}();
+
+	const dae::EnemyConfig kDollConfig = []()
+	{
+		dae::EnemyConfig config{
+			0.0f, 273.0f, 16.0f, 16.0f,
+			3.0f, 0.8f,
+			0.8f, 3.2f,
+			dae::EnemyChaseAxis::X,
+			400
+		};
+		config.deathFrames = dae::BuildHorizontalFrames(97.0f, 273.0f, 1, 16.0f, 16.0f);
+		auto deathRest = dae::BuildHorizontalFrames(113.0f, 273.0f, 4, 16.0f, 16.0f);
+		config.deathFrames.insert(config.deathFrames.end(), deathRest.begin(), deathRest.end());
+		config.deathFps = 10.0f;
+		return config;
+	}();
+
+	const dae::EnemyConfig kMinvoConfig = []()
+	{
+		dae::EnemyConfig config{
+			0.0f, 289.0f, 16.0f, 16.0f,
+			3.0f, 0.8f,
+			0.5f, 2.0f,
+			dae::EnemyChaseAxis::Both,
+			800
+		};
+		config.deathFrames = dae::BuildHorizontalFrames(97.0f, 289.0f, 1, 16.0f, 16.0f);
+		auto orangeDeath = dae::BuildHorizontalFrames(113.0f, 241.0f, 4, 16.0f, 16.0f);
+		config.deathFrames.insert(config.deathFrames.end(), orangeDeath.begin(), orangeDeath.end());
 		config.deathFps = 10.0f;
 		return config;
 	}();
@@ -226,10 +260,12 @@ namespace dae
 		constexpr int levelIndex = 0;
 		worldRootPtr->AddComponent<PlayfieldComponent>(scene, kPlayfieldWidth, kPlayfieldHeight, playfieldScale, ToPlayfieldConfig(levels.at(levelIndex)));
 
-		const glm::vec3 player1Pos{ tileWorldSize * 1.5f, tileWorldSize * 2.0f, 0.0f };
-		const glm::vec3 player2Pos{ tileWorldSize * 3.5f, tileWorldSize * 2.0f, 0.0f };
+		const glm::vec3 player1Pos{ tileWorldSize * 1.5f, tileWorldSize * 2.5f, 0.0f };
+		const glm::vec3 player2Pos{ tileWorldSize * 3.5f, tileWorldSize * 2.5f, 0.0f };
 		const int balloomCount = std::max(0, levels.at(levelIndex).balloomCount);
 		const int onealCount = std::max(0, levels.at(levelIndex).onealCount);
+		const int dollCount = std::max(0, levels.at(levelIndex).dollCount);
+		const int minvoCount = std::max(0, levels.at(levelIndex).minvoCount);
 
 		GameObject* player1 = nullptr;
 		GameObject* player2 = nullptr;
@@ -248,6 +284,14 @@ namespace dae
 			{
 				SpawnEnemy(scene, *worldRootPtr, tileWorldSize, kOnealConfig, kOnealSpeed, player1, player1Pos, true);
 			}
+			for (int i = 0; i < dollCount; ++i)
+			{
+				SpawnEnemy(scene, *worldRootPtr, tileWorldSize, kDollConfig, kDollSpeed, player1, player1Pos, true);
+			}
+			for (int i = 0; i < minvoCount; ++i)
+			{
+				SpawnEnemy(scene, *worldRootPtr, tileWorldSize, kMinvoConfig, kMinvoSpeed, player1, player1Pos, true);
+			}
 			break;
 		case GameMode::Coop:
 			player1 = CreatePlayer(scene, player1Pos);
@@ -264,6 +308,14 @@ namespace dae
 			{
 				SpawnEnemy(scene, *worldRootPtr, tileWorldSize, kOnealConfig, kOnealSpeed, (i == 0) ? player1 : player2, (i == 0) ? player1Pos : player2Pos, true);
 			}
+			for (int i = 0; i < dollCount; ++i)
+			{
+				SpawnEnemy(scene, *worldRootPtr, tileWorldSize, kDollConfig, kDollSpeed, (i == 0) ? player1 : player2, (i == 0) ? player1Pos : player2Pos, true);
+			}
+			for (int i = 0; i < minvoCount; ++i)
+			{
+				SpawnEnemy(scene, *worldRootPtr, tileWorldSize, kMinvoConfig, kMinvoSpeed, (i == 0) ? player1 : player2, (i == 0) ? player1Pos : player2Pos, true);
+			}
 			break;
 		case GameMode::Versus:
 			player1 = CreatePlayer(scene, player1Pos);
@@ -278,6 +330,14 @@ namespace dae
 			for (int i = 0; i < onealCount; ++i)
 			{
 				SpawnEnemy(scene, *worldRootPtr, tileWorldSize, kOnealConfig, kOnealSpeed, player1, player2Pos, true);
+			}
+			for (int i = 0; i < dollCount; ++i)
+			{
+				SpawnEnemy(scene, *worldRootPtr, tileWorldSize, kDollConfig, kDollSpeed, player1, player2Pos, true);
+			}
+			for (int i = 0; i < minvoCount; ++i)
+			{
+				SpawnEnemy(scene, *worldRootPtr, tileWorldSize, kMinvoConfig, kMinvoSpeed, player1, player2Pos, true);
 			}
 			break;
 		}

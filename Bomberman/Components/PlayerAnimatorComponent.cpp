@@ -1,6 +1,6 @@
 #include "PlayerAnimatorComponent.h"
-#include "GameObject.h"
-#include "TransformComponent.h"
+#include "Scene/GameObject.h"
+#include "Components/TransformComponent.h"
 #include "SpriteAnimatorComponent.h"
 #include "Rendering/Renderer.h"
 #include "EventQueue/EventManager.h"
