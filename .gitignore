@@ -398,6 +398,7 @@ FodyWeavers.xsd
 *.sln.iml
 
 #cmake output
+out/
 build
 build_web
 

@@ -19,9 +19,9 @@ namespace dae
 		glm::vec2 GetSize() const;
 
 		Texture2D(const Texture2D &) = delete;
-		Texture2D(Texture2D &&) = delete;
+		Texture2D(Texture2D &&) noexcept;
 		Texture2D & operator= (const Texture2D &) = delete;
-		Texture2D & operator= (const Texture2D &&) = delete;
+		Texture2D & operator= (Texture2D &&) noexcept;
 	private:
 		SDL_Texture* m_Texture;
 	};

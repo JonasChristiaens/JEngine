@@ -5,7 +5,8 @@
 
 dae::Texture2D::~Texture2D()
 {
-	SDL_DestroyTexture(m_Texture);
+	if (m_Texture)
+		SDL_DestroyTexture(m_Texture);
 }
 
 glm::vec2 dae::Texture2D::GetSize() const
@@ -51,5 +52,23 @@ dae::Texture2D::Texture2D(const std::string &fullPath)
 dae::Texture2D::Texture2D(SDL_Texture* texture)	: m_Texture{ texture } 
 {
 	assert(m_Texture != nullptr);
+}
+
+dae::Texture2D::Texture2D(Texture2D&& other) noexcept
+	: m_Texture(other.m_Texture)
+{
+	other.m_Texture = nullptr;
+}
+
+dae::Texture2D& dae::Texture2D::operator=(Texture2D&& other) noexcept
+{
+	if (this != &other)
+	{
+		if (m_Texture)
+			SDL_DestroyTexture(m_Texture);
+		m_Texture = other.m_Texture;
+		other.m_Texture = nullptr;
+	}
+	return *this;
 }
 

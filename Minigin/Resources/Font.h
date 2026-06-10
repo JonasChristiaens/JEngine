@@ -15,9 +15,9 @@ namespace dae
 		~Font();
 
 		Font(const Font &) = delete;
-		Font(Font &&) = delete;
+		Font(Font &&) noexcept;
 		Font & operator= (const Font &) = delete;
-		Font & operator= (const Font &&) = delete;
+		Font & operator= (Font &&) noexcept;
 	private:
 		TTF_Font* m_Font;
 	};

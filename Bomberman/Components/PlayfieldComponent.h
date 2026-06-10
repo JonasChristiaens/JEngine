@@ -2,14 +2,17 @@
 #include "BaseComponent.h"
 #include "EventQueue/IObserver.h"
 #include "Level/LevelData.h"
+#include "PlayfieldGrid.h"
 #include <SDL3/SDL.h>
 #include <glm/vec2.hpp>
+#include <memory>
 #include <string>
 #include <vector>
 
 namespace dae
 {
 	class Scene;
+	class HiddenItemManager;
 
 	class PlayfieldComponent final : public BaseComponent, public IObserver
 	{
@@ -42,40 +45,24 @@ namespace dae
 		~PlayfieldComponent() override;
 
 		void Update() override;
-		const std::vector<std::vector<bool>>& GetOccupiedTiles() const { return m_OccupiedTiles; }
+		const std::vector<std::vector<bool>>& GetOccupiedTiles() const { return m_Grid.GetGrid(); }
 		void Rebuild(const PlayfieldConfig& config);
-		void RegisterEnemySpawned();
-		void ClearOccupiedTile(float localX, float localY);
+		void RegisterEnemySpawned() { m_Grid.RegisterEnemySpawned(); }
+		void ClearOccupiedTile(float localX, float localY) { m_Grid.ClearTile(localX, localY, m_PlayfieldScale * m_Config.tileSize); }
 		void Notify(GameObject& actor, Event event) override;
-		bool AreAllEnemiesDead() const { return m_AliveEnemyCount <= 0; }
+		bool AreAllEnemiesDead() const { return m_Grid.AreAllEnemiesDead(); }
 
 	private:
 		Scene* m_pScene{};
 		float m_PlayfieldWidth{};
 		float m_PlayfieldHeight{};
 		float m_PlayfieldScale{};
-		std::vector<std::vector<bool>> m_OccupiedTiles{};
+		PlayfieldGrid m_Grid{};
 		std::vector<GameObject*> m_SpawnedBlocks{};
 		PlayfieldConfig m_Config{};
-		GameObject* m_pPowerupBrick{ nullptr };
-		GameObject* m_pPowerupObject{ nullptr };
-		glm::vec2 m_PowerupWorldPos{};
-		bool m_PowerupActivated{ false };
-		int m_VulnerabilityDelay{ 0 };
-
-		GameObject* m_pDoorBrick{ nullptr };
-		GameObject* m_pDoorObject{ nullptr };
-		glm::vec2 m_DoorWorldPos{};
-		bool m_DoorActivated{ false };
-
-		int m_AliveEnemyCount{ 0 };
+		std::unique_ptr<HiddenItemManager> m_pItems{};
 
 		void BuildPlayfield();
 		void ClearSpawnedObjects();
-		bool IsReservedTile(int column, int row) const;
-		void CreateHiddenPowerup();
-		void ActivatePowerup();
-		void CreateDoor();
-		void ActivateDoor();
 	};
 }
