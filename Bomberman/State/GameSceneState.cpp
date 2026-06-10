@@ -110,11 +110,30 @@ namespace dae
 
 		if (m_AlivePlayerCount <= 0)
 		{
+			const auto& players = m_Owner.GetPlayers();
+			int score1 = 0;
+			int score2 = 0;
+			bool hasPlayer2 = false;
+
+			if (!players.empty() && players[0])
+			{
+				auto* sc = players[0]->GetComponent<ScoreComponent>();
+				if (sc)
+					score1 = sc->GetScore();
+			}
+			if (players.size() > 1 && players[1])
+			{
+				hasPlayer2 = true;
+				auto* sc = players[1]->GetComponent<ScoreComponent>();
+				if (sc)
+					score2 = sc->GetScore();
+			}
+
 			m_Owner.GetStateMachine().SetState(
 				std::make_unique<TransitionSceneState>(
 					m_Owner,
 					"GAME OVER",
-					std::make_unique<EndSceneState>(m_Owner)
+					std::make_unique<EndSceneState>(m_Owner, score1, score2, hasPlayer2)
 				)
 			);
 			return;

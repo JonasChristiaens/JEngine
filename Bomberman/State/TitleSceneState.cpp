@@ -13,17 +13,20 @@
 #include "State/TransitionSceneState.h"
 #include "Commands/Command.h"
 #include "GameMode.h"
+#include "HighScoreManager.h"
 #include <array>
+#include <iomanip>
+#include <sstream>
 #include <utility>
 
 namespace
 {
 	constexpr float kTitleSpriteWidth{ 256.0f };
 	constexpr float kTitleSpriteHeight{ 240.0f };
-	constexpr float kStartArrowX{ 65.0f };
-	constexpr float kStartArrowY{ 153.0f };
-	constexpr float kModeArrowX{ 129.0f };
-	constexpr float kModeArrowY{ 153.0f };
+	constexpr float kStartArrowX{ 63.0f };
+	constexpr float kStartArrowY{ 152.0f };
+	constexpr float kModeArrowX{ 127.0f };
+	constexpr float kModeArrowY{ 152.0f };
 	constexpr float kModeLabelX{ 177.0f };
 	constexpr float kModeLabelY{ 153.0f };
 	constexpr float kScoreX{ 113.0f };
@@ -189,7 +192,11 @@ namespace dae
 		scene->Add(std::move(scoreRoot));
 
 		UpdateModeLabel();
-		CreateTextSprites(*scene, *m_ScoreRoot, "00", (kScoreWidth - (2.0f * kGlyphWidth)) * m_ScaleX, 0.0f, kMenuLayer);
+
+		const int topScore = HighScoreManager::GetEntries()[0].score;
+		std::ostringstream scoreStream;
+		scoreStream << std::setfill('0') << std::setw(5) << topScore;
+		CreateTextSprites(*scene, *m_ScoreRoot, scoreStream.str(), (kScoreWidth - (5.0f * kGlyphWidth)) * m_ScaleX, 0.0f, kMenuLayer);
 	}
 
 	void TitleSceneState::UpdateMenuSprites()

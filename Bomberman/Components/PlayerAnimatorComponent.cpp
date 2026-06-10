@@ -2,6 +2,7 @@
 #include "Scene/GameObject.h"
 #include "Components/TransformComponent.h"
 #include "Components/HealthComponent.h"
+#include "Components/DeathAnimatorComponent.h"
 #include "SpriteAnimatorComponent.h"
 #include "Rendering/Renderer.h"
 #include "EventQueue/EventManager.h"
@@ -34,6 +35,10 @@ void dae::PlayerAnimatorComponent::Update()
 
 	auto* health = GetOwner()->GetComponent<HealthComponent>();
 	if (health && health->IsDead())
+		return;
+
+	auto* deathAnim = GetOwner()->GetComponent<DeathAnimatorComponent>();
+	if (deathAnim && deathAnim->IsPlaying())
 		return;
 
 	glm::vec3 currentPos = m_pTransform->GetLocalPosition();

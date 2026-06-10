@@ -28,7 +28,7 @@ namespace
 	constexpr SDL_FRect kDetonatorSourceRect{ 64.0f, 0.0f, 16.0f, 16.0f };
 	constexpr SDL_FRect kDoorSourceRect{ 176.0f, 48.0f, 16.0f, 16.0f };
 	constexpr const char* kDoorTexture = "BombermanSprites_General.png";
-	constexpr int kPowerupScoreValue = 0;
+	constexpr int kPowerupScoreValue = 1000;
 	constexpr int kHiddenRenderLayer = 1;
 	constexpr int kActiveRenderLayer = 3;
 	constexpr int kVulnerabilityFrameDelay = 30;
@@ -378,6 +378,14 @@ namespace dae
 	{
 		if (event.id == kEntityDiedEventId)
 		{
+			auto* collider = actor.GetComponent<CollisionComponent>();
+			auto* tx = actor.GetComponent<TransformComponent>();
+			if (collider && !collider->IsTrigger() && tx)
+			{
+				const auto& localPos = tx->GetLocalPosition();
+				ClearOccupiedTile(localPos.x, localPos.y);
+			}
+
 			if (!m_PowerupActivated && &actor == m_pPowerupBrick)
 			{
 				ActivatePowerup();

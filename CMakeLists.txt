@@ -253,6 +253,7 @@ add_executable(${GAME_TARGET} ${GAME_TARGET_PARAM}
   Bomberman/State/TransitionSceneState.cpp
   Bomberman/Scenes/GameplaySceneBuilder.cpp
   Bomberman/Level/LevelDataLoader.cpp
+  Bomberman/HighScoreManager.cpp
 )
 
 target_compile_features(${GAME_TARGET} PUBLIC cxx_std_20)
