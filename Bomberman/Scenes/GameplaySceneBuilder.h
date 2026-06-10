@@ -17,6 +17,8 @@ namespace dae
 		int bombCapacity{ 1 };
 		int bombRange{ 1 };
 		bool hasDetonator{ false };
+		int health{ 4 };
+		int score{ 0 };
 	};
 
 	GameplaySceneData BuildGameplayScene(Scene& scene, GameMode gameMode, int levelIndex = 0, const PlayerCarryOver& carryOver = {});

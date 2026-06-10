@@ -22,9 +22,14 @@ namespace dae
 		int m_CarriedBombCapacity{ 1 };
 		int m_CarriedBombRange{ 1 };
 		bool m_CarriedDetonator{ false };
+		int m_CarriedHealth{ 4 };
+		int m_CarriedScore{ 0 };
 		int m_AlivePlayerCount{ 0 };
+		bool m_PlayerSurvivedDamage{ false };
+		bool m_RespawnAfterDeathAnim{ false };
+		GameObject* m_pRespawnPlayer{ nullptr };
 
 		void SavePlayerState();
-		void ReloadScene();
+		void HandlePlayerSurvivedDamage(GameObject& player);
 	};
 }

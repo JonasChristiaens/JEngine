@@ -1,6 +1,7 @@
 #include "GameSceneState.h"
 #include "Components/SceneStateMachineComponent.h"
 #include "Components/HealthComponent.h"
+#include "Components/ScoreComponent.h"
 #include "Components/DeathAnimatorComponent.h"
 #include "Components/BombCapacityComponent.h"
 #include "Components/BombRangeComponent.h"
@@ -32,6 +33,8 @@ namespace dae
 		, m_CarriedBombCapacity(carryOver.bombCapacity)
 		, m_CarriedBombRange(carryOver.bombRange)
 		, m_CarriedDetonator(carryOver.hasDetonator)
+		, m_CarriedHealth(carryOver.health)
+		, m_CarriedScore(carryOver.score)
 	{
 		SetGameMode(gameMode);
 	}
@@ -44,7 +47,7 @@ namespace dae
 		m_Owner.SetActiveScene(scene);
 		m_Owner.ClearPlayers();
 
-		const auto data = BuildGameplayScene(scene, GetGameMode(), m_CurrentLevelIndex, { m_CarriedBombCapacity, m_CarriedBombRange, m_CarriedDetonator });
+		const auto data = BuildGameplayScene(scene, GetGameMode(), m_CurrentLevelIndex, { m_CarriedBombCapacity, m_CarriedBombRange, m_CarriedDetonator, m_CarriedHealth, m_CarriedScore });
 		m_Owner.RegisterPlayer(data.player1);
 		m_Owner.RegisterPlayer(data.player2);
 		m_AlivePlayerCount = (data.player1 ? 1 : 0) + (data.player2 ? 1 : 0);
@@ -74,7 +77,7 @@ namespace dae
 			SavePlayerState();
 			++m_CurrentLevelIndex;
 
-			const PlayerCarryOver carryOver{ m_CarriedBombCapacity, m_CarriedBombRange, m_CarriedDetonator };
+			const PlayerCarryOver carryOver{ m_CarriedBombCapacity, m_CarriedBombRange, m_CarriedDetonator, m_CarriedHealth, m_CarriedScore };
 			const int level = m_CurrentLevelIndex;
 			const GameMode mode = GetGameMode();
 
@@ -83,6 +86,23 @@ namespace dae
 					m_Owner,
 					"STAGE " + std::to_string(level + 1),
 					std::make_unique<GameSceneState>(m_Owner, mode, level, carryOver)
+				)
+			);
+			return;
+		}
+
+		if (m_PlayerSurvivedDamage)
+		{
+			m_PlayerSurvivedDamage = false;
+
+			const PlayerCarryOver carryOver{ m_CarriedBombCapacity, m_CarriedBombRange, m_CarriedDetonator, m_CarriedHealth, m_CarriedScore };
+			const GameMode mode = GetGameMode();
+
+			m_Owner.GetStateMachine().SetState(
+				std::make_unique<TransitionSceneState>(
+					m_Owner,
+					"STAGE " + std::to_string(m_CurrentLevelIndex + 1),
+					std::make_unique<GameSceneState>(m_Owner, mode, m_CurrentLevelIndex, carryOver)
 				)
 			);
 			return;
@@ -109,6 +129,14 @@ namespace dae
 		}
 		else if (event.id == make_sdbm_hash("EntityDied"))
 		{
+			if (m_RespawnAfterDeathAnim && m_pRespawnPlayer == &actor)
+			{
+				m_RespawnAfterDeathAnim = false;
+				m_pRespawnPlayer = nullptr;
+				m_PlayerSurvivedDamage = true;
+				return;
+			}
+
 			const auto& players = m_Owner.GetPlayers();
 			for (const auto* player : players)
 			{
@@ -119,13 +147,10 @@ namespace dae
 				}
 			}
 		}
-	}
-
-	void GameSceneState::ReloadScene()
-	{
-		OnExit();
-		ResetGameplayObservers();
-		OnEnter();
+		else if (event.id == make_sdbm_hash("TookDamageEvent"))
+		{
+			HandlePlayerSurvivedDamage(actor);
+		}
 	}
 
 	void GameSceneState::SavePlayerState()
@@ -145,5 +170,44 @@ namespace dae
 		auto* detonator = players[0]->GetComponent<DetonatorComponent>();
 		if (detonator)
 			m_CarriedDetonator = detonator->HasDetonator();
+
+		auto* health = players[0]->GetComponent<HealthComponent>();
+		if (health)
+			m_CarriedHealth = health->GetHealth();
+
+		auto* score = players[0]->GetComponent<ScoreComponent>();
+		if (score)
+			m_CarriedScore = score->GetScore();
+	}
+
+	void GameSceneState::HandlePlayerSurvivedDamage(GameObject& actor)
+	{
+		const auto& players = m_Owner.GetPlayers();
+		bool isRegisteredPlayer = false;
+		for (const auto* player : players)
+		{
+			if (player == &actor)
+			{
+				isRegisteredPlayer = true;
+				break;
+			}
+		}
+
+		if (!isRegisteredPlayer)
+			return;
+
+		auto* health = actor.GetComponent<HealthComponent>();
+		if (!health || health->IsDead())
+			return;
+
+		SavePlayerState();
+
+		auto* deathAnim = actor.GetComponent<DeathAnimatorComponent>();
+		if (deathAnim)
+		{
+			deathAnim->Play();
+			m_RespawnAfterDeathAnim = true;
+			m_pRespawnPlayer = &actor;
+		}
 	}
 }

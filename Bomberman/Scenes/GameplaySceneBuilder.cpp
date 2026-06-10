@@ -140,8 +140,8 @@ namespace
 		render->SetRenderLayer(4);
 		go->AddComponent<dae::SpriteAnimatorComponent>();
 		go->AddComponent<dae::PlayerAnimatorComponent>();
-		go->AddComponent<dae::HealthComponent>(4);
-		go->AddComponent<dae::ScoreComponent>(0);
+		go->AddComponent<dae::HealthComponent>(carryOver.health);
+		go->AddComponent<dae::ScoreComponent>(carryOver.score);
 		go->AddComponent<dae::BombRangeComponent>(4);
 		go->AddComponent<dae::BombCapacityComponent>(carryOver.bombCapacity);
 		auto* detonator = go->AddComponent<dae::DetonatorComponent>();
