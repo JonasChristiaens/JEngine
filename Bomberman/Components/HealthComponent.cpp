@@ -3,6 +3,9 @@
 #include "Scene/GameObject.h"
 #include "Components/DeathAnimatorComponent.h"
 #include "Components/BombRangeComponent.h"
+#include "Components/PlayfieldComponent.h"
+#include "Components/TransformComponent.h"
+#include "Core/GameTime.h"
 
 dae::HealthComponent::HealthComponent(GameObject* pOwner, int health)
 	: BaseComponent(pOwner)
@@ -19,27 +22,56 @@ dae::HealthComponent::~HealthComponent()
 	}
 }
 
+void dae::HealthComponent::Update()
+{
+	if (m_InvulnerabilityTimer > 0.0f)
+	{
+		m_InvulnerabilityTimer -= GameTime::GetInstance().GetDeltaTime();
+		if (m_InvulnerabilityTimer < 0.0f)
+			m_InvulnerabilityTimer = 0.0f;
+	}
+}
+
 void dae::HealthComponent::ChangeCurrentHealth(int amount)
 {
 	if (m_IsDead)
 		return;
 
+	if (amount < 0 && m_InvulnerabilityTimer > 0.0f)
+		return;
+
 	m_CurrentHealth += amount;
+
+	if (amount < 0)
+		m_InvulnerabilityTimer = 1.0f;
+
 	NotifyObservers(Event(make_sdbm_hash("HealthChanged")), GetOwner());
 
-		if (m_CurrentHealth <= 0)
+	if (m_CurrentHealth <= 0)
+	{
+		m_IsDead = true;
+
+		GameObject* pParent = GetOwner()->GetParent();
+		if (pParent)
 		{
-			m_IsDead = true;
-
-			if (GetOwner()->HasComponent<BombRangeComponent>())
+			auto* playfield = pParent->GetComponent<PlayfieldComponent>();
+			auto* tx = GetOwner()->GetComponent<TransformComponent>();
+			if (playfield && tx)
 			{
-				Event playAudioEvent(make_sdbm_hash("PlayAudioEvent"));
-				playAudioEvent.nbArgs = 1;
-				playAudioEvent.args[0].p = const_cast<char*>("bomberman_killed.wav");
-				EventManager::GetInstance().BroadcastEvent(playAudioEvent, GetOwner());
+				const auto& localPos = tx->GetLocalPosition();
+				playfield->ClearOccupiedTile(localPos.x, localPos.y);
 			}
+		}
 
-			auto* deathAnim = GetOwner()->GetComponent<DeathAnimatorComponent>();
+		if (GetOwner()->HasComponent<BombRangeComponent>())
+		{
+			Event playAudioEvent(make_sdbm_hash("PlayAudioEvent"));
+			playAudioEvent.nbArgs = 1;
+			playAudioEvent.args[0].p = const_cast<char*>("bomberman_killed.wav");
+			EventManager::GetInstance().BroadcastEvent(playAudioEvent, GetOwner());
+		}
+
+		auto* deathAnim = GetOwner()->GetComponent<DeathAnimatorComponent>();
 		if (deathAnim)
 		{
 			deathAnim->Play();

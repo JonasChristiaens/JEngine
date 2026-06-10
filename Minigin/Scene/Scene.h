@@ -27,7 +27,7 @@ namespace dae
 		friend class SceneManager;
 		explicit Scene() = default;
 
-		std::vector < std::unique_ptr<GameObject>> m_Objects{};
+		std::vector<std::unique_ptr<GameObject>> m_Objects{};
 
 		size_t m_ObjectVersion{ 0 };
 		mutable size_t m_LastSortedVersion{ 0 };

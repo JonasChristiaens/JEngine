@@ -38,7 +38,7 @@ namespace dae
 	using EventId = unsigned int;
 
 	struct Event {
-		const EventId id;
+		EventId id;
 
 		static const uint8_t MAX_ARGS = { 8 };
 		uint8_t nbArgs{};

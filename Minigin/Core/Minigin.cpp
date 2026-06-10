@@ -4,7 +4,7 @@
 #include <stdexcept>
 #include <thread>
 
-#if WIN32
+#ifdef WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #endif
@@ -29,7 +29,7 @@ SDL_Window* g_window{};
 
 void LogSDLVersion(const std::string& message, int major, int minor, int patch)
 {
-#if WIN32
+#ifdef WIN32
 	std::stringstream ss;
 	ss << message << major << "." << minor << "." << patch << "\n";
 	OutputDebugString(ss.str().c_str());
@@ -67,7 +67,7 @@ dae::Minigin::Minigin(const std::filesystem::path& dataPath)
 	}
 
 #ifndef __EMSCRIPTEN__
-#if WIN32 && _DEBUG
+#if defined(WIN32) && defined(_DEBUG)
 	SDL_SetHint(SDL_HINT_AUDIO_DRIVER, "directsound");
 #endif
 	if (!SDL_InitSubSystem(SDL_INIT_AUDIO))

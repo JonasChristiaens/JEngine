@@ -35,6 +35,7 @@ namespace
 	constexpr dae::EventId kLevelCompletedEventId = dae::make_sdbm_hash("LevelCompleted");
 	constexpr dae::EventId kEntityDiedEventId = dae::make_sdbm_hash("EntityDied");
 	constexpr dae::EventId kTookDamageEventId = dae::make_sdbm_hash("TookDamageEvent");
+	constexpr dae::EventId kChangeHealthEventId = dae::make_sdbm_hash("ChangeHealthEvent");
 }
 
 namespace dae
@@ -361,6 +362,18 @@ namespace dae
 		++m_AliveEnemyCount;
 	}
 
+	void PlayfieldComponent::ClearOccupiedTile(float localX, float localY)
+	{
+		const float tileWorldSize = m_Config.tileSize * m_PlayfieldScale;
+		const int col = static_cast<int>(localX / tileWorldSize);
+		const int row = static_cast<int>(localY / tileWorldSize);
+		if (row >= 0 && static_cast<size_t>(row) < m_OccupiedTiles.size() &&
+			col >= 0 && static_cast<size_t>(col) < m_OccupiedTiles[row].size())
+		{
+			m_OccupiedTiles[row][col] = false;
+		}
+	}
+
 	void PlayfieldComponent::Notify(GameObject& actor, Event event)
 	{
 		if (event.id == kEntityDiedEventId)
@@ -384,21 +397,15 @@ namespace dae
 				--m_AliveEnemyCount;
 		}
 
-		if (event.id == kEntityDiedEventId || event.id == kTookDamageEventId)
+		if (event.id == kChangeHealthEventId || event.id == kEntityDiedEventId || event.id == kTookDamageEventId)
 		{
 			auto* collider = actor.GetComponent<CollisionComponent>();
 			auto* health = actor.GetComponent<HealthComponent>();
 			auto* tx = actor.GetComponent<TransformComponent>();
 			if (collider && !collider->IsTrigger() && health && health->GetHealth() <= 0 && tx)
 			{
-				const float tileWorldSize = m_Config.tileSize * m_PlayfieldScale;
-				const int col = static_cast<int>(tx->GetLocalPosition().x / tileWorldSize);
-				const int row = static_cast<int>(tx->GetLocalPosition().y / tileWorldSize);
-				if (row >= 0 && static_cast<size_t>(row) < m_OccupiedTiles.size() &&
-					col >= 0 && static_cast<size_t>(col) < m_OccupiedTiles[row].size())
-				{
-					m_OccupiedTiles[row][col] = false;
-				}
+				const auto& localPos = tx->GetLocalPosition();
+				ClearOccupiedTile(localPos.x, localPos.y);
 			}
 		}
 	}

@@ -8,6 +8,8 @@ namespace dae
 	class ISubject
 	{
 	public:
+		virtual ~ISubject() = default;
+
 		void AddObserver(IObserver& observer) { m_Observers.emplace_back(&observer); }
 		void RemoveObserver(IObserver& observer) {
 			m_Observers.erase(std::remove(m_Observers.begin(), m_Observers.end(), &observer), m_Observers.end());
@@ -16,7 +18,10 @@ namespace dae
 	protected:
 		void NotifyObservers(Event e, GameObject* pSubjectActor) {
 			for (auto observer : m_Observers)
-				observer->Notify(*pSubjectActor, e);
+			{
+				if (pSubjectActor)
+					observer->Notify(*pSubjectActor, e);
+			}
 		}
 
 	private:

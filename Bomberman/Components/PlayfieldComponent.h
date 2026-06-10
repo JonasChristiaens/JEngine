@@ -45,6 +45,7 @@ namespace dae
 		const std::vector<std::vector<bool>>& GetOccupiedTiles() const { return m_OccupiedTiles; }
 		void Rebuild(const PlayfieldConfig& config);
 		void RegisterEnemySpawned();
+		void ClearOccupiedTile(float localX, float localY);
 		void Notify(GameObject& actor, Event event) override;
 		bool AreAllEnemiesDead() const { return m_AliveEnemyCount <= 0; }
 

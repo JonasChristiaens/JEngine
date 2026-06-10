@@ -3,7 +3,9 @@
 #include "Components/TransformComponent.h"
 #include "Components/CollisionComponent.h"
 #include "Components/PlayfieldComponent.h"
+#include "Components/BombRangeComponent.h"
 #include "Core/GameTime.h"
+#include "EventQueue/EventManager.h"
 #include <glm/glm.hpp>
 #include <random>
 #include <array>
@@ -47,15 +49,38 @@ namespace dae
 			auto* targetTransform = m_pChaseTarget->GetComponent<TransformComponent>();
 			if (targetTransform)
 			{
-				const glm::vec3 targetPos = targetTransform->GetWorldPosition();
-				const glm::vec3 myPos = m_pTransform->GetWorldPosition();
+				const glm::vec3 targetLocal = targetTransform->GetLocalPosition();
+				const glm::vec3 myLocal = m_pTransform->GetLocalPosition();
 				const float tileSize = m_ChaseAlignmentThreshold;
-				const float innerHalf = tileSize * 0.45f;
 
-				const int myCellCol = static_cast<int>(myPos.x / tileSize);
-				const int myCellRow = static_cast<int>(myPos.y / tileSize);
-				const float myCellCenterX = (static_cast<float>(myCellCol) + 0.5f) * tileSize;
-				const float myCellCenterY = (static_cast<float>(myCellRow) + 0.5f) * tileSize;
+				const int myCellCol = static_cast<int>(myLocal.x / tileSize);
+				const int myCellRow = static_cast<int>(myLocal.y / tileSize);
+				const int targetCellCol = static_cast<int>(targetLocal.x / tileSize);
+				const int targetCellRow = static_cast<int>(targetLocal.y / tileSize);
+
+				const float cellLeft = static_cast<float>(myCellCol) * tileSize;
+				const float cellTop = static_cast<float>(myCellRow) * tileSize;
+				const float cellRight = cellLeft + tileSize;
+				const float cellBottom = cellTop + tileSize;
+				const glm::vec3 myCellCenter(
+					cellLeft + tileSize * 0.5f,
+					cellTop + tileSize * 0.5f,
+					0.0f
+				);
+
+				float myColliderLeft = myLocal.x;
+				float myColliderRight = myLocal.x;
+				float myColliderTop = myLocal.y;
+				float myColliderBottom = myLocal.y;
+				if (m_pCollision)
+				{
+					myColliderLeft = myLocal.x + m_pCollision->GetOffset().x;
+					myColliderRight = myColliderLeft + m_pCollision->GetWidth();
+					myColliderTop = myLocal.y + m_pCollision->GetOffset().y;
+					myColliderBottom = myColliderTop + m_pCollision->GetHeight();
+				}
+				const bool enemyInCell = myColliderLeft >= cellLeft && myColliderRight <= cellRight
+					&& myColliderTop >= cellTop && myColliderBottom <= cellBottom;
 
 				glm::vec2 chaseDir{};
 
@@ -65,54 +90,46 @@ namespace dae
 				bool canChaseY = false;
 				bool canChaseX = false;
 
-				float colliderLeft = myPos.x;
-				float colliderRight = myPos.x;
-				float colliderTop = myPos.y;
-				float colliderBottom = myPos.y;
-				if (m_pCollision)
-				{
-					colliderLeft = myPos.x + m_pCollision->GetOffset().x;
-					colliderRight = colliderLeft + m_pCollision->GetWidth();
-					colliderTop = myPos.y + m_pCollision->GetOffset().y;
-					colliderBottom = colliderTop + m_pCollision->GetHeight();
-				}
-
 				if (checkY)
 				{
-					const float columnLeft = myCellCenterX - innerHalf;
-					const float columnRight = myCellCenterX + innerHalf;
-					const bool enemyInColumn = colliderLeft >= columnLeft && colliderRight <= columnRight;
-					const bool targetInColumn = std::abs(targetPos.x - myCellCenterX) <= innerHalf;
-
-					if (enemyInColumn && targetInColumn && IsLineOfSightClear(myPos, targetPos, tileSize, false))
-						canChaseY = true;
+					const bool sameCol = targetCellCol == myCellCol;
+					const bool losClear = IsLineOfSightClear(myCellCenter, targetLocal, tileSize, false);
+					if (sameCol && losClear)
+					{
+						if (enemyInCell)
+							canChaseY = true;
+						else if (m_WasChasing)
+							canChaseY = true;
+					}
 				}
 				if (checkX)
 				{
-					const float rowTop = myCellCenterY - innerHalf;
-					const float rowBottom = myCellCenterY + innerHalf;
-					const bool enemyInRow = colliderTop >= rowTop && colliderBottom <= rowBottom;
-					const bool targetInRow = std::abs(targetPos.y - myCellCenterY) <= innerHalf;
-
-					if (enemyInRow && targetInRow && IsLineOfSightClear(myPos, targetPos, tileSize, true))
-						canChaseX = true;
+					const bool sameRow = targetCellRow == myCellRow;
+					const bool losClear = IsLineOfSightClear(myCellCenter, targetLocal, tileSize, true);
+					if (sameRow && losClear)
+					{
+						if (enemyInCell)
+							canChaseX = true;
+						else if (m_WasChasing)
+							canChaseX = true;
+					}
 				}
 
 				if (canChaseX && canChaseY)
 				{
 					std::uniform_int_distribution<int> axisDist(0, 1);
 					if (axisDist(GetRng()) == 0)
-						chaseDir = { 0.0f, (targetPos.y > myPos.y) ? 1.0f : -1.0f };
+						chaseDir = { 0.0f, (targetLocal.y > myLocal.y) ? 1.0f : -1.0f };
 					else
-						chaseDir = { (targetPos.x > myPos.x) ? 1.0f : -1.0f, 0.0f };
+						chaseDir = { (targetLocal.x > myLocal.x) ? 1.0f : -1.0f, 0.0f };
 				}
 				else if (canChaseY)
 				{
-					chaseDir = { 0.0f, (targetPos.y > myPos.y) ? 1.0f : -1.0f };
+					chaseDir = { 0.0f, (targetLocal.y > myLocal.y) ? 1.0f : -1.0f };
 				}
 				else if (canChaseX)
 				{
-					chaseDir = { (targetPos.x > myPos.x) ? 1.0f : -1.0f, 0.0f };
+					chaseDir = { (targetLocal.x > myLocal.x) ? 1.0f : -1.0f, 0.0f };
 				}
 
 				const bool isChasing = chaseDir.x != 0.0f || chaseDir.y != 0.0f;
@@ -137,7 +154,7 @@ namespace dae
 					}
 					else
 					{
-						PickRandomDirection();
+						OnBlocked(nextWorld);
 						m_TimeUntilDirectionChange = RandomRange(m_MinDirectionTime, m_MaxDirectionTime);
 						m_WasChasing = false;
 					}
@@ -160,7 +177,7 @@ namespace dae
 		}
 		else
 		{
-			OnBlocked();
+			OnBlocked(nextWorld);
 		}
 
 		m_TimeUntilDirectionChange -= deltaTime;
@@ -184,8 +201,43 @@ namespace dae
 		m_TimeUntilDirectionChange = RandomRange(m_MinDirectionTime, m_MaxDirectionTime);
 	}
 
-	void EnemyMovementComponent::OnBlocked()
+	void EnemyMovementComponent::OnBlocked(const glm::vec3& attemptedWorldPos)
 	{
+		if (m_pCollision)
+		{
+			for (auto* other : CollisionComponent::GetAllColliders())
+			{
+				if (other == m_pCollision)
+					continue;
+				if (other->IsTrigger())
+					continue;
+				auto* otherOwner = other->GetOwner();
+				if (!otherOwner || otherOwner->IsMarkedForDeletion())
+					continue;
+				if (!otherOwner->HasComponent<BombRangeComponent>())
+					continue;
+
+				auto* otherTx = otherOwner->GetComponent<TransformComponent>();
+				if (!otherTx)
+					continue;
+
+				if (CollisionComponent::RectOverlaps(
+					attemptedWorldPos.x + m_pCollision->GetOffset().x,
+					attemptedWorldPos.y + m_pCollision->GetOffset().y,
+					m_pCollision->GetWidth(), m_pCollision->GetHeight(),
+					otherTx->GetWorldPosition().x + other->GetOffset().x,
+					otherTx->GetWorldPosition().y + other->GetOffset().y,
+					other->GetWidth(), other->GetHeight()))
+				{
+					Event damageEvent(make_sdbm_hash("ChangeHealthEvent"));
+					damageEvent.nbArgs = 1;
+					damageEvent.args[0].i = -1;
+					EventManager::GetInstance().BroadcastEvent(damageEvent, otherOwner);
+					break;
+				}
+			}
+		}
+
 		PickRandomDirection();
 	}
 
@@ -198,8 +250,29 @@ namespace dae
 			glm::vec2{ 0.0f, -1.0f }
 		};
 
+		const glm::vec2 oldDir = m_Direction;
 		std::uniform_int_distribution<int> directionDist(0, static_cast<int>(directions.size()) - 1);
 		m_Direction = directions[directionDist(GetRng())];
+
+		const bool axisChanged = (oldDir.x != 0.0f) != (m_Direction.x != 0.0f);
+		if (axisChanged && m_pTransform && m_ChaseAlignmentThreshold > 0.0f)
+		{
+			const float tileSize = m_ChaseAlignmentThreshold;
+			glm::vec3 pos = m_pTransform->GetLocalPosition();
+
+			if (m_Direction.x != 0.0f)
+			{
+				const int row = static_cast<int>(pos.y / tileSize);
+				pos.y = (static_cast<float>(row) + 0.5f) * tileSize;
+			}
+			else
+			{
+				const int col = static_cast<int>(pos.x / tileSize);
+				pos.x = (static_cast<float>(col) + 0.5f) * tileSize;
+			}
+
+			m_pTransform->SetLocalPosition(pos);
+		}
 	}
 
 	float EnemyMovementComponent::RandomRange(float min, float max) const

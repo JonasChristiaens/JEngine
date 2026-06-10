@@ -1,6 +1,6 @@
 #include "StateMachineComponent.h"
 
- dae::StateMachineComponent::StateMachineComponent(GameObject* pOwner)
+dae::StateMachineComponent::StateMachineComponent(GameObject* pOwner)
 	: BaseComponent(pOwner)
 {
 }

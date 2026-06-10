@@ -10,6 +10,7 @@
 #include "Input/ControllerButtons.h"
 #include "Rendering/Renderer.h"
 #include "State/GameSceneState.h"
+#include "State/TransitionSceneState.h"
 #include "Commands/Command.h"
 #include "GameMode.h"
 #include <array>
@@ -29,9 +30,9 @@ namespace
 	constexpr float kScoreY{ 169.0f };
 	constexpr float kGlyphWidth{ 8.0f };
 	constexpr float kGlyphHeight{ 8.0f };
-	constexpr float kGlyphRowY{ 249.0f };
-	constexpr float kGlyphRow2Y{ 257.0f };
-	constexpr float kArrowGlyphX{ 81.0f };
+	constexpr float kGlyphRowY{ 264.0f };
+	constexpr float kGlyphRow2Y{ 272.0f };
+	constexpr float kArrowGlyphX{ 80.0f };
 	constexpr float kScoreWidth{ 72.0f };
 	constexpr int kMenuLayer{ 2 };
 	constexpr int kBackgroundLayer{ 0 };
@@ -310,7 +311,13 @@ namespace dae
 	{
 		if (m_SelectedIndex == 0)
 		{
-			m_Owner.GetStateMachine().SetState(std::make_unique<GameSceneState>(m_Owner, GetGameMode()));
+			m_Owner.GetStateMachine().SetState(
+				std::make_unique<TransitionSceneState>(
+					m_Owner,
+					"STAGE 1",
+					std::make_unique<GameSceneState>(m_Owner, GetGameMode())
+				)
+			);
 		}
 		else if (m_SelectedIndex == 1)
 		{

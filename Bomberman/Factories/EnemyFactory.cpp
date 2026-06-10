@@ -67,42 +67,46 @@ namespace
 		float tileWorldSize, float colliderSize,
 		const std::vector<glm::vec3>& reservedWorldPositions)
 	{
-		std::uniform_int_distribution<int> columnDist(0, gridColumns - 1);
-		std::uniform_int_distribution<int> rowDist(0, gridRows - 1);
-		std::uniform_real_distribution<float> fallbackOffset(0.0f, tileWorldSize * 0.5f);
-
 		std::vector<std::pair<int, int>> reservedTiles{};
 		reservedTiles.reserve(reservedWorldPositions.size());
 		for (const auto& pos : reservedWorldPositions)
 			reservedTiles.push_back(WorldToTile(pos, tileWorldSize));
 
-		constexpr int maxAttempts{ 128 };
-		for (int attempt = 0; attempt < maxAttempts; ++attempt)
+		auto isReserved = [&](int column, int row)
 		{
-			const int column = columnDist(GetRng());
-			const int row = rowDist(GetRng());
-
-			bool isReserved = false;
 			for (const auto& [reservedCol, reservedRow] : reservedTiles)
 			{
 				if (column == reservedCol && row == reservedRow)
-				{
-					isReserved = true;
-					break;
-				}
+					return true;
 			}
-			if (isReserved)
-				continue;
+			return false;
+		};
 
-			const float spawnX = (static_cast<float>(column) + 0.5f) * tileWorldSize;
-			const float spawnY = (static_cast<float>(row) + 0.5f) * tileWorldSize;
-			const glm::vec3 spawnPos{ spawnX, spawnY, 0.0f };
+		std::vector<std::pair<int, int>> validCells{};
+		for (int row = 0; row < gridRows; ++row)
+		{
+			for (int column = 0; column < gridColumns; ++column)
+			{
+				if (isReserved(column, row))
+					continue;
 
-			if (!IsBlockedAtPosition(parent, spawnPos, colliderSize))
-				return spawnPos;
+				const float spawnX = (static_cast<float>(column) + 0.5f) * tileWorldSize;
+				const float spawnY = (static_cast<float>(row) + 0.5f) * tileWorldSize;
+				const glm::vec3 spawnPos{ spawnX, spawnY, 0.0f };
+
+				if (!IsBlockedAtPosition(parent, spawnPos, colliderSize))
+					validCells.emplace_back(column, row);
+			}
 		}
 
-		return { tileWorldSize + fallbackOffset(GetRng()), tileWorldSize + fallbackOffset(GetRng()), 0.0f };
+		if (!validCells.empty())
+		{
+			std::uniform_int_distribution<size_t> dist(0, validCells.size() - 1);
+			const auto [col, row] = validCells[dist(GetRng())];
+			return { (static_cast<float>(col) + 0.5f) * tileWorldSize, (static_cast<float>(row) + 0.5f) * tileWorldSize, 0.0f };
+		}
+
+		return { tileWorldSize * 1.5f, tileWorldSize * 1.5f, 0.0f };
 	}
 }
 
@@ -130,11 +134,11 @@ namespace dae::EnemyFactory
 		if (useAiMovement)
 		{
 			auto* movement = enemy->AddComponent<EnemyMovementComponent>(moveSpeed, config.minDirectionTime, config.maxDirectionTime);
+			movement->SetChaseAlignmentThreshold(tileWorldSize);
 			if (pChaseTarget && config.chaseAxis != EnemyChaseAxis::None)
 			{
 				movement->SetChaseTarget(pChaseTarget);
 				movement->SetChaseAxis(config.chaseAxis);
-				movement->SetChaseAlignmentThreshold(tileWorldSize);
 			}
 		}
 		enemy->AddComponent<HealthComponent>(1);

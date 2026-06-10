@@ -10,6 +10,7 @@
 #include "Scene/SceneManager.h"
 #include "Scene/Scene.h"
 #include "State/EndSceneState.h"
+#include "State/TransitionSceneState.h"
 #include "Scenes/GameplaySceneBuilder.h"
 
 namespace
@@ -21,6 +22,16 @@ namespace dae
 {
 	GameSceneState::GameSceneState(SceneStateMachineComponent& owner, GameMode gameMode)
 		: SceneState(owner)
+	{
+		SetGameMode(gameMode);
+	}
+
+	GameSceneState::GameSceneState(SceneStateMachineComponent& owner, GameMode gameMode, int levelIndex, const PlayerCarryOver& carryOver)
+		: SceneState(owner)
+		, m_CurrentLevelIndex(levelIndex)
+		, m_CarriedBombCapacity(carryOver.bombCapacity)
+		, m_CarriedBombRange(carryOver.bombRange)
+		, m_CarriedDetonator(carryOver.hasDetonator)
 	{
 		SetGameMode(gameMode);
 	}
@@ -46,6 +57,7 @@ namespace dae
 
 		InputManager::GetInstance().ClearAllBindings();
 		EventManager::GetInstance().ClearQueue();
+		ResetGameplayObservers();
 
 		if (auto* scene = m_Owner.GetActiveScene())
 		{
@@ -61,13 +73,31 @@ namespace dae
 			m_LevelCompleted = false;
 			SavePlayerState();
 			++m_CurrentLevelIndex;
-			ReloadScene();
+
+			const PlayerCarryOver carryOver{ m_CarriedBombCapacity, m_CarriedBombRange, m_CarriedDetonator };
+			const int level = m_CurrentLevelIndex;
+			const GameMode mode = GetGameMode();
+
+			m_Owner.GetStateMachine().SetState(
+				std::make_unique<TransitionSceneState>(
+					m_Owner,
+					"STAGE " + std::to_string(level + 1),
+					std::make_unique<GameSceneState>(m_Owner, mode, level, carryOver)
+				)
+			);
 			return;
 		}
 
 		if (m_AlivePlayerCount <= 0)
 		{
-			m_Owner.GetStateMachine().SetState(std::make_unique<EndSceneState>(m_Owner));
+			m_Owner.GetStateMachine().SetState(
+				std::make_unique<TransitionSceneState>(
+					m_Owner,
+					"GAME OVER",
+					std::make_unique<EndSceneState>(m_Owner)
+				)
+			);
+			return;
 		}
 	}
 

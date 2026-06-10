@@ -28,7 +28,7 @@ namespace dae
 		void SetChaseAxis(EnemyChaseAxis axis) { m_ChaseAxis = axis; }
 		void SetChaseAlignmentThreshold(float threshold) { m_ChaseAlignmentThreshold = threshold; }
 		void SetEnabled(bool enabled) { m_Enabled = enabled; }
-		void OnBlocked();
+		void OnBlocked(const glm::vec3& attemptedWorldPos);
 
 	private:
 		TransformComponent* m_pTransform{};

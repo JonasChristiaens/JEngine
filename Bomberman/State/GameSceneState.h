@@ -1,6 +1,7 @@
 #pragma once
 #include "SceneState.h"
 #include "EventQueue/IObserver.h"
+#include "Scenes/GameplaySceneBuilder.h"
 
 namespace dae
 {
@@ -8,6 +9,7 @@ namespace dae
 	{
 	public:
 		explicit GameSceneState(SceneStateMachineComponent& owner, GameMode gameMode = GameMode::Solo);
+		explicit GameSceneState(SceneStateMachineComponent& owner, GameMode gameMode, int levelIndex, const PlayerCarryOver& carryOver);
 
 		void OnEnter() override;
 		void OnExit() override;

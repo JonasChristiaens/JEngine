@@ -35,14 +35,17 @@ dae::Texture2D::Texture2D(const std::string &fullPath)
         surface
     );
 
-    SDL_DestroySurface(surface);
-
     if (!m_Texture)
     {
+        SDL_DestroySurface(surface);
         throw std::runtime_error(
             std::string("Failed to create texture from surface: ") + SDL_GetError()
         );
     }
+
+    SDL_SetTextureScaleMode(m_Texture, SDL_SCALEMODE_NEAREST);
+
+    SDL_DestroySurface(surface);
 }
 
 dae::Texture2D::Texture2D(SDL_Texture* texture)	: m_Texture{ texture } 

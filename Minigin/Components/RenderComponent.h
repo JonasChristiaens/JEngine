@@ -13,7 +13,7 @@ namespace dae
 	class RenderComponent final : public BaseComponent
 	{
 	public:
-		RenderComponent(GameObject* pOwner);
+		explicit RenderComponent(GameObject* pOwner);
 		~RenderComponent();
 
 		void Update() override {}

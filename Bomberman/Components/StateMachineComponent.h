@@ -7,7 +7,7 @@ namespace dae
 	class StateMachineComponent final : public BaseComponent
 	{
 	public:
-		StateMachineComponent(GameObject* pOwner);
+		explicit StateMachineComponent(GameObject* pOwner);
 
 		void Update() override;
 		void Render() const override;

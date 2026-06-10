@@ -5,13 +5,13 @@
 
 dae::CSteamAchievements::CSteamAchievements(Achievement_t* Achievements, int NumAchievements):
 	m_iAppID(0),
+	m_pAchievements(Achievements),
+	m_iNumAchievements(NumAchievements),
 	m_bInitialized(false),
 	m_CallbackUserStatsStored(this, &CSteamAchievements::OnUserStatsStored),
 	m_CallbackAchievementStored(this, &CSteamAchievements::OnAchievementStored)
 {
 	m_iAppID = SteamUtils()->GetAppID();
-	m_pAchievements = Achievements;
-	m_iNumAchievements = NumAchievements;
 	m_bInitialized = Initialize();
 }
 

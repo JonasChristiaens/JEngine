@@ -8,7 +8,7 @@ namespace dae
 	struct EnemyConfig
 	{
 		float spriteX{ 0.0f };
-		float spriteY{ 241.0f };
+		float spriteY{ 240.0f };
 		float spriteWidth{ 16.0f };
 		float spriteHeight{ 16.0f };
 		float scale{ 3.0f };

@@ -1,3 +1,4 @@
+
 cmake_minimum_required(VERSION 3.26)
 set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 project(JEngine)
@@ -249,6 +250,7 @@ add_executable(${GAME_TARGET} ${GAME_TARGET_PARAM}
   Bomberman/State/TitleSceneState.cpp
   Bomberman/State/GameSceneState.cpp
   Bomberman/State/EndSceneState.cpp
+  Bomberman/State/TransitionSceneState.cpp
   Bomberman/Scenes/GameplaySceneBuilder.cpp
   Bomberman/Level/LevelDataLoader.cpp
 )

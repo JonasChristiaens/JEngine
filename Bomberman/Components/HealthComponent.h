@@ -16,7 +16,7 @@ namespace dae
 		HealthComponent& operator=(const HealthComponent& other) = delete;
 		HealthComponent& operator=(HealthComponent&& other) = delete;
 
-		void Update() override {};
+		void Update() override;
 		void ChangeCurrentHealth(int amount);
 
 		int GetHealth() const { return m_CurrentHealth; }
@@ -27,5 +27,6 @@ namespace dae
 	private:
 		int m_CurrentHealth;
 		bool m_IsDead{ false };
+		float m_InvulnerabilityTimer{ 0.0f };
 	};
 }

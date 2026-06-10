@@ -31,7 +31,7 @@ void dae::SceneManager::Render()
 
 dae::Scene& dae::SceneManager::CreateScene()
 {
-	m_Scenes.emplace_back(new Scene());
+	m_Scenes.push_back(std::unique_ptr<Scene>(new Scene()));
 	return *m_Scenes.back();
 }
 

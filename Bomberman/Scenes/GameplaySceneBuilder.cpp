@@ -50,8 +50,8 @@ namespace
 	const dae::EnemyConfig kBalloomConfig = []()
 	{
 		dae::EnemyConfig config{
-			0.0f, 241.0f, 16.0f, 16.0f,
-			3.0f, 0.8f,
+			0.0f, 240.0f, 16.0f, 16.0f,
+			3.0f, 0.90f,
 			2.0f, 4.0f,
 			dae::EnemyChaseAxis::None,
 			100
@@ -66,8 +66,8 @@ namespace
 	const dae::EnemyConfig kOnealConfig = []()
 	{
 		dae::EnemyConfig config{
-			0.0f, 257.0f, 16.0f, 16.0f,
-			3.0f, 0.8f,
+			0.0f, 256.0f, 16.0f, 16.0f,
+			3.0f, 0.90f,
 			0.8f, 3.2f,
 			dae::EnemyChaseAxis::Y,
 			200
@@ -82,8 +82,8 @@ namespace
 	const dae::EnemyConfig kDollConfig = []()
 	{
 		dae::EnemyConfig config{
-			0.0f, 273.0f, 16.0f, 16.0f,
-			3.0f, 0.8f,
+			0.0f, 272.0f, 16.0f, 16.0f,
+			3.0f, 0.90f,
 			0.8f, 3.2f,
 			dae::EnemyChaseAxis::X,
 			400
@@ -98,8 +98,8 @@ namespace
 	const dae::EnemyConfig kMinvoConfig = []()
 	{
 		dae::EnemyConfig config{
-			0.0f, 289.0f, 16.0f, 16.0f,
-			3.0f, 0.8f,
+			0.0f, 288.0f, 16.0f, 16.0f,
+			3.0f, 0.90f,
 			0.5f, 2.0f,
 			dae::EnemyChaseAxis::Both,
 			800
@@ -246,7 +246,8 @@ namespace
 namespace dae
 {
 	GameplaySceneData BuildGameplayScene(Scene& scene, GameMode gameMode, int levelIndex, const PlayerCarryOver& carryOver)
-	{		const auto windowSize = Renderer::GetInstance().GetWindowSize();
+	{
+		const auto windowSize = Renderer::GetInstance().GetWindowSize();
 		const float windowWidth = static_cast<float>(windowSize.x);
 		const float windowHeight = static_cast<float>(windowSize.y);
 		const float hudHeight = windowHeight * kHudHeightRatio;
@@ -282,14 +283,15 @@ namespace dae
 
 		const auto levels = LoadLevels();
 		const int idx = levelIndex < static_cast<int>(levels.size()) ? levelIndex : 0;
-		worldRootPtr->AddComponent<PlayfieldComponent>(scene, kPlayfieldWidth, kPlayfieldHeight, playfieldScale, ToPlayfieldConfig(levels.at(idx)));
+		worldRootPtr->AddComponent<PlayfieldComponent>(scene, kPlayfieldWidth, kPlayfieldHeight, playfieldScale, ToPlayfieldConfig(levels.at(static_cast<size_t>(idx))));
 
 		const glm::vec3 player1Pos{ tileWorldSize * 1.5f, tileWorldSize * 2.5f, 0.0f };
 		const glm::vec3 player2Pos{ tileWorldSize * 3.5f, tileWorldSize * 2.5f, 0.0f };
-		const int balloomCount = std::max(0, levels.at(idx).balloomCount);
-		const int onealCount = std::max(0, levels.at(idx).onealCount);
-		const int dollCount = std::max(0, levels.at(idx).dollCount);
-		const int minvoCount = std::max(0, levels.at(idx).minvoCount);
+		const size_t levelIdx = static_cast<size_t>(idx);
+		const int balloomCount = std::max(0, levels.at(levelIdx).balloomCount);
+		const int onealCount = std::max(0, levels.at(levelIdx).onealCount);
+		const int dollCount = std::max(0, levels.at(levelIdx).dollCount);
+		const int minvoCount = std::max(0, levels.at(levelIdx).minvoCount);
 
 		GameObject* player1 = nullptr;
 		GameObject* player2 = nullptr;

@@ -96,8 +96,12 @@ namespace dae
 
 			if (event.id == changeScoreId && event.nbArgs > 0)
 				m_Scores[i] += event.args[0].i;
-			else if (event.id == changeHealthId && event.nbArgs > 0)
-				m_Lives[i] += event.args[0].i;
+			else if (event.id == changeHealthId)
+			{
+				auto* health = actor.GetComponent<HealthComponent>();
+				if (health)
+					m_Lives[i] = health->GetHealth();
+			}
 			break;
 		}
 	}
