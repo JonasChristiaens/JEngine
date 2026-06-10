@@ -86,7 +86,7 @@ void dae::BombEventObserver::Notify(GameObject& actor, Event event)
 
 		dae::Event playAudioEvent(kPlayAudioEventId);
 		playAudioEvent.nbArgs = 1;
-		playAudioEvent.args[0].p = const_cast<char*>(kBombLaySfxPath);
+		playAudioEvent.args[0].p = kBombLaySfxPath;
 		dae::EventManager::GetInstance().BroadcastEvent(playAudioEvent, &actor);
 
 		auto bomb = std::make_unique<dae::GameObject>();
@@ -225,7 +225,7 @@ void dae::BombEventObserver::DetonateBomb(GameObject& bomb)
 
 	Event playAudioEvent(kPlayAudioEventId);
 	playAudioEvent.nbArgs = 1;
-	playAudioEvent.args[0].p = const_cast<char*>(kBombExplosionSfxPath);
+	playAudioEvent.args[0].p = kBombExplosionSfxPath;
 	EventManager::GetInstance().BroadcastEvent(playAudioEvent, &bomb);
 
 	m_pExplosionManager->SpawnExplosion(x, y, explosionRange, bombParent, pBombOwner);

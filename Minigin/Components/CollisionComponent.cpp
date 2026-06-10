@@ -3,7 +3,6 @@
 #include "TransformComponent.h"
 #include "RectBounds.h"
 #include <algorithm>
-#include "Renderer.h"
 
 namespace dae
 {
@@ -55,28 +54,6 @@ namespace dae
 		}
 
 		return false;
-	}
-
-	void CollisionComponent::Render() const
-	{
-		if (m_pTransform == nullptr)
-			m_pTransform = GetOwner()->GetComponent<TransformComponent>();
-		if (!m_pTransform)
-			return;
-
-		const auto pos = m_pTransform->GetWorldPosition();
-		float cameraX = 0.0f, cameraY = 0.0f;
-		Renderer::GetInstance().GetCameraOffset(cameraX, cameraY);
-
-		SDL_FRect rect{};
-		rect.x = pos.x + m_Offset.x + cameraX;
-		rect.y = pos.y + m_Offset.y + cameraY;
-		rect.w = m_Width;
-		rect.h = m_Height;
-
-		SDL_Renderer* renderer = Renderer::GetInstance().GetSDLRenderer();
-		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-		SDL_RenderRect(renderer, &rect);
 	}
 
 	void CollisionComponent::Update()

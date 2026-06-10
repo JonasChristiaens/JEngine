@@ -67,7 +67,7 @@ void dae::HealthComponent::ChangeCurrentHealth(int amount)
 		{
 			Event playAudioEvent(make_sdbm_hash("PlayAudioEvent"));
 			playAudioEvent.nbArgs = 1;
-			playAudioEvent.args[0].p = const_cast<char*>("bomberman_killed.wav");
+			playAudioEvent.args[0].p = "bomberman_killed.wav";
 			EventManager::GetInstance().BroadcastEvent(playAudioEvent, GetOwner());
 		}
 

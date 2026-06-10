@@ -4,10 +4,8 @@
 #include "Components/HealthComponent.h"
 #include "Components/DeathAnimatorComponent.h"
 #include "SpriteAnimatorComponent.h"
-#include "Rendering/Renderer.h"
 #include "EventQueue/EventManager.h"
 #include "Core/GameTime.h"
-#include <SDL3/SDL.h>
 #include <cmath>
 
 namespace
@@ -62,7 +60,7 @@ void dae::PlayerAnimatorComponent::Update()
 			const char* sfxPath = movedVertically ? kFootstepVerticalSfxPath : kFootstepHorizontalSfxPath;
 			dae::Event playAudioEvent(kPlayAudioEventId);
 			playAudioEvent.nbArgs = 1;
-			playAudioEvent.args[0].p = const_cast<char*>(sfxPath);
+			playAudioEvent.args[0].p = sfxPath;
 			dae::EventManager::GetInstance().BroadcastEvent(playAudioEvent, GetOwner());
 			m_StepElapsed = 0.0f;
 		}
@@ -95,24 +93,4 @@ void dae::PlayerAnimatorComponent::Update()
 		// Idle frame
 		m_pAnimator->SetAnimation(4, 0, 1, 1, 10.0f, true);
 	}
-}
-
-void dae::PlayerAnimatorComponent::Render() const
-{
-	if (m_pTransform == nullptr)
-		return;
-
-	const auto& pos = m_pTransform->GetWorldPosition();
-	float cameraX = 0.0f, cameraY = 0.0f;
-	Renderer::GetInstance().GetCameraOffset(cameraX, cameraY);
-
-	SDL_Renderer* renderer = Renderer::GetInstance().GetSDLRenderer();
-	SDL_SetRenderDrawColor(renderer, 0, 120, 255, 255);
-	SDL_FRect rect{};
-	constexpr float markerSize = 6.0f;
-	rect.x = pos.x - markerSize * 0.5f + cameraX;
-	rect.y = pos.y - markerSize * 0.5f + cameraY;
-	rect.w = markerSize;
-	rect.h = markerSize;
-	SDL_RenderFillRect(renderer, &rect);
 }

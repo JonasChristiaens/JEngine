@@ -16,7 +16,6 @@ namespace dae
 		virtual ~CollisionComponent();
 
 		void Update() override;
-		void Render() const override;
 
 		void SetOnCollisionCallback(std::function<void(GameObject*)> callback) { m_OnCollision = callback; }
 

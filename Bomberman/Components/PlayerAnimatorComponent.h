@@ -14,7 +14,6 @@ namespace dae
 		virtual ~PlayerAnimatorComponent() = default;
 
 		void Update() override;
-		void Render() const override;
 
 	private:
 		SpriteAnimatorComponent* m_pAnimator{ nullptr };

@@ -11,6 +11,7 @@ namespace dae
 	public:
 	   static bool IsAlive() { return s_isAlive; }
 		void BroadcastEvent(Event e, GameObject* pSubjectActor) { QueueEvent(e, pSubjectActor); }
+		void BroadcastImmediate(Event e, GameObject* pSubjectActor) { NotifyObservers(e, pSubjectActor); }
 
 		void QueueEvent(Event e, GameObject* pSubjectActor)
 		{

@@ -9,6 +9,7 @@
 #include "Components/EnemyComponent.h"
 #include "Components/PlayfieldComponent.h"
 #include "EventQueue/EventManager.h"
+#include "Core/GameTime.h"
 
 namespace
 {
@@ -20,6 +21,41 @@ namespace
 	constexpr int kExplosionFrameCount = 4;
 	constexpr float kExplosionFramesPerSecond = 12.0f;
 	constexpr float kDamageColliderScale = 0.7f;
+
+	constexpr int kChainScores[]{ 100, 200, 400, 800, 1000, 2000, 4000, 8000, 10000 };
+	constexpr int kChainSize = sizeof(kChainScores) / sizeof(kChainScores[0]);
+	constexpr int kMaxChainScore = 10000;
+	constexpr float kChainWindow = 0.5f;
+
+	float s_LastKillTime = -10.0f;
+	int s_KillChainCount = 0;
+
+	int ComputeChainScore(int basePoints)
+	{
+		const float now = dae::GameTime::GetInstance().GetTotalTime();
+		if (now - s_LastKillTime > kChainWindow)
+		{
+			s_KillChainCount = 0;
+		}
+		s_LastKillTime = now;
+
+		int startIdx = 0;
+		for (int i = 0; i < kChainSize; ++i)
+		{
+			if (kChainScores[i] >= basePoints)
+			{
+				startIdx = i;
+				break;
+			}
+		}
+
+		const int idx = startIdx + s_KillChainCount;
+		++s_KillChainCount;
+
+		if (idx >= kChainSize)
+			return kMaxChainScore;
+		return kChainScores[idx];
+	}
 }
 
 namespace dae
@@ -103,19 +139,23 @@ namespace dae
 				if (!health)
 					return;
 
+				const int healthBefore = health->GetHealth();
+
 				Event damageEvent(make_sdbm_hash("ChangeHealthEvent"));
 				damageEvent.nbArgs = 1;
 				damageEvent.args[0].i = -1;
-				EventManager::GetInstance().BroadcastEvent(damageEvent, other);
+				EventManager::GetInstance().BroadcastImmediate(damageEvent, other);
 
-				if (health->GetHealth() > 0 && health->GetHealth() <= 1 && pBombOwner && other->HasComponent<EnemyComponent>())
+				if (healthBefore > 0 && healthBefore <= 1 && pBombOwner && other->HasComponent<EnemyComponent>())
 				{
 					auto* enemyComp = other->GetComponent<EnemyComponent>();
 					if (enemyComp)
 					{
+						const int score = ComputeChainScore(enemyComp->GetPoints());
+
 						Event scoreEvent(make_sdbm_hash("ChangeScoreEvent"));
 						scoreEvent.nbArgs = 1;
-						scoreEvent.args[0].i = enemyComp->GetPoints();
+						scoreEvent.args[0].i = score;
 						EventManager::GetInstance().BroadcastEvent(scoreEvent, pBombOwner);
 					}
 				}

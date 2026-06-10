@@ -31,7 +31,7 @@ namespace dae
 		union {
 			int i;
 			float f;
-			void* p;
+			const void* p;
 		};
 	};
 

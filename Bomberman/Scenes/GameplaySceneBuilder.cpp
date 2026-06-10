@@ -201,7 +201,7 @@ namespace
 
 		auto bindMove = [&](unsigned int button, const glm::vec3& dir)
 		{
-			auto cmd = std::make_unique<dae::MoveCommand>(dir, kPlayerMoveSpeed * 2.0f);
+			auto cmd = std::make_unique<dae::MoveCommand>(dir, kPlayerMoveSpeed);
 			cmd->SetGameActor(&player);
 			input.BindControllerInput(controllerIndex, button, dae::KeyState::Pressed, std::move(cmd));
 		};

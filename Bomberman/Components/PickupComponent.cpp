@@ -31,7 +31,7 @@ namespace dae
 
 		Event playAudioEvent(make_sdbm_hash("PlayAudioEvent"));
 		playAudioEvent.nbArgs = 1;
-		playAudioEvent.args[0].p = const_cast<char*>("powerup.wav");
+		playAudioEvent.args[0].p = "powerup.wav";
 		EventManager::GetInstance().BroadcastEvent(playAudioEvent, other);
 
 		GetOwner()->MarkForDeletion();
