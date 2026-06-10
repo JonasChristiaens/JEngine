@@ -1,12 +1,12 @@
 #pragma once
 #include "../Core/Singleton.h"
-#include "ISubject.h"
+#include "Subject.h"
 #include <queue>
 #include <mutex>
 
 namespace dae
 {
-	class EventManager final : public Singleton<EventManager>, public ISubject
+	class EventManager final : public Singleton<EventManager>, public Subject
 	{
 	public:
 	   static bool IsAlive() { return s_isAlive; }

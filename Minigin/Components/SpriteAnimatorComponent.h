@@ -11,7 +11,7 @@ namespace dae
 	class SpriteAnimatorComponent final : public BaseComponent
 	{
 	public:
-		SpriteAnimatorComponent(GameObject* pOwner);
+		explicit SpriteAnimatorComponent(GameObject* pOwner);
 		virtual ~SpriteAnimatorComponent() = default;
 
 		void Update() override;

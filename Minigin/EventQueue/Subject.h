@@ -5,7 +5,7 @@
 
 namespace dae
 {
-	class ISubject
+	class Subject
 	{
 	public:
 		virtual ~ISubject() = default;

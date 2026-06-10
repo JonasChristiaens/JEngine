@@ -256,6 +256,8 @@ add_executable(${GAME_TARGET} ${GAME_TARGET_PARAM}
   Bomberman/State/EndSceneState.cpp
   Bomberman/State/TransitionSceneState.cpp
   Bomberman/Scenes/GameplaySceneBuilder.cpp
+  Bomberman/Scenes/PlayerSetup.cpp
+  Bomberman/Scenes/ModeSetup.cpp
   Bomberman/Level/LevelDataLoader.cpp
   Bomberman/HighScoreManager.cpp
 )

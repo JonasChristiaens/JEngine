@@ -1,11 +1,11 @@
 #pragma once
 #include "BaseComponent.h"
-#include "EventQueue/ISubject.h"
+#include "EventQueue/Subject.h"
 #include "EventQueue/IObserver.h"
 
 namespace dae
 {
-	class ScoreComponent final : public BaseComponent, public ISubject, public IObserver
+	class ScoreComponent final : public BaseComponent, public Subject, public IObserver
 	{
 	public:
 		ScoreComponent(GameObject* pOwner, int score = 0);

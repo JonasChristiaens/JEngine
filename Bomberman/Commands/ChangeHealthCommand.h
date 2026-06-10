@@ -6,7 +6,7 @@ namespace dae
 	class ChangeHealthCommand final : public Command
 	{
 	public:
-		ChangeHealthCommand(int deltaHealth);
+		explicit ChangeHealthCommand(int deltaHealth);
 		virtual ~ChangeHealthCommand() = default;
 
 		void Execute() override;

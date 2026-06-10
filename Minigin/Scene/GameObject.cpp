@@ -16,13 +16,13 @@ void dae::GameObject::Update()
 		component->Update();
 	}
 
-	// Update snapshot of children; callbacks may detach children during update.
-	const auto children = m_Children;
-	for (auto* pChild : children)
+	// Iterate by index to avoid copying the child vector every frame
+	const size_t childCount = m_Children.size();
+	for (size_t i = 0; i < childCount && i < m_Children.size(); ++i)
 	{
-		if (pChild)
+		if (m_Children[i])
 		{
-			pChild->Update();
+			m_Children[i]->Update();
 		}
 	}
 }

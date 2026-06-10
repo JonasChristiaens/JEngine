@@ -18,7 +18,6 @@
 
 namespace
 {
-	constexpr int kSolidBlockRenderLayer = 0;
 	constexpr dae::EventId kEntityDiedEventId = dae::make_sdbm_hash("EntityDied");
 	constexpr dae::EventId kTookDamageEventId = dae::make_sdbm_hash("TookDamageEvent");
 	constexpr dae::EventId kChangeHealthEventId = dae::make_sdbm_hash("ChangeHealthEvent");

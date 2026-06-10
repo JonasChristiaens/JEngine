@@ -6,7 +6,7 @@ namespace dae
 	class ChangeScoreCommand final : public Command
 	{
 	public:
-		ChangeScoreCommand(int deltaScore);
+		explicit ChangeScoreCommand(int deltaScore);
 		virtual ~ChangeScoreCommand() = default;
 
 		void Execute() override;

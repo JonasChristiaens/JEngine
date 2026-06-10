@@ -20,6 +20,7 @@
 #include "ResourceManager.h"
 #include "GameTime.h"
 #include "EventQueue/EventManager.h"
+#include "Components/CollisionComponent.h"
 
 #ifdef __EMSCRIPTEN__
 #include "emscripten.h"
@@ -95,6 +96,7 @@ dae::Minigin::Minigin(const std::filesystem::path& dataPath)
 dae::Minigin::~Minigin()
 {
 	SceneManager::GetInstance().RemoveAll();
+	CollisionComponent::Cleanup();
 	ServiceLocator::RegisterSoundService(nullptr);
 
 	ResourceManager::GetInstance().Shutdown();

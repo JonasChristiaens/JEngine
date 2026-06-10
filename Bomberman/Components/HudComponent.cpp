@@ -21,7 +21,7 @@ namespace dae
 		const size_t count = players.size();
 		m_Scores.resize(count, 0);
 		m_Lives.resize(count, 4);
-		m_pFontTexture = ResourceManager::GetInstance().LoadTexture("BombermanSprites_Titlescreen.png");
+		m_pFontTexture = ResourceManager::GetInstance().LoadTexture("BombermanSprites_TitleScreen.png");
 		RefreshStats();
 		EventManager::GetInstance().AddObserver(*this);
 	}
