@@ -10,7 +10,7 @@ namespace dae
 
 		void Update() override {}
 
-		int GetPoints() const { return m_Points; }
+		int GetPoints() const noexcept { return m_Points; }
 
 	private:
 		int m_Points{};

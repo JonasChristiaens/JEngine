@@ -7,8 +7,7 @@ namespace dae
 {
 	AchievementObserver::AchievementObserver(CSteamAchievements* pAchievements)
 		: m_pAchievements(pAchievements)
-	{
-	}
+	{}
 
 	void AchievementObserver::Notify(dae::GameObject& /*actor*/, dae::Event event)
 	{

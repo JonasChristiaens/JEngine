@@ -73,14 +73,14 @@ namespace
 			reservedTiles.push_back(WorldToTile(pos, tileWorldSize));
 
 		auto isReserved = [&](int column, int row)
-		{
-			for (const auto& [reservedCol, reservedRow] : reservedTiles)
 			{
-				if (column == reservedCol && row == reservedRow)
-					return true;
-			}
-			return false;
-		};
+				for (const auto& [reservedCol, reservedRow] : reservedTiles)
+				{
+					if (column == reservedCol && row == reservedRow)
+						return true;
+				}
+				return false;
+			};
 
 		std::vector<std::pair<int, int>> validCells{};
 		for (int row = 0; row < gridRows; ++row)

@@ -63,8 +63,7 @@ namespace dae
 	ExplosionEffectManager::ExplosionEffectManager(Scene& scene, float tileWorldSize)
 		: m_pScene(&scene)
 		, m_TileWorldSize(tileWorldSize)
-	{
-	}
+	{}
 
 	int ExplosionEffectManager::ClassifyTile(const PlayfieldComponent& playfield, float tileWorldSize, float x, float y)
 	{
@@ -122,83 +121,83 @@ namespace dae
 		explosionVisuals.reserve(static_cast<size_t>(1 + explosionRange * 4));
 
 		auto addDamageTile = [&](float posX, float posY)
-		{
-			auto damageTile = std::make_unique<GameObject>();
-			auto* transform = damageTile->AddComponent<TransformComponent>();
-			transform->SetLocalPosition(posX, posY, 0.0f);
-
-			const float damageSize = m_TileWorldSize * kDamageColliderScale;
-			auto* collider = damageTile->AddComponent<CollisionComponent>(damageSize, damageSize, true);
-			collider->SetOffset({ -damageSize * 0.5f, -damageSize * 0.5f });
-			collider->SetOnCollisionCallback([pBombOwner](GameObject* other)
 			{
-				if (!other || other->IsMarkedForDeletion())
-					return;
+				auto damageTile = std::make_unique<GameObject>();
+				auto* transform = damageTile->AddComponent<TransformComponent>();
+				transform->SetLocalPosition(posX, posY, 0.0f);
 
-				auto* health = other->GetComponent<HealthComponent>();
-				if (!health)
-					return;
-
-				const int healthBefore = health->GetHealth();
-
-				Event damageEvent(make_sdbm_hash("ChangeHealthEvent"));
-				damageEvent.nbArgs = 1;
-				damageEvent.args[0].i = -1;
-				EventManager::GetInstance().BroadcastImmediate(damageEvent, other);
-
-				if (healthBefore > 0 && healthBefore <= 1 && pBombOwner && other->HasComponent<EnemyComponent>())
-				{
-					auto* enemyComp = other->GetComponent<EnemyComponent>();
-					if (enemyComp)
+				const float damageSize = m_TileWorldSize * kDamageColliderScale;
+				auto* collider = damageTile->AddComponent<CollisionComponent>(damageSize, damageSize, true);
+				collider->SetOffset({ -damageSize * 0.5f, -damageSize * 0.5f });
+				collider->SetOnCollisionCallback([pBombOwner](GameObject* other)
 					{
-						const int score = ComputeChainScore(enemyComp->GetPoints());
+						if (!other || other->IsMarkedForDeletion())
+							return;
 
-						Event scoreEvent(make_sdbm_hash("ChangeScoreEvent"));
-						scoreEvent.nbArgs = 1;
-						scoreEvent.args[0].i = score;
-						EventManager::GetInstance().BroadcastEvent(scoreEvent, pBombOwner);
-					}
+						auto* health = other->GetComponent<HealthComponent>();
+						if (!health)
+							return;
+
+						const int healthBefore = health->GetHealth();
+
+						Event damageEvent(make_sdbm_hash("ChangeHealthEvent"));
+						damageEvent.nbArgs = 1;
+						damageEvent.args[0].i = -1;
+						EventManager::GetInstance().BroadcastImmediate(damageEvent, other);
+
+						if (healthBefore > 0 && healthBefore <= 1 && pBombOwner && other->HasComponent<EnemyComponent>())
+						{
+							auto* enemyComp = other->GetComponent<EnemyComponent>();
+							if (enemyComp)
+							{
+								const int score = ComputeChainScore(enemyComp->GetPoints());
+
+								Event scoreEvent(make_sdbm_hash("ChangeScoreEvent"));
+								scoreEvent.nbArgs = 1;
+								scoreEvent.args[0].i = score;
+								EventManager::GetInstance().BroadcastEvent(scoreEvent, pBombOwner);
+							}
+						}
+					});
+
+				if (bombParent)
+				{
+					damageTile->SetParent(bombParent, false);
 				}
-			});
-
-			if (bombParent)
-			{
-				damageTile->SetParent(bombParent, false);
-			}
-			damageTiles.push_back(damageTile.get());
-			m_pScene->Add(std::move(damageTile));
-		};
+				damageTiles.push_back(damageTile.get());
+				m_pScene->Add(std::move(damageTile));
+			};
 
 		auto addExplosionTile = [&](float posX, float posY, int tileColumn, int tileRow) -> SpriteAnimatorComponent*
-		{
-			auto tile = std::make_unique<GameObject>();
-			auto* transform = tile->AddComponent<TransformComponent>();
-			transform->SetLocalPosition(posX, posY, 0.0f);
-
-			auto* render = tile->AddComponent<RenderComponent>();
-			render->SetTexture("BombermanSprites_General.png");
-			render->SetScale(m_TileWorldSize / kExplosionTileSize);
-			render->SetPivot({ 0.5f, 0.5f });
-			render->SetRenderLayer(2);
-
-			auto* animator = tile->AddComponent<SpriteAnimatorComponent>();
-			animator->SetAnimation(BuildExplosionFrames(tileColumn, tileRow), kExplosionFramesPerSecond, false);
-
-			if (bombParent)
 			{
-				tile->SetParent(bombParent, false);
-			}
+				auto tile = std::make_unique<GameObject>();
+				auto* transform = tile->AddComponent<TransformComponent>();
+				transform->SetLocalPosition(posX, posY, 0.0f);
 
-			auto* tilePtr = tile.get();
-			explosionVisuals.push_back(tilePtr);
-			m_pScene->Add(std::move(tile));
-			return animator;
-		};
+				auto* render = tile->AddComponent<RenderComponent>();
+				render->SetTexture("BombermanSprites_General.png");
+				render->SetScale(m_TileWorldSize / kExplosionTileSize);
+				render->SetPivot({ 0.5f, 0.5f });
+				render->SetRenderLayer(2);
+
+				auto* animator = tile->AddComponent<SpriteAnimatorComponent>();
+				animator->SetAnimation(BuildExplosionFrames(tileColumn, tileRow), kExplosionFramesPerSecond, false);
+
+				if (bombParent)
+				{
+					tile->SetParent(bombParent, false);
+				}
+
+				auto* tilePtr = tile.get();
+				explosionVisuals.push_back(tilePtr);
+				m_pScene->Add(std::move(tile));
+				return animator;
+			};
 
 		auto classify = [&](float x, float y)
-		{
-			return playfield ? ClassifyTile(*playfield, m_TileWorldSize, x, y) : 0;
-		};
+			{
+				return playfield ? ClassifyTile(*playfield, m_TileWorldSize, x, y) : 0;
+			};
 
 		addDamageTile(centerX, centerY);
 		auto* centerAnimator = addExplosionTile(centerX, centerY, 2, 2);

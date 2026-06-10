@@ -73,11 +73,11 @@ namespace dae
 	{
 		auto& input = InputManager::GetInstance();
 		auto bindMove = [&](KeyCode key, const glm::vec3& dir)
-		{
-			auto cmd = std::make_unique<MoveCommand>(dir, kPlayerMoveSpeed);
-			cmd->SetGameActor(&player);
-			input.BindKeyboardInput(key, KeyState::Pressed, std::move(cmd));
-		};
+			{
+				auto cmd = std::make_unique<MoveCommand>(dir, kPlayerMoveSpeed);
+				cmd->SetGameActor(&player);
+				input.BindKeyboardInput(key, KeyState::Pressed, std::move(cmd));
+			};
 
 		bindMove(KeyCode::W, { 0, -1, 0 });
 		bindMove(KeyCode::S, { 0, 1, 0 });
@@ -104,11 +104,11 @@ namespace dae
 			return;
 
 		auto bindMove = [&](unsigned int button, const glm::vec3& dir)
-		{
-			auto cmd = std::make_unique<MoveCommand>(dir, kPlayerMoveSpeed);
-			cmd->SetGameActor(&player);
-			input.BindControllerInput(controllerIndex, button, KeyState::Pressed, std::move(cmd));
-		};
+			{
+				auto cmd = std::make_unique<MoveCommand>(dir, kPlayerMoveSpeed);
+				cmd->SetGameActor(&player);
+				input.BindControllerInput(controllerIndex, button, KeyState::Pressed, std::move(cmd));
+			};
 
 		bindMove(ControllerButton::kDpadUp, { 0, -1, 0 });
 		bindMove(ControllerButton::kDpadDown, { 0, 1, 0 });

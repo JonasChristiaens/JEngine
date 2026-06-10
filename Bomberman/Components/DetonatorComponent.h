@@ -10,8 +10,8 @@ namespace dae
 
 		void Update() override {}
 
-		bool HasDetonator() const { return m_HasDetonator; }
-		void SetHasDetonator(bool has) { m_HasDetonator = has; }
+		bool HasDetonator() const noexcept { return m_HasDetonator; }
+		void SetHasDetonator(bool has) noexcept { m_HasDetonator = has; }
 
 	private:
 		bool m_HasDetonator{ false };

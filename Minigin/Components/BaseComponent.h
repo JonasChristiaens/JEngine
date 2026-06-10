@@ -3,7 +3,7 @@
 namespace dae
 {
 	class GameObject;
-	
+
 	class BaseComponent
 	{
 	public:
@@ -18,7 +18,7 @@ namespace dae
 		virtual void Update() = 0;
 		virtual void Render() const {};
 
-		GameObject* GetOwner() const { return m_pOwner; } 
+		GameObject* GetOwner() const { return m_pOwner; }
 
 	private:
 		GameObject* m_pOwner;

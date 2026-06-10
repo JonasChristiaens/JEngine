@@ -18,7 +18,7 @@ namespace dae
 	private:
 		SpriteAnimatorComponent* m_pAnimator{ nullptr };
 		TransformComponent* m_pTransform{ nullptr };
-		
+
 		glm::vec3 m_LastPosition{};
 		bool m_IsInitialized{ false };
 		float m_StepElapsed{};

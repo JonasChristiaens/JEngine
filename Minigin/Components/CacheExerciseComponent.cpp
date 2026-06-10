@@ -63,10 +63,10 @@ namespace
 			// Remove top and bottom outliers
 			const int trimCount = (samples > 2) ? 1 : 0;
 			auto begin = timings.begin() + trimCount;
-			auto end   = timings.end()   - trimCount;
+			auto end = timings.end() - trimCount;
 
 			const auto count = std::distance(begin, end);
-			const auto sum   = std::accumulate(begin, end, 0LL);
+			const auto sum = std::accumulate(begin, end, 0LL);
 
 			results.push_back(count > 0 ? static_cast<float>(sum) / static_cast<float>(count) : 0.f);
 		}
@@ -77,8 +77,7 @@ namespace
 
 dae::CacheExerciseComponent::CacheExerciseComponent(GameObject* pOwner)
 	: BaseComponent(pOwner)
-{
-}
+{}
 
 void dae::CacheExerciseComponent::Render() const
 {

@@ -31,8 +31,7 @@ namespace dae
 		: SceneState(owner)
 		, m_Text(text)
 		, m_NextState(std::move(nextState))
-	{
-	}
+	{}
 
 	TransitionSceneState::~TransitionSceneState()
 	{

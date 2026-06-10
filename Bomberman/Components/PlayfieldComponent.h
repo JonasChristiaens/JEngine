@@ -37,8 +37,7 @@ namespace dae
 				, softBlockRenderLayer(2)
 				, reservedTiles{}
 				, pickupType(PickupType::None)
-			{
-			}
+			{}
 		};
 
 		PlayfieldComponent(GameObject* pOwner, Scene& scene, float playfieldWidth, float playfieldHeight, float playfieldScale, PlayfieldConfig config = {});

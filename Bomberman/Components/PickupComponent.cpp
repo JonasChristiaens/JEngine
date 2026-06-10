@@ -9,8 +9,7 @@ namespace dae
 		: BaseComponent(pOwner)
 		, m_ScoreValue(scoreValue)
 		, m_pEffect(std::move(pEffect))
-	{
-	}
+	{}
 
 	void PickupComponent::OnCollision(GameObject* other)
 	{

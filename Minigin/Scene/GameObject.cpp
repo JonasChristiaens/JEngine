@@ -8,7 +8,7 @@ dae::GameObject::~GameObject() = default;
 
 void dae::GameObject::Update()
 {
-    if (m_MarkedForDeletion)
+	if (m_MarkedForDeletion)
 		return;
 
 	for (auto& component : m_Components)

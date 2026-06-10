@@ -32,11 +32,11 @@ namespace dae
 		void SetSprite(int column, int row);
 
 		void SetScale(float scale);
-		float GetScale() const { return m_Scale; }
+		float GetScale() const noexcept { return m_Scale; }
 		void SetPivot(const glm::vec2& pivot);
 
-		void SetRenderLayer(int layer) { m_RenderLayer = layer; }
-		int GetRenderLayer() const { return m_RenderLayer; }
+		void SetRenderLayer(int layer) noexcept { m_RenderLayer = layer; }
+		int GetRenderLayer() const noexcept { return m_RenderLayer; }
 
 	private:
 		std::unique_ptr<Texture2D> m_Texture{};

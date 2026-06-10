@@ -6,13 +6,13 @@
 #include "Components/CameraComponent.h"
 #include "Components/HudComponent.h"
 #include "Components/PlayfieldComponent.h"
+#include "Components/CollisionGrid.h"
 #include "Observers/BombEventObserver.h"
 #include "Observers/EntityDeathObserver.h"
 #include "Audio/AudioEventObserver.h"
 #include "Rendering/Renderer.h"
 #include "Level/LevelData.h"
 #include "Level/LevelDataLoader.h"
-#include "Resources/ResourceManager.h"
 #include <SDL3/SDL.h>
 #include <algorithm>
 #include <cmath>
@@ -34,8 +34,7 @@ namespace
 
 	std::vector<dae::LevelData> LoadLevels()
 	{
-		const auto jsonText = dae::ResourceManager::GetInstance().LoadTextFile("levels.json");
-		return dae::LevelDataLoader::LoadFromText(jsonText);
+		return dae::LevelDataLoader::Load("Data/levels.bin");
 	}
 
 	std::unique_ptr<dae::BombEventObserver> g_BombObserver{};
@@ -55,6 +54,8 @@ namespace dae
 		const float playfieldScale = playfieldAreaHeight / kPlayfieldHeight;
 		const float playfieldScaledWidth = kPlayfieldWidth * playfieldScale;
 		const float tileWorldSize = 16.0f * playfieldScale;
+
+		CollisionGrid::Initialize(0.0f, hudHeight, tileWorldSize, static_cast<int>(kPlayfieldWidth / 16.0f), static_cast<int>(kPlayfieldHeight / 16.0f));
 
 		auto hudObj = std::make_unique<GameObject>();
 		hudObj->AddComponent<TransformComponent>();

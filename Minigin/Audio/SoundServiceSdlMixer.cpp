@@ -190,16 +190,16 @@ namespace dae
 		{
 			m_ActiveTracks.erase(
 				std::remove_if(m_ActiveTracks.begin(), m_ActiveTracks.end(), [](MIX_Track* pTrack)
-				{
-					if (pTrack == nullptr)
+					{
+						if (pTrack == nullptr)
+							return true;
+
+						if (MIX_TrackPlaying(pTrack))
+							return false;
+
+						MIX_DestroyTrack(pTrack);
 						return true;
-
-					if (MIX_TrackPlaying(pTrack))
-						return false;
-
-					MIX_DestroyTrack(pTrack);
-					return true;
-				}),
+					}),
 				m_ActiveTracks.end()
 			);
 		}
@@ -217,8 +217,7 @@ namespace dae
 
 	SoundServiceSdlMixer::SoundServiceSdlMixer()
 		: m_pImpl(std::make_unique<SoundServiceSdlMixerImpl>())
-	{
-	}
+	{}
 
 	SoundServiceSdlMixer::~SoundServiceSdlMixer() = default;
 

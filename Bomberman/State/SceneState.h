@@ -11,11 +11,10 @@ namespace dae
 	public:
 		explicit SceneState(SceneStateMachineComponent& owner)
 			: m_Owner(owner)
-		{
-		}
+		{}
 
-		GameMode GetGameMode() const { return m_GameMode; }
-		void SetGameMode(GameMode gameMode) { m_GameMode = gameMode; }
+		GameMode GetGameMode() const noexcept { return m_GameMode; }
+		void SetGameMode(GameMode gameMode) noexcept { m_GameMode = gameMode; }
 
 	protected:
 		SceneStateMachineComponent& m_Owner;

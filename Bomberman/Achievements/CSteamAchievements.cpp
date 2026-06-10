@@ -3,7 +3,7 @@
 #if USE_STEAMWORKS
 #include <iostream>
 
-dae::CSteamAchievements::CSteamAchievements(Achievement_t* Achievements, int NumAchievements):
+dae::CSteamAchievements::CSteamAchievements(Achievement_t* Achievements, int NumAchievements) :
 	m_iAppID(0),
 	m_pAchievements(Achievements),
 	m_iNumAchievements(NumAchievements),

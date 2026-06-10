@@ -133,8 +133,8 @@ namespace dae
 		m_ArrowHeight = kGlyphHeight * m_ScaleY;
 
 		auto rootObject = std::make_unique<GameObject>();
-		m_Root = rootObject.get();
-		auto rootTransform = m_Root->AddComponent<TransformComponent>();
+		m_pRoot = rootObject.get();
+		auto rootTransform = m_pRoot->AddComponent<TransformComponent>();
 		rootTransform->SetLocalPosition(offsetX, offsetY);
 		scene->Add(std::move(rootObject));
 
@@ -146,49 +146,49 @@ namespace dae
 		backgroundRender->SetSourceRectangle(0, 0, kTitleSpriteWidth, kTitleSpriteHeight);
 		backgroundRender->SetDestinationSize(scaledWidth, scaledHeight);
 		backgroundRender->SetRenderLayer(kBackgroundLayer);
-		background->SetParent(m_Root, false);
+		background->SetParent(m_pRoot, false);
 		scene->Add(std::move(background));
 
 		auto menuRoot = std::make_unique<GameObject>();
 		menuRoot->AddComponent<TransformComponent>();
-		menuRoot->SetParent(m_Root, false);
-		m_MenuRoot = menuRoot.get();
+		menuRoot->SetParent(m_pRoot, false);
+		m_pMenuRoot = menuRoot.get();
 		scene->Add(std::move(menuRoot));
 
 		auto startArrow = std::make_unique<GameObject>();
 		auto startTransform = startArrow->AddComponent<TransformComponent>();
 		startTransform->SetLocalPosition(kStartArrowX * m_ScaleX, kStartArrowY * m_ScaleY);
-		m_StartArrow = startArrow->AddComponent<RenderComponent>();
-		m_StartArrow->SetTexture("BombermanSprites_TitleScreen.png");
-		m_StartArrow->SetSourceRectangle(kArrowGlyphX, kGlyphRowY, kGlyphWidth, kGlyphHeight);
-		m_StartArrow->SetDestinationSize(m_ArrowWidth, m_ArrowHeight);
-		m_StartArrow->SetRenderLayer(kMenuLayer);
-		startArrow->SetParent(m_MenuRoot, false);
+		m_pStartArrow = startArrow->AddComponent<RenderComponent>();
+		m_pStartArrow->SetTexture("BombermanSprites_TitleScreen.png");
+		m_pStartArrow->SetSourceRectangle(kArrowGlyphX, kGlyphRowY, kGlyphWidth, kGlyphHeight);
+		m_pStartArrow->SetDestinationSize(m_ArrowWidth, m_ArrowHeight);
+		m_pStartArrow->SetRenderLayer(kMenuLayer);
+		startArrow->SetParent(m_pMenuRoot, false);
 		scene->Add(std::move(startArrow));
 
 		auto modeArrow = std::make_unique<GameObject>();
 		auto modeTransform = modeArrow->AddComponent<TransformComponent>();
 		modeTransform->SetLocalPosition(kModeArrowX * m_ScaleX, kModeArrowY * m_ScaleY);
-		m_ModeArrow = modeArrow->AddComponent<RenderComponent>();
-		m_ModeArrow->SetTexture("BombermanSprites_TitleScreen.png");
-		m_ModeArrow->SetSourceRectangle(kArrowGlyphX, kGlyphRowY, kGlyphWidth, kGlyphHeight);
-		m_ModeArrow->SetDestinationSize(m_ArrowWidth, m_ArrowHeight);
-		m_ModeArrow->SetRenderLayer(kMenuLayer);
-		modeArrow->SetParent(m_MenuRoot, false);
+		m_pModeArrow = modeArrow->AddComponent<RenderComponent>();
+		m_pModeArrow->SetTexture("BombermanSprites_TitleScreen.png");
+		m_pModeArrow->SetSourceRectangle(kArrowGlyphX, kGlyphRowY, kGlyphWidth, kGlyphHeight);
+		m_pModeArrow->SetDestinationSize(m_ArrowWidth, m_ArrowHeight);
+		m_pModeArrow->SetRenderLayer(kMenuLayer);
+		modeArrow->SetParent(m_pMenuRoot, false);
 		scene->Add(std::move(modeArrow));
 
 		auto modeLabelRoot = std::make_unique<GameObject>();
 		auto modeLabelTransform = modeLabelRoot->AddComponent<TransformComponent>();
 		modeLabelTransform->SetLocalPosition(kModeLabelX * m_ScaleX, kModeLabelY * m_ScaleY);
-		modeLabelRoot->SetParent(m_MenuRoot, false);
-		m_ModeLabelRoot = modeLabelRoot.get();
+		modeLabelRoot->SetParent(m_pMenuRoot, false);
+		m_pModeLabelRoot = modeLabelRoot.get();
 		scene->Add(std::move(modeLabelRoot));
 
 		auto scoreRoot = std::make_unique<GameObject>();
 		auto scoreTransform = scoreRoot->AddComponent<TransformComponent>();
 		scoreTransform->SetLocalPosition(kScoreX * m_ScaleX, kScoreY * m_ScaleY);
-		scoreRoot->SetParent(m_MenuRoot, false);
-		m_ScoreRoot = scoreRoot.get();
+		scoreRoot->SetParent(m_pMenuRoot, false);
+		m_pScoreRoot = scoreRoot.get();
 		scene->Add(std::move(scoreRoot));
 
 		UpdateModeLabel();
@@ -196,30 +196,30 @@ namespace dae
 		const int topScore = HighScoreManager::GetEntries()[0].score;
 		std::ostringstream scoreStream;
 		scoreStream << std::setfill('0') << std::setw(5) << topScore;
-		CreateTextSprites(*scene, *m_ScoreRoot, scoreStream.str(), (kScoreWidth - (5.0f * kGlyphWidth)) * m_ScaleX, 0.0f, kMenuLayer);
+		CreateTextSprites(*scene, *m_pScoreRoot, scoreStream.str(), (kScoreWidth - (5.0f * kGlyphWidth)) * m_ScaleX, 0.0f, kMenuLayer);
 	}
 
 	void TitleSceneState::UpdateMenuSprites()
 	{
-		if (m_StartArrow)
+		if (m_pStartArrow)
 		{
 			const float width = (m_SelectedIndex == 0) ? m_ArrowWidth : 0.0f;
-			m_StartArrow->SetDestinationSize(width, m_ArrowHeight);
+			m_pStartArrow->SetDestinationSize(width, m_ArrowHeight);
 		}
-		if (m_ModeArrow)
+		if (m_pModeArrow)
 		{
 			const float width = (m_SelectedIndex == 1) ? m_ArrowWidth : 0.0f;
-			m_ModeArrow->SetDestinationSize(width, m_ArrowHeight);
+			m_pModeArrow->SetDestinationSize(width, m_ArrowHeight);
 		}
 	}
 
 	void TitleSceneState::UpdateModeLabel()
 	{
-		if (!m_ModeLabelRoot)
+		if (!m_pModeLabelRoot)
 			return;
 
-		m_ModeLabelRoot->MarkForDeletion();
-		m_ModeLabelRoot = nullptr;
+		m_pModeLabelRoot->MarkForDeletion();
+		m_pModeLabelRoot = nullptr;
 
 		auto* scene = m_Owner.GetActiveScene();
 		if (!scene)
@@ -227,11 +227,11 @@ namespace dae
 		auto labelRoot = std::make_unique<GameObject>();
 		auto labelTransform = labelRoot->AddComponent<TransformComponent>();
 		labelTransform->SetLocalPosition(kModeLabelX * m_ScaleX, kModeLabelY * m_ScaleY);
-		labelRoot->SetParent(m_MenuRoot, false);
-		m_ModeLabelRoot = labelRoot.get();
+		labelRoot->SetParent(m_pMenuRoot, false);
+		m_pModeLabelRoot = labelRoot.get();
 		scene->Add(std::move(labelRoot));
 
-		CreateTextSprites(*scene, *m_ModeLabelRoot, kModeLabels[m_ModeIndex], 0.0f, 0.0f, kMenuLayer);
+		CreateTextSprites(*scene, *m_pModeLabelRoot, kModeLabels[m_ModeIndex], 0.0f, 0.0f, kMenuLayer);
 	}
 
 	void TitleSceneState::CreateTextSprites(Scene& scene, GameObject& parent, const std::string& text, float x, float y, int renderLayer)
@@ -269,12 +269,12 @@ namespace dae
 			scene->RemoveAll();
 		}
 
-		m_Root = nullptr;
-		m_MenuRoot = nullptr;
-		m_StartArrow = nullptr;
-		m_ModeArrow = nullptr;
-		m_ModeLabelRoot = nullptr;
-		m_ScoreRoot = nullptr;
+		m_pRoot = nullptr;
+		m_pMenuRoot = nullptr;
+		m_pStartArrow = nullptr;
+		m_pModeArrow = nullptr;
+		m_pModeLabelRoot = nullptr;
+		m_pScoreRoot = nullptr;
 	}
 
 	void TitleSceneState::BindInput()

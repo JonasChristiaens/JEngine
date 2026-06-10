@@ -113,7 +113,7 @@ public:
 	{
 		if (!m_gamepad)
 		{
-			TryOpenGamepad();            
+			TryOpenGamepad();
 			if (!m_gamepad) return;
 		}
 
@@ -159,9 +159,9 @@ public:
 private:
 	unsigned int m_controllerIndex;
 	SDL_Gamepad* m_gamepad;
-	uint16_t currentButtonState;      
-	uint16_t previousButtonState;     
-	uint16_t buttonsPressedThisFrame; 
+	uint16_t currentButtonState;
+	uint16_t previousButtonState;
+	uint16_t buttonsPressedThisFrame;
 	uint16_t buttonsReleasedThisFrame;
 };
 #endif
@@ -170,8 +170,7 @@ namespace dae
 {
 	ControllerInput::ControllerInput(unsigned int controllerIndex)
 		: m_pImpl(std::make_unique<ControllerInputImpl>(controllerIndex))
-	{
-	}
+	{}
 
 	ControllerInput::~ControllerInput() = default;
 

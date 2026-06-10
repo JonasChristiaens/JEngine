@@ -3,8 +3,7 @@
 
 dae::TransformComponent::TransformComponent(GameObject* pOwner)
 	: BaseComponent(pOwner)
-{
-}
+{}
 
 void dae::TransformComponent::SetLocalPosition(float x, float y, float z)
 {

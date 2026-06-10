@@ -2,5 +2,4 @@
 
 dae::DetonatorComponent::DetonatorComponent(GameObject* pOwner)
 	: BaseComponent(pOwner)
-{
-}
+{}

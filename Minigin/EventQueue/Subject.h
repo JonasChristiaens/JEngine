@@ -8,7 +8,7 @@ namespace dae
 	class Subject
 	{
 	public:
-		virtual ~ISubject() = default;
+		virtual ~Subject() = default;
 
 		void AddObserver(IObserver& observer) { m_Observers.emplace_back(&observer); }
 		void RemoveObserver(IObserver& observer) {

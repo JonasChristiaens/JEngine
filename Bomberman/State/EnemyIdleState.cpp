@@ -10,8 +10,7 @@ dae::EnemyIdleState::EnemyIdleState(GameObject* owner, float spriteX, float spri
 	, m_SpriteWidth(spriteWidth)
 	, m_SpriteHeight(spriteHeight)
 	, m_Scale(scale)
-{
-}
+{}
 
 void dae::EnemyIdleState::OnEnter()
 {

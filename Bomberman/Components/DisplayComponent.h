@@ -18,8 +18,7 @@ namespace dae
 			, m_ObservedEvent(observedEvent)
 			, m_Prefix(prefix)
 			, m_ValueAccessor(valueAccessor)
-		{
-		}
+		{}
 
 		virtual ~DisplayComponent() = default;
 

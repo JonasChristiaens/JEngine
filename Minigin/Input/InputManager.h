@@ -35,9 +35,9 @@ namespace dae
 
 		bool operator==(const ControllerKey& other) const
 		{
-			return controllerIndex == other.controllerIndex && 
-				   button == other.button && 
-				   keyState == other.keyState;
+			return controllerIndex == other.controllerIndex &&
+				button == other.button &&
+				keyState == other.keyState;
 		}
 	};
 

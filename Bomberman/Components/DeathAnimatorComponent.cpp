@@ -15,8 +15,7 @@ namespace dae
 		, m_DeathFps(fps)
 		, m_DeathScale(scale)
 		, m_BroadcastEntityDied(broadcastEntityDied)
-	{
-	}
+	{}
 
 	void DeathAnimatorComponent::Play()
 	{

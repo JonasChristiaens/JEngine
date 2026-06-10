@@ -20,8 +20,8 @@ namespace dae
 		static bool IsHighScore(int score);
 		static int SubmitScore(const std::string& name, int score);
 		static void UpdateName(int entryIndex, const std::string& name);
-		static void LoadFromFile(const std::string& filepath);
-		static void SaveToFile(const std::string& filepath);
+		static void Load(const std::string& filepath);
+		static void Save(const std::string& filepath);
 
 	private:
 		inline static std::array<HighScoreEntry, kMaxEntries> s_Entries{};

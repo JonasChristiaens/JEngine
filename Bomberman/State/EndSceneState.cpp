@@ -180,7 +180,7 @@ namespace dae
 
 		const int entryIndex = m_PendingEntries[m_CurrentPendingIndex].entryIndex;
 		HighScoreManager::UpdateName(entryIndex, m_CurrentName);
-		HighScoreManager::SaveToFile("Data/highscores.json");
+		HighScoreManager::Save("Data/highscores.bin");
 		RefreshScoreDisplay();
 		RefreshNameDisplay();
 	}

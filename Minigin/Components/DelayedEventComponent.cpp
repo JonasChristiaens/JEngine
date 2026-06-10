@@ -6,8 +6,7 @@ dae::DelayedEventComponent::DelayedEventComponent(GameObject* pOwner, const Even
 	: BaseComponent(pOwner)
 	, m_EventToSend(eventToSend)
 	, m_DelaySeconds(delaySeconds)
-{
-}
+{}
 
 void dae::DelayedEventComponent::Update()
 {

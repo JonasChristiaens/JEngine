@@ -6,8 +6,7 @@ namespace dae
 {
 	ChangeScoreCommand::ChangeScoreCommand(int deltaScore)
 		: m_DeltaScore(deltaScore)
-	{
-	}
+	{}
 
 	void ChangeScoreCommand::Execute()
 	{

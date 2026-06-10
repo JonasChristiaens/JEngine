@@ -3,8 +3,7 @@
 dae::BombCapacityComponent::BombCapacityComponent(GameObject* pOwner, int maxBombs)
 	: BaseComponent(pOwner)
 	, m_MaxBombs(maxBombs)
-{
-}
+{}
 
 void dae::BombCapacityComponent::IncreaseCapacity()
 {

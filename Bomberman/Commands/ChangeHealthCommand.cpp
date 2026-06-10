@@ -6,8 +6,7 @@ namespace dae
 {
 	ChangeHealthCommand::ChangeHealthCommand(int deltaHealth)
 		: m_DeltaHealth(deltaHealth)
-	{
-	}
+	{}
 
 	void ChangeHealthCommand::Execute()
 	{

@@ -1,12 +1,11 @@
-	#include "SpriteAnimatorComponent.h"
+#include "SpriteAnimatorComponent.h"
 #include "GameObject.h"
 #include "RenderComponent.h"
 #include "GameTime.h"
 
 dae::SpriteAnimatorComponent::SpriteAnimatorComponent(GameObject* pOwner)
 	: BaseComponent(pOwner)
-{
-}
+{}
 
 void dae::SpriteAnimatorComponent::Update()
 {
@@ -65,12 +64,12 @@ void dae::SpriteAnimatorComponent::SetAnimation(int startColumn, int startRow, i
 	m_StartRow = startRow;
 	m_Columns = columns > 0 ? columns : 1;
 	m_FrameCount = frameCount > 0 ? frameCount : 1;
-	
+
 	if (framesPerSecond > 0.0f)
 		m_FrameDuration = 1.0f / framesPerSecond;
 
 	m_IsLooping = isLooping;
-	
+
 	// Reset runtime state
 	m_CurrentFrame = 0;
 	m_AnimationTimer = 0.0f;

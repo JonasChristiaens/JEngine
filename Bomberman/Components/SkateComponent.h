@@ -10,8 +10,8 @@ namespace dae
 
 		void Update() override {}
 
-		bool HasSkate() const { return m_HasSkate; }
-		void SetHasSkate(bool has) { m_HasSkate = has; }
+		bool HasSkate() const noexcept { return m_HasSkate; }
+		void SetHasSkate(bool has) noexcept { m_HasSkate = has; }
 
 	private:
 		bool m_HasSkate{ false };

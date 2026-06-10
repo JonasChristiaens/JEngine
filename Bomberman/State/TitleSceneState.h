@@ -39,11 +39,11 @@ namespace dae
 		float m_ArrowWidth{ 0.0f };
 		float m_ArrowHeight{ 0.0f };
 
-		GameObject* m_Root{};
-		GameObject* m_MenuRoot{};
-		RenderComponent* m_StartArrow{};
-		RenderComponent* m_ModeArrow{};
-		GameObject* m_ModeLabelRoot{};
-		GameObject* m_ScoreRoot{};
+		GameObject* m_pRoot{};
+		GameObject* m_pMenuRoot{};
+		RenderComponent* m_pStartArrow{};
+		RenderComponent* m_pModeArrow{};
+		GameObject* m_pModeLabelRoot{};
+		GameObject* m_pScoreRoot{};
 	};
 }

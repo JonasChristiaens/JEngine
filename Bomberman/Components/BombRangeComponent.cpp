@@ -3,8 +3,7 @@
 dae::BombRangeComponent::BombRangeComponent(GameObject* pOwner, int maxRange)
 	: BaseComponent(pOwner)
 	, m_MaxRange(maxRange)
-{
-}
+{}
 
 void dae::BombRangeComponent::IncreaseRange()
 {

@@ -9,8 +9,7 @@ dae::BombComponent::BombComponent(GameObject* pOwnerBomb, GameObject* pOwnerPlay
 	, m_pOwnerPlayer(pOwnerPlayer)
 	, m_TileSize(tileSize)
 	, m_ExplosionRange(explosionRange)
-{
-}
+{}
 
 void dae::BombComponent::Update()
 {
@@ -37,16 +36,16 @@ bool dae::BombComponent::OwnerOverlapsBomb() const
 	const auto& bombWorldPos = bombTransform->GetWorldPosition();
 
 	const RectBounds ownerBox = [&]()
-	{
-		auto* ownerCollider = m_pOwnerPlayer->GetComponent<CollisionComponent>();
-		if (ownerCollider)
 		{
-			return RectBounds::FromOffset(ownerWorldPos.x, ownerWorldPos.y,
-				ownerCollider->GetWidth(), ownerCollider->GetHeight(),
-				ownerCollider->GetOffset().x, ownerCollider->GetOffset().y);
-		}
-		return RectBounds::FromOffset(ownerWorldPos.x, ownerWorldPos.y, 0.0f, 0.0f, 0.0f, 0.0f);
-	}();
+			auto* ownerCollider = m_pOwnerPlayer->GetComponent<CollisionComponent>();
+			if (ownerCollider)
+			{
+				return RectBounds::FromOffset(ownerWorldPos.x, ownerWorldPos.y,
+					ownerCollider->GetWidth(), ownerCollider->GetHeight(),
+					ownerCollider->GetOffset().x, ownerCollider->GetOffset().y);
+			}
+			return RectBounds::FromOffset(ownerWorldPos.x, ownerWorldPos.y, 0.0f, 0.0f, 0.0f, 0.0f);
+		}();
 
 	const RectBounds bombBox = RectBounds::FromCenterSize(bombWorldPos.x, bombWorldPos.y, m_TileSize, m_TileSize);
 

@@ -10,10 +10,10 @@ namespace dae
 
 		void Update() override {}
 
-		int GetMaxBombs() const { return m_MaxBombs; }
-		int GetActiveBombs() const { return m_ActiveBombs; }
-		bool CanPlaceBomb() const { return m_ActiveBombs < m_MaxBombs; }
-		bool CanIncrease() const { return m_MaxBombs < kAbsoluteMax; }
+		int GetMaxBombs() const noexcept { return m_MaxBombs; }
+		int GetActiveBombs() const noexcept { return m_ActiveBombs; }
+		bool CanPlaceBomb() const noexcept { return m_ActiveBombs < m_MaxBombs; }
+		bool CanIncrease() const noexcept { return m_MaxBombs < kAbsoluteMax; }
 		void IncreaseCapacity();
 
 		void RegisterBombPlaced();

@@ -120,7 +120,6 @@ target_include_directories(imgui PUBLIC
 target_link_libraries(imgui PUBLIC SDL3::SDL3)
 
 # ----- ImGui Plot -----
-set(IMGUI_INCLUDE_DIR ${imgui_SOURCE_DIR})
 FetchContent_Declare(
   imgui_plot
   GIT_REPOSITORY https://github.com/soulthreads/imgui-plot.git
@@ -176,6 +175,7 @@ add_library(minigin STATIC
   Minigin/Components/CacheExerciseComponent.cpp
   Minigin/Components/SpriteAnimatorComponent.cpp
   Minigin/Components/CollisionComponent.cpp
+  Minigin/Components/CollisionGrid.cpp
   Minigin/Components/DelayedEventComponent.cpp
 
   # States

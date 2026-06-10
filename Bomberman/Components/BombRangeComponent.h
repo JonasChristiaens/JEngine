@@ -10,9 +10,9 @@ namespace dae
 
 		void Update() override {}
 
-		int GetRange() const { return m_Range; }
-		int GetMaxRange() const { return m_MaxRange; }
-		bool CanIncrease() const { return m_Range < m_MaxRange; }
+		int GetRange() const noexcept { return m_Range; }
+		int GetMaxRange() const noexcept { return m_MaxRange; }
+		bool CanIncrease() const noexcept { return m_Range < m_MaxRange; }
 		void IncreaseRange();
 
 	private:

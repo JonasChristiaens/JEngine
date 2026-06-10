@@ -10,7 +10,7 @@ namespace dae
 	{
 	public:
 		CameraComponent(GameObject* pOwner, GameObject* pTarget, float windowWidth, float playfieldWidth);
-		virtual ~CameraComponent() = default;
+		~CameraComponent() = default;
 
 		void Update() override;
 

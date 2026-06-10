@@ -2,6 +2,7 @@
 #include "Scene/GameObject.h"
 #include "Components/TransformComponent.h"
 #include "Components/CollisionComponent.h"
+#include "Components/CollisionGrid.h"
 #include "Components/PlayfieldComponent.h"
 #include "Components/BombRangeComponent.h"
 #include "Core/GameTime.h"
@@ -205,7 +206,12 @@ namespace dae
 	{
 		if (m_pCollision)
 		{
-			for (auto* other : CollisionComponent::GetAllColliders())
+			std::vector<CollisionComponent*> candidates{};
+			candidates.reserve(8);
+			CollisionGrid::Query({ attemptedWorldPos.x + m_pCollision->GetOffset().x, attemptedWorldPos.y + m_pCollision->GetOffset().y, 0.0f },
+				m_pCollision->GetWidth(), m_pCollision->GetHeight(), candidates);
+
+			for (auto* other : candidates)
 			{
 				if (other == m_pCollision)
 					continue;

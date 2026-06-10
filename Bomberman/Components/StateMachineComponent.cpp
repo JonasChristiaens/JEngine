@@ -2,8 +2,7 @@
 
 dae::StateMachineComponent::StateMachineComponent(GameObject* pOwner)
 	: BaseComponent(pOwner)
-{
-}
+{}
 
 void dae::StateMachineComponent::Update()
 {

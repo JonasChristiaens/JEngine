@@ -1,8 +1,12 @@
 #include "HighScoreManager.h"
 #include <algorithm>
 #include <fstream>
-#include <sstream>
-#include <string>
+
+namespace
+{
+	constexpr const char* kMagic = "JHSC";
+	constexpr int kVersion = 1;
+}
 
 namespace dae
 {
@@ -63,81 +67,44 @@ namespace dae
 		entry.name[kMaxNameLength] = '\0';
 	}
 
-	void HighScoreManager::SaveToFile(const std::string& filepath)
+	void HighScoreManager::Save(const std::string& filepath)
 	{
-		std::ofstream file(filepath);
+		std::ofstream file(filepath, std::ios::binary);
 		if (!file.is_open())
 			return;
 
-		file << "{\n  \"highScores\": [\n";
+		file.write(kMagic, 4);
+
+		const int version = kVersion;
+		file.write(reinterpret_cast<const char*>(&version), sizeof(version));
+
 		for (int i = 0; i < kMaxEntries; ++i)
 		{
-			file << "    { \"name\": \"" << s_Entries[i].name << "\", \"score\": " << s_Entries[i].score << " }";
-			if (i < kMaxEntries - 1)
-				file << ",";
-			file << "\n";
+			file.write(s_Entries[i].name, sizeof(s_Entries[i].name));
+			file.write(reinterpret_cast<const char*>(&s_Entries[i].score), sizeof(s_Entries[i].score));
 		}
-		file << "  ]\n}\n";
 	}
 
-	void HighScoreManager::LoadFromFile(const std::string& filepath)
+	void HighScoreManager::Load(const std::string& filepath)
 	{
-		std::ifstream file(filepath);
+		std::ifstream file(filepath, std::ios::binary);
 		if (!file.is_open())
 			return;
 
-		std::stringstream buffer;
-		buffer << file.rdbuf();
-		const std::string content = buffer.str();
-
-		s_Entries = {};
-
-		size_t pos = content.find("\"highScores\"");
-		if (pos == std::string::npos)
+		char magic[5]{};
+		file.read(magic, 4);
+		if (std::string(magic) != kMagic)
 			return;
 
-		pos = content.find('[', pos);
-		if (pos == std::string::npos)
+		int version = 0;
+		file.read(reinterpret_cast<char*>(&version), sizeof(version));
+		if (version != kVersion)
 			return;
-		++pos;
 
-		int entryIndex = 0;
-		while (entryIndex < kMaxEntries)
+		for (int i = 0; i < kMaxEntries; ++i)
 		{
-			pos = content.find('{', pos);
-			if (pos == std::string::npos)
-				break;
-
-			size_t nameStart = content.find("\"name\"", pos);
-			if (nameStart == std::string::npos)
-				break;
-			nameStart = content.find('\"', nameStart + 7);
-			if (nameStart == std::string::npos)
-				break;
-			const size_t nameEnd = content.find('\"', nameStart + 1);
-			if (nameEnd == std::string::npos)
-				break;
-			std::string name = content.substr(nameStart + 1, nameEnd - nameStart - 1);
-
-			size_t scoreStart = content.find("\"score\"", pos);
-			if (scoreStart == std::string::npos)
-				break;
-			scoreStart = content.find(':', scoreStart);
-			if (scoreStart == std::string::npos)
-				break;
-			++scoreStart;
-			while (scoreStart < content.size() && (content[scoreStart] == ' ' || content[scoreStart] == '\t'))
-				++scoreStart;
-			const size_t scoreEnd = content.find_first_of(",}\n", scoreStart);
-			std::string scoreStr = content.substr(scoreStart, scoreEnd - scoreStart);
-			int score = std::stoi(scoreStr);
-
-			s_Entries[entryIndex].score = score;
-			std::copy_n(name.begin(), std::min<size_t>(name.size(), kMaxNameLength), s_Entries[entryIndex].name);
-			s_Entries[entryIndex].name[kMaxNameLength] = '\0';
-			++entryIndex;
-
-			pos = scoreEnd;
+			file.read(s_Entries[i].name, sizeof(s_Entries[i].name));
+			file.read(reinterpret_cast<char*>(&s_Entries[i].score), sizeof(s_Entries[i].score));
 		}
 
 		std::sort(s_Entries.begin(), s_Entries.end(),

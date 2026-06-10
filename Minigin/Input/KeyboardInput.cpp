@@ -75,8 +75,7 @@ namespace dae
 
 	KeyboardInput::KeyboardInput()
 		: m_pImpl(std::make_unique<KeyboardInputImpl>())
-	{
-	}
+	{}
 
 	KeyboardInput::~KeyboardInput() = default;
 

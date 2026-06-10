@@ -14,7 +14,7 @@ dae::AudioEventObserver::AudioEventObserver()
 
 dae::AudioEventObserver::~AudioEventObserver()
 {
- if (dae::EventManager::IsAlive())
+	if (dae::EventManager::IsAlive())
 	{
 		dae::EventManager::GetInstance().RemoveObserver(*this);
 	}

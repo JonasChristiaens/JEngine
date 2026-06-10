@@ -37,8 +37,7 @@ namespace dae
 		: m_pScene(&scene)
 		, m_pOwner(&owner)
 		, m_PlayfieldScale(playfieldScale)
-	{
-	}
+	{}
 
 	HiddenItemManager::~HiddenItemManager()
 	{

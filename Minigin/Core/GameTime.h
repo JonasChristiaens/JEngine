@@ -6,9 +6,9 @@ namespace dae
 	class GameTime final : public Singleton<GameTime>
 	{
 	public:
-		float GetDeltaTime() const { return m_DeltaTime; }
+		float GetDeltaTime() const noexcept { return m_DeltaTime; }
 		void SetDeltaTime(float deltaTime) { m_DeltaTime = deltaTime; m_TotalTime += deltaTime; }
-		float GetTotalTime() const { return m_TotalTime; }
+		float GetTotalTime() const noexcept { return m_TotalTime; }
 
 	private:
 		friend class Singleton<GameTime>;

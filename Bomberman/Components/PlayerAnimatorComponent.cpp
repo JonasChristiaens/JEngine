@@ -18,8 +18,7 @@ namespace
 
 dae::PlayerAnimatorComponent::PlayerAnimatorComponent(GameObject* pOwner)
 	: BaseComponent(pOwner)
-{
-}
+{}
 
 void dae::PlayerAnimatorComponent::Update()
 {

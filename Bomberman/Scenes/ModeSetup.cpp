@@ -15,68 +15,68 @@ namespace
 	constexpr float kMinvoSpeed{ 180.0f };
 
 	const dae::EnemyConfig kBalloomConfig = []()
-	{
-		dae::EnemyConfig config{
-			0.0f, 240.0f, 16.0f, 16.0f,
-			3.0f, 0.90f,
-			2.0f, 4.0f,
-			dae::EnemyChaseAxis::None,
-			100
-		};
-		config.deathFrames = dae::BuildHorizontalFrames(96.0f, 240.0f, 1, 16.0f, 16.0f);
-		auto orangeDeath = dae::BuildHorizontalFrames(112.0f, 240.0f, 4, 16.0f, 16.0f);
-		config.deathFrames.insert(config.deathFrames.end(), orangeDeath.begin(), orangeDeath.end());
-		config.deathFps = 10.0f;
-		return config;
-	}();
+		{
+			dae::EnemyConfig config{
+				0.0f, 240.0f, 16.0f, 16.0f,
+				3.0f, 0.90f,
+				2.0f, 4.0f,
+				dae::EnemyChaseAxis::None,
+				100
+			};
+			config.deathFrames = dae::BuildHorizontalFrames(96.0f, 240.0f, 1, 16.0f, 16.0f);
+			auto orangeDeath = dae::BuildHorizontalFrames(112.0f, 240.0f, 4, 16.0f, 16.0f);
+			config.deathFrames.insert(config.deathFrames.end(), orangeDeath.begin(), orangeDeath.end());
+			config.deathFps = 10.0f;
+			return config;
+		}();
 
 	const dae::EnemyConfig kOnealConfig = []()
-	{
-		dae::EnemyConfig config{
-			0.0f, 256.0f, 16.0f, 16.0f,
-			3.0f, 0.90f,
-			0.8f, 3.2f,
-			dae::EnemyChaseAxis::Y,
-			200
-		};
-		config.deathFrames = dae::BuildHorizontalFrames(96.0f, 256.0f, 1, 16.0f, 16.0f);
-		auto blueDeath = dae::BuildHorizontalFrames(112.0f, 288.0f, 4, 16.0f, 16.0f);
-		config.deathFrames.insert(config.deathFrames.end(), blueDeath.begin(), blueDeath.end());
-		config.deathFps = 10.0f;
-		return config;
-	}();
+		{
+			dae::EnemyConfig config{
+				0.0f, 256.0f, 16.0f, 16.0f,
+				3.0f, 0.90f,
+				0.8f, 3.2f,
+				dae::EnemyChaseAxis::Y,
+				200
+			};
+			config.deathFrames = dae::BuildHorizontalFrames(96.0f, 256.0f, 1, 16.0f, 16.0f);
+			auto blueDeath = dae::BuildHorizontalFrames(112.0f, 288.0f, 4, 16.0f, 16.0f);
+			config.deathFrames.insert(config.deathFrames.end(), blueDeath.begin(), blueDeath.end());
+			config.deathFps = 10.0f;
+			return config;
+		}();
 
 	const dae::EnemyConfig kDollConfig = []()
-	{
-		dae::EnemyConfig config{
-			0.0f, 272.0f, 16.0f, 16.0f,
-			3.0f, 0.90f,
-			0.8f, 3.2f,
-			dae::EnemyChaseAxis::X,
-			400
-		};
-		config.deathFrames = dae::BuildHorizontalFrames(96.0f, 272.0f, 1, 16.0f, 16.0f);
-		auto deathRest = dae::BuildHorizontalFrames(112.0f, 272.0f, 4, 16.0f, 16.0f);
-		config.deathFrames.insert(config.deathFrames.end(), deathRest.begin(), deathRest.end());
-		config.deathFps = 10.0f;
-		return config;
-	}();
+		{
+			dae::EnemyConfig config{
+				0.0f, 272.0f, 16.0f, 16.0f,
+				3.0f, 0.90f,
+				0.8f, 3.2f,
+				dae::EnemyChaseAxis::X,
+				400
+			};
+			config.deathFrames = dae::BuildHorizontalFrames(96.0f, 272.0f, 1, 16.0f, 16.0f);
+			auto deathRest = dae::BuildHorizontalFrames(112.0f, 272.0f, 4, 16.0f, 16.0f);
+			config.deathFrames.insert(config.deathFrames.end(), deathRest.begin(), deathRest.end());
+			config.deathFps = 10.0f;
+			return config;
+		}();
 
 	const dae::EnemyConfig kMinvoConfig = []()
-	{
-		dae::EnemyConfig config{
-			0.0f, 288.0f, 16.0f, 16.0f,
-			3.0f, 0.90f,
-			0.5f, 2.0f,
-			dae::EnemyChaseAxis::Both,
-			800
-		};
-		config.deathFrames = dae::BuildHorizontalFrames(96.0f, 288.0f, 1, 16.0f, 16.0f);
-		auto orangeDeath2 = dae::BuildHorizontalFrames(112.0f, 240.0f, 4, 16.0f, 16.0f);
-		config.deathFrames.insert(config.deathFrames.end(), orangeDeath2.begin(), orangeDeath2.end());
-		config.deathFps = 10.0f;
-		return config;
-	}();
+		{
+			dae::EnemyConfig config{
+				0.0f, 288.0f, 16.0f, 16.0f,
+				3.0f, 0.90f,
+				0.5f, 2.0f,
+				dae::EnemyChaseAxis::Both,
+				800
+			};
+			config.deathFrames = dae::BuildHorizontalFrames(96.0f, 288.0f, 1, 16.0f, 16.0f);
+			auto orangeDeath2 = dae::BuildHorizontalFrames(112.0f, 240.0f, 4, 16.0f, 16.0f);
+			config.deathFrames.insert(config.deathFrames.end(), orangeDeath2.begin(), orangeDeath2.end());
+			config.deathFps = 10.0f;
+			return config;
+		}();
 }
 
 namespace dae

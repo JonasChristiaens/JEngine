@@ -21,7 +21,7 @@ namespace
 {
 	void load()
 	{
-		dae::HighScoreManager::LoadFromFile("Data/highscores.json");
+		dae::HighScoreManager::Load("Data/highscores.bin");
 
 		auto& scene = dae::SceneManager::GetInstance().CreateScene();
 		auto stateMachineObject = std::make_unique<dae::GameObject>();
@@ -33,7 +33,8 @@ namespace
 }
 
 
-int main(int, char* []) {
+int main(int, char* [])
+{
 #if __EMSCRIPTEN__
 	fs::path data_location = "";
 #else

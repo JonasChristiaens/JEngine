@@ -1,4 +1,5 @@
 #include "CollisionComponent.h"
+#include "CollisionGrid.h"
 #include "../Scene/GameObject.h"
 #include "TransformComponent.h"
 #include "RectBounds.h"
@@ -6,20 +7,16 @@
 
 namespace dae
 {
-	std::vector<CollisionComponent*> CollisionComponent::m_AllColliders{};
-
 	CollisionComponent::CollisionComponent(GameObject* pOwner, float width, float height, bool isTrigger)
 		: BaseComponent(pOwner)
 		, m_Width(width)
 		, m_Height(height)
 		, m_IsTrigger(isTrigger)
-	{
-		m_AllColliders.push_back(this);
-	}
+	{}
 
 	CollisionComponent::~CollisionComponent()
 	{
-		m_AllColliders.erase(std::remove(m_AllColliders.begin(), m_AllColliders.end(), this), m_AllColliders.end());
+		CollisionGrid::Unregister(this);
 	}
 
 	void CollisionComponent::SetOffset(const glm::vec2& offset)
@@ -29,9 +26,21 @@ namespace dae
 
 	bool CollisionComponent::WouldCollide(const glm::vec3& worldPosition) const
 	{
+		if (!m_Registered)
+		{
+			CollisionGrid::Register(this);
+			m_Registered = true;
+			if (auto* pTx = GetOwner()->GetComponent<TransformComponent>())
+				m_LastRegisteredPos = pTx->GetWorldPosition();
+		}
+
 		const RectBounds self = RectBounds::FromOffset(worldPosition.x, worldPosition.y, m_Width, m_Height, m_Offset.x, m_Offset.y);
 
-		for (auto* other : m_AllColliders)
+		std::vector<CollisionComponent*> candidates{};
+		candidates.reserve(16);
+		CollisionGrid::Query({ worldPosition.x + m_Offset.x, worldPosition.y + m_Offset.y, 0.0f }, m_Width, m_Height, candidates);
+
+		for (auto* other : candidates)
 		{
 			if (other == this)
 				continue;
@@ -58,6 +67,27 @@ namespace dae
 
 	void CollisionComponent::Update()
 	{
+		if (!m_Registered)
+		{
+			CollisionGrid::Register(this);
+			m_Registered = true;
+			if (auto* pTx = GetOwner()->GetComponent<TransformComponent>())
+				m_LastRegisteredPos = pTx->GetWorldPosition();
+		}
+		else
+		{
+			if (auto* pTx = GetOwner()->GetComponent<TransformComponent>())
+			{
+				const auto& currentPos = pTx->GetWorldPosition();
+				if (currentPos != m_LastRegisteredPos)
+				{
+					CollisionGrid::Unregister(this);
+					CollisionGrid::Register(this);
+					m_LastRegisteredPos = currentPos;
+				}
+			}
+		}
+
 		if (!m_OnCollision) return;
 
 		if (m_pTransform == nullptr)
@@ -67,7 +97,11 @@ namespace dae
 		const auto pos = m_pTransform->GetWorldPosition();
 		const RectBounds self = RectBounds::FromOffset(pos.x, pos.y, m_Width, m_Height, m_Offset.x, m_Offset.y);
 
-		for (auto* other : m_AllColliders)
+		std::vector<CollisionComponent*> candidates{};
+		candidates.reserve(16);
+		CollisionGrid::Query({ pos.x + m_Offset.x, pos.y + m_Offset.y, 0.0f }, m_Width, m_Height, candidates);
+
+		for (auto* other : candidates)
 		{
 			if (other == this) continue;
 			if (other->GetOwner()->IsMarkedForDeletion()) continue;

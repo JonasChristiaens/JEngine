@@ -2,5 +2,4 @@
 
 dae::SkateComponent::SkateComponent(GameObject* pOwner)
 	: BaseComponent(pOwner)
-{
-}
+{}

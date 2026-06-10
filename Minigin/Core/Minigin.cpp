@@ -20,7 +20,7 @@
 #include "ResourceManager.h"
 #include "GameTime.h"
 #include "EventQueue/EventManager.h"
-#include "Components/CollisionComponent.h"
+#include "Components/CollisionGrid.h"
 
 #ifdef __EMSCRIPTEN__
 #include "emscripten.h"
@@ -84,7 +84,7 @@ dae::Minigin::Minigin(const std::filesystem::path& dataPath)
 		throw std::runtime_error(std::string("SDL_CreateWindow Error: ") + SDL_GetError());
 	}
 
-    Renderer::GetInstance().Init(g_window);
+	Renderer::GetInstance().Init(g_window);
 	ResourceManager::GetInstance().Init(dataPath);
 #ifndef __EMSCRIPTEN__
 	ServiceLocator::RegisterSoundService(std::make_unique<SoundServiceSdlMixer>());
@@ -96,7 +96,7 @@ dae::Minigin::Minigin(const std::filesystem::path& dataPath)
 dae::Minigin::~Minigin()
 {
 	SceneManager::GetInstance().RemoveAll();
-	CollisionComponent::Cleanup();
+	CollisionGrid::Cleanup();
 	ServiceLocator::RegisterSoundService(nullptr);
 
 	ResourceManager::GetInstance().Shutdown();
