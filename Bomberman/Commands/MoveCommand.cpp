@@ -3,6 +3,7 @@
 #include "Components/TransformComponent.h"
 #include "Components/CollisionComponent.h"
 #include "Components/HealthComponent.h"
+#include "Components/SkateComponent.h"
 #include "Core/GameTime.h"
 #include <glm/geometric.hpp>
 
@@ -28,7 +29,13 @@ namespace dae
 		if (transform == nullptr)
 			return;
 
-		glm::vec3 movement = m_Direction * m_Speed * deltaTime;
+		float speed = m_Speed;
+		if (auto* skate = m_pGameActor->GetComponent<SkateComponent>())
+		{
+			if (skate->HasSkate())
+				speed *= 1.5f;
+		}
+		glm::vec3 movement = m_Direction * speed * deltaTime;
 		const auto currentPosition = transform->GetLocalPosition();
 		const auto nextPosition = currentPosition + movement;
 		const auto currentWorldPosition = transform->GetWorldPosition();

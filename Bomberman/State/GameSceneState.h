@@ -22,6 +22,7 @@ namespace dae
 		int m_CarriedBombCapacity{ 1 };
 		int m_CarriedBombRange{ 1 };
 		bool m_CarriedDetonator{ false };
+		bool m_CarriedHasSkate{ false };
 		int m_CarriedHealth{ 4 };
 		int m_CarriedScore{ 0 };
 		int m_AlivePlayerCount{ 0 };

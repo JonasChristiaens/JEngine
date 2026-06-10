@@ -12,12 +12,14 @@
 #include "Components/BombRangeComponent.h"
 #include "Components/BombCapacityComponent.h"
 #include "Components/DetonatorComponent.h"
+#include "Components/SkateComponent.h"
 #include "Components/DeathAnimatorComponent.h"
 #include "EnemyConfig.h"
 #include "Factories/EnemyFactory.h"
 #include "Commands/MoveCommand.h"
 #include "Commands/SpawnBombCommand.h"
 #include "Commands/DetonateBombsCommand.h"
+#include "Commands/SkipLevelCommand.h"
 #include "Observers/BombEventObserver.h"
 #include "Observers/EntityDeathObserver.h"
 #include "Audio/AudioEventObserver.h"
@@ -147,6 +149,9 @@ namespace
 		auto* detonator = go->AddComponent<dae::DetonatorComponent>();
 		if (carryOver.hasDetonator)
 			detonator->SetHasDetonator(true);
+		auto* skate = go->AddComponent<dae::SkateComponent>();
+		if (carryOver.hasSkate)
+			skate->SetHasSkate(true);
 		go->AddComponent<dae::DeathAnimatorComponent>("BombermanSprites_General.png", dae::BuildHorizontalFrames(0.0f, 32.0f, 7, 16.0f, 16.0f), 10.0f, kPlayerSpriteScale, true);
 		auto* collider = go->AddComponent<dae::CollisionComponent>(kPlayerCollisionSize, kPlayerCollisionSize);
 		collider->SetOffset({ -kPlayerCollisionSize * 0.5f, -kPlayerCollisionSize * 0.5f });
@@ -182,6 +187,10 @@ namespace
 		auto detonate = std::make_unique<dae::DetonateBombsCommand>();
 		detonate->SetGameActor(&player);
 		input.BindKeyboardInput(dae::KeyCode::B, dae::KeyState::Down, std::move(detonate));
+
+		auto skip = std::make_unique<dae::SkipLevelCommand>();
+		skip->SetGameActor(&player);
+		input.BindKeyboardInput(dae::KeyCode::F1, dae::KeyState::Down, std::move(skip));
 	}
 
 	void BindControllerMovement(dae::GameObject& player, unsigned int controllerIndex)

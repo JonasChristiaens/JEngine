@@ -14,5 +14,6 @@ namespace dae
 		Up,
 		Down,
 		Return,
+		F1,
 	};
 }

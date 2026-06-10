@@ -17,6 +17,7 @@ namespace dae
 		int bombCapacity{ 1 };
 		int bombRange{ 1 };
 		bool hasDetonator{ false };
+		bool hasSkate{ false };
 		int health{ 4 };
 		int score{ 0 };
 	};

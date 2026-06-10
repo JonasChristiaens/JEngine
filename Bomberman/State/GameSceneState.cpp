@@ -6,6 +6,7 @@
 #include "Components/BombCapacityComponent.h"
 #include "Components/BombRangeComponent.h"
 #include "Components/DetonatorComponent.h"
+#include "Components/SkateComponent.h"
 #include "EventQueue/EventManager.h"
 #include "Input/InputManager.h"
 #include "Scene/SceneManager.h"
@@ -33,6 +34,7 @@ namespace dae
 		, m_CarriedBombCapacity(carryOver.bombCapacity)
 		, m_CarriedBombRange(carryOver.bombRange)
 		, m_CarriedDetonator(carryOver.hasDetonator)
+		, m_CarriedHasSkate(carryOver.hasSkate)
 		, m_CarriedHealth(carryOver.health)
 		, m_CarriedScore(carryOver.score)
 	{
@@ -47,7 +49,7 @@ namespace dae
 		m_Owner.SetActiveScene(scene);
 		m_Owner.ClearPlayers();
 
-		const auto data = BuildGameplayScene(scene, GetGameMode(), m_CurrentLevelIndex, { m_CarriedBombCapacity, m_CarriedBombRange, m_CarriedDetonator, m_CarriedHealth, m_CarriedScore });
+		const auto data = BuildGameplayScene(scene, GetGameMode(), m_CurrentLevelIndex, { m_CarriedBombCapacity, m_CarriedBombRange, m_CarriedDetonator, m_CarriedHasSkate, m_CarriedHealth, m_CarriedScore });
 		m_Owner.RegisterPlayer(data.player1);
 		m_Owner.RegisterPlayer(data.player2);
 		m_AlivePlayerCount = (data.player1 ? 1 : 0) + (data.player2 ? 1 : 0);
@@ -77,7 +79,7 @@ namespace dae
 			SavePlayerState();
 			++m_CurrentLevelIndex;
 
-			const PlayerCarryOver carryOver{ m_CarriedBombCapacity, m_CarriedBombRange, m_CarriedDetonator, m_CarriedHealth, m_CarriedScore };
+			const PlayerCarryOver carryOver{ m_CarriedBombCapacity, m_CarriedBombRange, m_CarriedDetonator, m_CarriedHasSkate, m_CarriedHealth, m_CarriedScore };
 			const int level = m_CurrentLevelIndex;
 			const GameMode mode = GetGameMode();
 
@@ -95,7 +97,7 @@ namespace dae
 		{
 			m_PlayerSurvivedDamage = false;
 
-			const PlayerCarryOver carryOver{ m_CarriedBombCapacity, m_CarriedBombRange, m_CarriedDetonator, m_CarriedHealth, m_CarriedScore };
+			const PlayerCarryOver carryOver{ m_CarriedBombCapacity, m_CarriedBombRange, m_CarriedDetonator, m_CarriedHasSkate, m_CarriedHealth, m_CarriedScore };
 			const GameMode mode = GetGameMode();
 
 			m_Owner.GetStateMachine().SetState(
@@ -189,6 +191,10 @@ namespace dae
 		auto* detonator = players[0]->GetComponent<DetonatorComponent>();
 		if (detonator)
 			m_CarriedDetonator = detonator->HasDetonator();
+
+		auto* skate = players[0]->GetComponent<SkateComponent>();
+		if (skate)
+			m_CarriedHasSkate = skate->HasSkate();
 
 		auto* health = players[0]->GetComponent<HealthComponent>();
 		if (health)

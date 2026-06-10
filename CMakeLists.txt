@@ -225,6 +225,7 @@ add_executable(${GAME_TARGET} ${GAME_TARGET_PARAM}
   Bomberman/Commands/ChangeHealthCommand.cpp
   Bomberman/Commands/ChangeScoreCommand.cpp
   Bomberman/Commands/ResetAchievementsCommand.cpp
+  Bomberman/Commands/SkipLevelCommand.cpp
   Bomberman/Components/CameraComponent.cpp
   Bomberman/Components/PlayfieldComponent.cpp
   Bomberman/Components/PlayerAnimatorComponent.cpp
@@ -239,6 +240,7 @@ add_executable(${GAME_TARGET} ${GAME_TARGET_PARAM}
   Bomberman/Components/BombRangeComponent.cpp
   Bomberman/Components/BombCapacityComponent.cpp
   Bomberman/Components/DetonatorComponent.cpp
+  Bomberman/Components/SkateComponent.cpp
   Bomberman/Components/DeathAnimatorComponent.cpp
   Bomberman/Components/HudComponent.cpp
   Bomberman/Factories/EnemyFactory.cpp
@@ -246,6 +248,7 @@ add_executable(${GAME_TARGET} ${GAME_TARGET_PARAM}
   Bomberman/Powerups/FlamesEffect.cpp
   Bomberman/Powerups/ExtraBombEffect.cpp
   Bomberman/Powerups/DetonatorEffect.cpp
+  Bomberman/Powerups/SkateEffect.cpp
   Bomberman/State/EnemyIdleState.cpp
   Bomberman/State/TitleSceneState.cpp
   Bomberman/State/GameSceneState.cpp

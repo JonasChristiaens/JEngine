@@ -14,6 +14,7 @@
 #include "Powerups/FlamesEffect.h"
 #include "Powerups/ExtraBombEffect.h"
 #include "Powerups/DetonatorEffect.h"
+#include "Powerups/SkateEffect.h"
 #include <algorithm>
 #include <cmath>
 #include <random>
@@ -26,6 +27,7 @@ namespace
 	constexpr SDL_FRect kFlamesSourceRect{ 16.0f, 0.0f, 16.0f, 16.0f };
 	constexpr SDL_FRect kExtraBombSourceRect{ 0.0f, 0.0f, 16.0f, 16.0f };
 	constexpr SDL_FRect kDetonatorSourceRect{ 64.0f, 0.0f, 16.0f, 16.0f };
+	constexpr SDL_FRect kSkateSourceRect{ 32.0f, 0.0f, 16.0f, 16.0f };
 	constexpr SDL_FRect kDoorSourceRect{ 176.0f, 48.0f, 16.0f, 16.0f };
 	constexpr const char* kDoorTexture = "BombermanSprites_General.png";
 	constexpr int kPowerupScoreValue = 1000;
@@ -255,6 +257,9 @@ namespace dae
 		case PickupType::RemoteControl:
 			sourceRect = kDetonatorSourceRect;
 			break;
+		case PickupType::Skate:
+			sourceRect = kSkateSourceRect;
+			break;
 		default:
 			return;
 		}
@@ -292,6 +297,9 @@ namespace dae
 			break;
 		case PickupType::RemoteControl:
 			pEffect = std::make_unique<DetonatorEffect>();
+			break;
+		case PickupType::Skate:
+			pEffect = std::make_unique<SkateEffect>();
 			break;
 		default:
 			return;
