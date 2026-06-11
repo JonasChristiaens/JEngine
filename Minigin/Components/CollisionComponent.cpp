@@ -48,6 +48,8 @@ namespace dae
 				continue;
 			if (other->IsTrigger())
 				continue;
+			if (m_CollisionFilter && m_CollisionFilter(other->GetOwner()))
+				continue;
 
 			auto* otherTransform = other->GetOwner()->GetComponent<TransformComponent>();
 			if (!otherTransform)

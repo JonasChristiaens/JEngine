@@ -14,6 +14,8 @@
 #include "State/EndSceneState.h"
 #include "State/TransitionSceneState.h"
 #include "Scenes/GameplaySceneBuilder.h"
+#include "Level/LevelDataLoader.h"
+#include "Resources/ResourceManager.h"
 
 namespace
 {
@@ -53,6 +55,7 @@ namespace dae
 		m_Owner.RegisterPlayer(data.player1);
 		m_Owner.RegisterPlayer(data.player2);
 		m_AlivePlayerCount = (data.player1 ? 1 : 0) + (data.player2 ? 1 : 0);
+		m_TotalLevels = static_cast<int>(LevelDataLoader::Load((ResourceManager::GetInstance().GetDataPath() / "levels.bin").string()).size());
 	}
 
 	void GameSceneState::OnExit()
@@ -78,6 +81,37 @@ namespace dae
 			m_LevelCompleted = false;
 			SavePlayerState();
 			++m_CurrentLevelIndex;
+
+			if (m_CurrentLevelIndex >= m_TotalLevels)
+			{
+				const auto& players = m_Owner.GetPlayers();
+				int score1 = 0;
+				int score2 = 0;
+				bool hasPlayer2 = false;
+
+				if (!players.empty() && players[0])
+				{
+					auto* sc = players[0]->GetComponent<ScoreComponent>();
+					if (sc)
+						score1 = sc->GetScore();
+				}
+				if (players.size() > 1 && players[1])
+				{
+					hasPlayer2 = true;
+					auto* sc = players[1]->GetComponent<ScoreComponent>();
+					if (sc)
+						score2 = sc->GetScore();
+				}
+
+				m_Owner.GetStateMachine().SetState(
+					std::make_unique<TransitionSceneState>(
+						m_Owner,
+						"GAME COMPLETE",
+						std::make_unique<EndSceneState>(m_Owner, score1, score2, hasPlayer2)
+					)
+				);
+				return;
+			}
 
 			const PlayerCarryOver carryOver{ m_CarriedBombCapacity, m_CarriedBombRange, m_CarriedDetonator, m_CarriedHasSkate, m_CarriedHealth, m_CarriedScore };
 			const int level = m_CurrentLevelIndex;

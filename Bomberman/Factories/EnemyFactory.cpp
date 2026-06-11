@@ -12,6 +12,7 @@
 #include "Components/DeathAnimatorComponent.h"
 #include "State/EnemyIdleState.h"
 #include "Components/RectBounds.h"
+#include <cmath>
 #include <random>
 #include <glm/vec3.hpp>
 
@@ -76,7 +77,7 @@ namespace
 			{
 				for (const auto& [reservedCol, reservedRow] : reservedTiles)
 				{
-					if (column == reservedCol && row == reservedRow)
+					if (std::abs(column - reservedCol) <= 2 && std::abs(row - reservedRow) <= 2)
 						return true;
 				}
 				return false;

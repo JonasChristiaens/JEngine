@@ -21,6 +21,7 @@ namespace dae
 		void Update() override;
 
 		void SetOnCollisionCallback(std::function<void(GameObject*)> callback) { m_OnCollision = callback; }
+		void SetCollisionFilter(std::function<bool(GameObject*)> filter) { m_CollisionFilter = std::move(filter); }
 
 		float GetWidth() const noexcept { return m_Width; }
 		float GetHeight() const noexcept { return m_Height; }
@@ -40,6 +41,7 @@ namespace dae
 		bool m_IsTrigger;
 		glm::vec2 m_Offset{ 0.0f, 0.0f };
 		std::function<void(GameObject*)> m_OnCollision{ nullptr };
+		std::function<bool(GameObject*)> m_CollisionFilter{ nullptr };
 		mutable TransformComponent* m_pTransform{};
 		int m_LastQueryId{ 0 };
 		mutable bool m_Registered{ false };

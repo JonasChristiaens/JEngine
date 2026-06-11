@@ -335,7 +335,8 @@ namespace dae
 
 		const auto& entries = HighScoreManager::GetEntries();
 		const float rowYs[HighScoreManager::kMaxEntries] = { kScoreRow1Y, kScoreRow2Y, kScoreRow3Y, kScoreRow4Y };
-		const int pendingEntryIndex = (m_Phase == Phase::EnterName) ? m_CurrentPendingIndex : -1;
+		const int pendingEntryIndex = (m_Phase == Phase::EnterName && m_CurrentPendingIndex < static_cast<int>(m_PendingEntries.size()))
+			? m_PendingEntries[m_CurrentPendingIndex].entryIndex : -1;
 
 		for (int i = 0; i < HighScoreManager::kMaxEntries; ++i)
 		{

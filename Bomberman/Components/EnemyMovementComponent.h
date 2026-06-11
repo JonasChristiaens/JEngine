@@ -44,6 +44,7 @@ namespace dae
 		float m_ChaseAlignmentThreshold{ 24.0f };
 		bool m_Enabled{ true };
 		bool m_WasChasing{ false };
+		bool m_FilterSet{ false };
 
 		void RefreshComponents();
 		void ChooseNewDirection();

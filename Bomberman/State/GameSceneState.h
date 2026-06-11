@@ -18,6 +18,7 @@ namespace dae
 
 	private:
 		int m_CurrentLevelIndex{ 0 };
+		int m_TotalLevels{ 0 };
 		bool m_LevelCompleted{ false };
 		int m_CarriedBombCapacity{ 1 };
 		int m_CarriedBombRange{ 1 };

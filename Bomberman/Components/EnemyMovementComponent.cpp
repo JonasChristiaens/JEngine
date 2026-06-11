@@ -5,6 +5,7 @@
 #include "Components/CollisionGrid.h"
 #include "Components/PlayfieldComponent.h"
 #include "Components/BombRangeComponent.h"
+#include "Components/EnemyComponent.h"
 #include "Core/GameTime.h"
 #include "EventQueue/EventManager.h"
 #include <glm/glm.hpp>
@@ -40,6 +41,14 @@ namespace dae
 			return;
 
 		RefreshComponents();
+		if (m_pCollision && !m_FilterSet)
+		{
+			m_pCollision->SetCollisionFilter([](GameObject* other)
+				{
+					return other->HasComponent<EnemyComponent>();
+				});
+			m_FilterSet = true;
+		}
 		if (!m_pTransform)
 			return;
 
