@@ -11,6 +11,7 @@
 #include "Rendering/Renderer.h"
 #include "Commands/Command.h"
 #include "HighScoreManager.h"
+#include "Resources/ResourceManager.h"
 #include "State/TitleSceneState.h"
 #include <iomanip>
 #include <sstream>
@@ -180,7 +181,7 @@ namespace dae
 
 		const int entryIndex = m_PendingEntries[m_CurrentPendingIndex].entryIndex;
 		HighScoreManager::UpdateName(entryIndex, m_CurrentName);
-		HighScoreManager::Save("Data/highscores.bin");
+		HighScoreManager::Save(ResourceManager::GetInstance().GetDataPath().string() + "highscores.bin");
 		RefreshScoreDisplay();
 		RefreshNameDisplay();
 	}

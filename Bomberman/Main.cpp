@@ -12,6 +12,7 @@
 #include "Components/SceneStateMachineComponent.h"
 #include "State/TitleSceneState.h"
 #include "HighScoreManager.h"
+#include "Resources/ResourceManager.h"
 
 #include <filesystem>
 #include <vector>
@@ -21,7 +22,7 @@ namespace
 {
 	void load()
 	{
-		dae::HighScoreManager::Load("Data/highscores.bin");
+		dae::HighScoreManager::Load(dae::ResourceManager::GetInstance().GetDataPath().string() + "highscores.bin");
 
 		auto& scene = dae::SceneManager::GetInstance().CreateScene();
 		auto stateMachineObject = std::make_unique<dae::GameObject>();

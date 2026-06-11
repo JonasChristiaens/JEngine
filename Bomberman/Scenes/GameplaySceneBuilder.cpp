@@ -13,6 +13,7 @@
 #include "Rendering/Renderer.h"
 #include "Level/LevelData.h"
 #include "Level/LevelDataLoader.h"
+#include "Resources/ResourceManager.h"
 #include <SDL3/SDL.h>
 #include <algorithm>
 #include <cmath>
@@ -34,7 +35,8 @@ namespace
 
 	std::vector<dae::LevelData> LoadLevels()
 	{
-		return dae::LevelDataLoader::Load("Data/levels.bin");
+		const std::string path = ResourceManager::GetInstance().GetDataPath().string() + "levels.bin";
+		return dae::LevelDataLoader::Load(path);
 	}
 
 	std::unique_ptr<dae::BombEventObserver> g_BombObserver{};
