@@ -9,7 +9,6 @@
 #include "Components/CollisionGrid.h"
 #include "Observers/BombEventObserver.h"
 #include "Observers/EntityDeathObserver.h"
-#include "Audio/AudioEventObserver.h"
 #include "Rendering/Renderer.h"
 #include "Level/LevelData.h"
 #include "Level/LevelDataLoader.h"
@@ -41,7 +40,6 @@ namespace
 
 	std::unique_ptr<dae::BombEventObserver> g_BombObserver{};
 	std::unique_ptr<dae::EntityDeathObserver> g_EntityDeathObserver{};
-	std::unique_ptr<dae::AudioEventObserver> g_AudioObserver{};
 }
 
 namespace dae
@@ -124,8 +122,6 @@ namespace dae
 			g_BombObserver = std::make_unique<BombEventObserver>(scene, tileWorldSize);
 		if (!g_EntityDeathObserver)
 			g_EntityDeathObserver = std::make_unique<EntityDeathObserver>(scene);
-		if (!g_AudioObserver)
-			g_AudioObserver = std::make_unique<AudioEventObserver>();
 
 		std::vector<GameObject*> hudPlayers{};
 		if (player1) hudPlayers.push_back(player1);
@@ -139,6 +135,5 @@ namespace dae
 	{
 		g_BombObserver.reset();
 		g_EntityDeathObserver.reset();
-		g_AudioObserver.reset();
 	}
 }

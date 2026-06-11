@@ -18,6 +18,12 @@ namespace dae
 		if (m_pTarget == nullptr)
 			return;
 
+		if (m_pTarget->IsMarkedForDeletion())
+		{
+			m_pTarget = nullptr;
+			return;
+		}
+
 		if (m_pTransform == nullptr)
 			m_pTransform = GetOwner()->GetComponent<TransformComponent>();
 		if (m_pTransform == nullptr)

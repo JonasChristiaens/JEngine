@@ -1,6 +1,5 @@
 #include "TransitionSceneState.h"
 #include "Components/SceneStateMachineComponent.h"
-#include "Components/DelayedEventComponent.h"
 #include "Components/RenderComponent.h"
 #include "Components/TransformComponent.h"
 #include "EventQueue/EventManager.h"
@@ -9,6 +8,8 @@
 #include "Scene/Scene.h"
 #include "Scene/GameObject.h"
 #include "State/StateMachine.h"
+#include "Audio/ServiceLocator.h"
+#include "Core/GameTime.h"
 #include <SDL3/SDL.h>
 
 namespace
@@ -19,8 +20,12 @@ namespace
 	constexpr float kGlyphRow2Y{ 272.0f };
 	constexpr float kTextScale{ 4.0f };
 	constexpr int kTextRenderLayer{ 1 };
-	constexpr float kTransitionDelay{ 2.0f };
-	constexpr dae::EventId kTransitionCompleteEventId = dae::make_sdbm_hash("TransitionComplete");
+	constexpr float kMinDisplayTime{ 1.0f };
+	constexpr float kMaxDisplayTime{ 8.0f };
+	constexpr float kGracePeriod{ 0.6f };
+	constexpr const char* kStageStartPath = "Stage_Start.flac";
+	constexpr const char* kGameOverPath = "Game_Over.flac";
+	constexpr const char* kEndingPath = "Ending.flac";
 }
 
 namespace dae
@@ -33,23 +38,30 @@ namespace dae
 		, m_NextState(std::move(nextState))
 	{}
 
-	TransitionSceneState::~TransitionSceneState()
-	{
-		if (EventManager::IsAlive())
-			EventManager::GetInstance().RemoveObserver(*this);
-	}
+	TransitionSceneState::~TransitionSceneState() = default;
 
 	void TransitionSceneState::OnEnter()
 	{
-		EventManager::GetInstance().AddObserver(*this);
 		BuildScene();
+
+		const char* soundPath = kStageStartPath;
+		if (m_Text == "GAME OVER")
+			soundPath = kGameOverPath;
+		else if (m_Text == "GAME COMPLETE")
+			soundPath = kEndingPath;
+
+		Event playSoundEvent(make_sdbm_hash("PlayAudioEvent"));
+		playSoundEvent.nbArgs = 1;
+		playSoundEvent.args[0].p = const_cast<char*>(soundPath);
+		EventManager::GetInstance().BroadcastImmediate(playSoundEvent, m_Root);
+
+		m_SoundPlayed = true;
+		m_Elapsed = 0.0f;
 	}
 
 	void TransitionSceneState::OnExit()
 	{
-		if (EventManager::IsAlive())
-			EventManager::GetInstance().RemoveObserver(*this);
-
+		ServiceLocator::GetSoundService().StopAll();
 		ClearScene();
 	}
 
@@ -59,6 +71,38 @@ namespace dae
 		{
 			m_ShouldTransition = false;
 			m_Owner.GetStateMachine().SetState(std::move(m_NextState));
+			return;
+		}
+
+		if (!m_SoundPlayed)
+			return;
+
+		m_Elapsed += GameTime::GetInstance().GetDeltaTime();
+
+		if (m_Elapsed < kMinDisplayTime)
+			return;
+
+		if (m_Elapsed > kMaxDisplayTime)
+		{
+			m_ShouldTransition = true;
+			return;
+		}
+
+		if (!ServiceLocator::GetSoundService().IsPlaying())
+		{
+			if (!m_SoundFinished)
+			{
+				m_SoundFinished = true;
+				m_GraceTimer = kGracePeriod;
+			}
+			else
+			{
+				m_GraceTimer -= GameTime::GetInstance().GetDeltaTime();
+				if (m_GraceTimer <= 0.0f)
+				{
+					m_ShouldTransition = true;
+				}
+			}
 		}
 	}
 
@@ -75,14 +119,6 @@ namespace dae
 		SDL_RenderFillRect(renderer, &fullScreen);
 
 		SDL_SetRenderDrawColor(renderer, prevR, prevG, prevB, prevA);
-	}
-
-	void TransitionSceneState::Notify(GameObject& /*actor*/, Event event)
-	{
-		if (event.id == kTransitionCompleteEventId)
-		{
-			m_ShouldTransition = true;
-		}
 	}
 
 	void TransitionSceneState::BuildScene()
@@ -112,12 +148,6 @@ namespace dae
 		scene.Add(std::move(rootObject));
 
 		CreateTextSprites(scene, *m_Root, m_Text, startX, startY);
-
-		const Event transitionEvent(kTransitionCompleteEventId);
-		auto timerObject = std::make_unique<GameObject>();
-		timerObject->AddComponent<DelayedEventComponent>(transitionEvent, kTransitionDelay);
-		timerObject->SetParent(m_Root, false);
-		scene.Add(std::move(timerObject));
 	}
 
 	void TransitionSceneState::CreateTextSprites(Scene& scene, GameObject& parent, const std::string& text, float startX, float startY)

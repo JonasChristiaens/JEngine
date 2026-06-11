@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <filesystem>
 #include <atomic>
+#include <chrono>
 #include <condition_variable>
 #include <mutex>
 #include <thread>
@@ -58,6 +59,7 @@ namespace dae
 				}
 			}
 			m_ActiveTracks.clear();
+			m_ActiveTrackCount.store(0);
 
 			for (auto& [_, pAudio] : m_LoadedSounds)
 			{
@@ -85,6 +87,11 @@ namespace dae
 			m_Condition.notify_one();
 		}
 
+		bool IsPlaying() const
+		{
+			return !m_Muted && m_ActiveTrackCount.load() > 0;
+		}
+
 		void PreloadSound(const std::string& relativePath)
 		{
 			std::lock_guard lock(m_QueueMutex);
@@ -100,6 +107,17 @@ namespace dae
 				std::lock_guard lock(m_QueueMutex);
 				m_Queue.clear();
 			}
+			if (m_pMixer)
+			{
+				MIX_SetMixerGain(m_pMixer, muted ? 0.0f : 1.0f);
+			}
+		}
+
+		void StopAll()
+		{
+			std::lock_guard lock(m_QueueMutex);
+			m_Queue.push_back({ RequestType::StopAll, {} });
+			m_Condition.notify_one();
 		}
 
 	private:
@@ -107,7 +125,8 @@ namespace dae
 		{
 			Preload,
 			Play,
-			Stop
+			Stop,
+			StopAll
 		};
 
 		struct Request
@@ -118,16 +137,23 @@ namespace dae
 
 		void ThreadMain()
 		{
+			using namespace std::chrono_literals;
+
 			for (;;)
 			{
 				Request request{};
 
 				{
 					std::unique_lock lock(m_QueueMutex);
-					m_Condition.wait(lock, [this]() { return !m_Queue.empty() || !m_Running; });
+					m_Condition.wait_for(lock, 100ms, [this]() { return !m_Queue.empty() || !m_Running; });
 
-					if (m_Queue.empty() && !m_Running)
-						break;
+					if (m_Queue.empty())
+					{
+						if (!m_Running)
+							break;
+						CleanupFinishedTracks();
+						continue;
+					}
 
 					request = std::move(m_Queue.front());
 					m_Queue.erase(m_Queue.begin());
@@ -144,6 +170,22 @@ namespace dae
 		{
 			if (m_pMixer == nullptr)
 				return;
+
+			if (request.type == RequestType::StopAll)
+			{
+				CleanupFinishedTracks();
+				for (auto* pTrack : m_ActiveTracks)
+				{
+					if (pTrack)
+					{
+						MIX_StopTrack(pTrack, 0);
+						MIX_DestroyTrack(pTrack);
+					}
+				}
+				m_ActiveTracks.clear();
+				m_ActiveTrackCount.store(0);
+				return;
+			}
 
 			if (request.path.empty())
 				return;
@@ -179,6 +221,7 @@ namespace dae
 			}
 
 			m_ActiveTracks.push_back(pTrack);
+			++m_ActiveTrackCount;
 		}
 
 		MIX_Audio* LoadSoundIfNeeded(const std::string& relativePath)
@@ -201,6 +244,7 @@ namespace dae
 
 		void CleanupFinishedTracks()
 		{
+			const auto before = m_ActiveTracks.size();
 			m_ActiveTracks.erase(
 				std::remove_if(m_ActiveTracks.begin(), m_ActiveTracks.end(), [](MIX_Track* pTrack)
 					{
@@ -215,6 +259,10 @@ namespace dae
 					}),
 				m_ActiveTracks.end()
 			);
+			if (m_ActiveTracks.size() < before)
+			{
+				m_ActiveTrackCount.store(static_cast<int>(m_ActiveTracks.size()));
+			}
 		}
 
 		std::atomic<bool> m_Running{ true };
@@ -226,6 +274,7 @@ namespace dae
 		MIX_Mixer* m_pMixer{};
 		std::unordered_map<std::string, MIX_Audio*> m_LoadedSounds{};
 		std::vector<MIX_Track*> m_ActiveTracks{};
+		std::atomic<int> m_ActiveTrackCount{ 0 };
 		bool m_Muted{ false };
 	};
 
@@ -243,6 +292,11 @@ namespace dae
 		m_pImpl->PlaySound(relativePath);
 	}
 
+	bool SoundServiceSdlMixer::IsPlaying() const
+	{
+		return m_pImpl->IsPlaying();
+	}
+
 	void SoundServiceSdlMixer::PreloadSound(const std::string& relativePath)
 	{
 		m_pImpl->PreloadSound(relativePath);
@@ -251,5 +305,10 @@ namespace dae
 	void SoundServiceSdlMixer::SetMuted(bool muted)
 	{
 		m_pImpl->SetMuted(muted);
+	}
+
+	void SoundServiceSdlMixer::StopAll()
+	{
+		m_pImpl->StopAll();
 	}
 }

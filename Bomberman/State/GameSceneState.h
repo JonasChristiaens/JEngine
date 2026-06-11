@@ -30,6 +30,8 @@ namespace dae
 		bool m_PlayerSurvivedDamage{ false };
 		bool m_RespawnAfterDeathAnim{ false };
 		GameObject* m_pRespawnPlayer{ nullptr };
+		float m_BgmCooldown{ 0.0f };
+		bool m_StageClearPlayed{ false };
 
 		void SavePlayerState();
 		void HandlePlayerSurvivedDamage(GameObject& player);

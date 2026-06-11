@@ -16,10 +16,13 @@
 #include "Scenes/GameplaySceneBuilder.h"
 #include "Level/LevelDataLoader.h"
 #include "Resources/ResourceManager.h"
+#include "Audio/ServiceLocator.h"
+#include "Core/GameTime.h"
 
 namespace
 {
 	constexpr dae::EventId kLevelCompletedEventId = dae::make_sdbm_hash("LevelCompleted");
+	constexpr dae::EventId kAllEnemiesDeadEventId = dae::make_sdbm_hash("AllEnemiesDead");
 }
 
 namespace dae
@@ -56,10 +59,19 @@ namespace dae
 		m_Owner.RegisterPlayer(data.player2);
 		m_AlivePlayerCount = (data.player1 ? 1 : 0) + (data.player2 ? 1 : 0);
 		m_TotalLevels = static_cast<int>(LevelDataLoader::Load((ResourceManager::GetInstance().GetDataPath() / "levels.bin").string()).size());
+
+		m_StageClearPlayed = false;
+
+		Event playBgmEvent(make_sdbm_hash("PlayAudioEvent"));
+		playBgmEvent.nbArgs = 1;
+		playBgmEvent.args[0].p = const_cast<char*>("Main_BGM.flac");
+		EventManager::GetInstance().BroadcastImmediate(playBgmEvent, m_Owner.GetOwner());
+		m_BgmCooldown = 1.0f;
 	}
 
 	void GameSceneState::OnExit()
 	{
+		ServiceLocator::GetSoundService().StopAll();
 		if (EventManager::IsAlive())
 			EventManager::GetInstance().RemoveObserver(*this);
 
@@ -76,6 +88,19 @@ namespace dae
 
 	void GameSceneState::Update()
 	{
+		if (m_BgmCooldown > 0.0f)
+		{
+			m_BgmCooldown -= GameTime::GetInstance().GetDeltaTime();
+		}
+		else if (!ServiceLocator::GetSoundService().IsPlaying())
+		{
+			Event playBgmEvent(make_sdbm_hash("PlayAudioEvent"));
+			playBgmEvent.nbArgs = 1;
+			playBgmEvent.args[0].p = const_cast<char*>("Main_BGM.flac");
+			EventManager::GetInstance().BroadcastImmediate(playBgmEvent, m_Owner.GetOwner());
+			m_BgmCooldown = 1.0f;
+		}
+
 		if (m_LevelCompleted)
 		{
 			m_LevelCompleted = false;
@@ -181,6 +206,18 @@ namespace dae
 		if (event.id == kLevelCompletedEventId)
 		{
 			m_LevelCompleted = true;
+		}
+		else if (event.id == kAllEnemiesDeadEventId)
+		{
+			if (!m_StageClearPlayed)
+			{
+				m_StageClearPlayed = true;
+
+				Event playSfxEvent(make_sdbm_hash("PlayAudioEvent"));
+				playSfxEvent.nbArgs = 1;
+				playSfxEvent.args[0].p = const_cast<char*>("Stage_Clear.flac");
+				EventManager::GetInstance().BroadcastImmediate(playSfxEvent, m_Owner.GetOwner());
+			}
 		}
 		else if (event.id == make_sdbm_hash("EntityDied"))
 		{

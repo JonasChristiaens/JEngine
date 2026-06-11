@@ -1,6 +1,5 @@
 #pragma once
 #include "SceneState.h"
-#include "EventQueue/IObserver.h"
 #include <memory>
 #include <string>
 
@@ -10,7 +9,7 @@ namespace dae
 	class GameObject;
 	class State;
 
-	class TransitionSceneState final : public SceneState, public IObserver
+	class TransitionSceneState final : public SceneState
 	{
 	public:
 		TransitionSceneState(SceneStateMachineComponent& owner,
@@ -22,7 +21,6 @@ namespace dae
 		void OnExit() override;
 		void Update() override;
 		void Render() const override;
-		void Notify(GameObject& actor, Event event) override;
 
 	private:
 		void BuildScene();
@@ -33,6 +31,10 @@ namespace dae
 		std::string m_Text;
 		std::unique_ptr<State> m_NextState;
 		bool m_ShouldTransition{ false };
+		bool m_SoundPlayed{ false };
+		bool m_SoundFinished{ false };
+		float m_Elapsed{ 0.0f };
+		float m_GraceTimer{ 0.0f };
 		GameObject* m_Root{};
 		Scene* m_pScene{};
 	};

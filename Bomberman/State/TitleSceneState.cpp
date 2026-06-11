@@ -15,6 +15,9 @@
 #include "Config/GameMode.h"
 #include "Managers/HighScoreManager.h"
 #include "Commands/ToggleMuteCommand.h"
+#include "Audio/ServiceLocator.h"
+#include "EventQueue/EventManager.h"
+#include "Core/GameTime.h"
 #include <array>
 #include <iomanip>
 #include <sstream>
@@ -101,12 +104,37 @@ namespace dae
 		UpdateMenuSprites();
 		UpdateModeLabel();
 		BindInput();
+
+		Event playBgmEvent(make_sdbm_hash("PlayAudioEvent"));
+		playBgmEvent.nbArgs = 1;
+		playBgmEvent.args[0].p = const_cast<char*>("Title_Screen.flac");
+		EventManager::GetInstance().BroadcastImmediate(playBgmEvent, m_pRoot);
+		m_BgmCooldown = 1.0f;
 	}
 
 	void TitleSceneState::OnExit()
 	{
+		ServiceLocator::GetSoundService().StopAll();
 		UnbindInput();
 		ClearScene();
+	}
+
+	void TitleSceneState::Update()
+	{
+		if (m_BgmCooldown > 0.0f)
+		{
+			m_BgmCooldown -= GameTime::GetInstance().GetDeltaTime();
+			return;
+		}
+
+		if (!ServiceLocator::GetSoundService().IsPlaying())
+		{
+			Event playBgmEvent(make_sdbm_hash("PlayAudioEvent"));
+			playBgmEvent.nbArgs = 1;
+			playBgmEvent.args[0].p = const_cast<char*>("Title_Screen.flac");
+			EventManager::GetInstance().BroadcastImmediate(playBgmEvent, m_pRoot);
+			m_BgmCooldown = 1.0f;
+		}
 	}
 
 	void TitleSceneState::BuildScene()

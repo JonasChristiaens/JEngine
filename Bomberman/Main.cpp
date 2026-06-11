@@ -16,6 +16,7 @@
 #include "Commands/ToggleMuteCommand.h"
 #include "Input/InputManager.h"
 #include "Input/KeyCodes.h"
+#include "Audio/AudioEventObserver.h"
 
 #include <filesystem>
 #include <vector>
@@ -33,6 +34,8 @@ namespace
 	void load()
 	{
 		dae::HighScoreManager::Load((dae::ResourceManager::GetInstance().GetDataPath() / "highscores.bin").string());
+
+		static auto g_AudioObserver = std::make_unique<dae::AudioEventObserver>();
 
 		auto& scene = dae::SceneManager::GetInstance().CreateScene();
 		auto stateMachineObject = std::make_unique<dae::GameObject>();

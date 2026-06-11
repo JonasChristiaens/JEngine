@@ -11,5 +11,7 @@ namespace dae
 		virtual void PlaySound(const std::string& relativePath) = 0;
 		virtual void PreloadSound(const std::string& relativePath) = 0;
 		virtual void SetMuted(bool muted) = 0;
+		virtual bool IsPlaying() const { return false; }
+		virtual void StopAll() {}
 	};
 }

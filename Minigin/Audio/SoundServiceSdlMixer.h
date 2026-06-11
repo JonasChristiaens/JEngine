@@ -18,6 +18,8 @@ namespace dae
 		void PlaySound(const std::string& relativePath) override;
 		void PreloadSound(const std::string& relativePath) override;
 		void SetMuted(bool muted) override;
+		bool IsPlaying() const override;
+		void StopAll() override;
 
 	private:
 		class SoundServiceSdlMixerImpl;

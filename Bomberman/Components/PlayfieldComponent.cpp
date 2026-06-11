@@ -206,7 +206,14 @@ namespace dae
 			m_pItems->OnBrickDestroyed(&actor, m_Grid, tileWorldSize);
 
 			if (actor.HasComponent<EnemyComponent>())
+			{
 				m_Grid.DecrementEnemyCount();
+				if (m_Grid.AreAllEnemiesDead())
+				{
+					Event allDeadEvent(make_sdbm_hash("AllEnemiesDead"));
+					EventManager::GetInstance().BroadcastImmediate(allDeadEvent, &actor);
+				}
+			}
 		}
 
 		if (event.id == kChangeHealthEventId || event.id == kEntityDiedEventId || event.id == kTookDamageEventId)

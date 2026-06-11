@@ -18,6 +18,7 @@ namespace dae
 		void OnEnter() override;
 		void OnExit() override;
 		void HandleInput() override {}
+		void Update() override;
 		void MoveSelection(int direction);
 		void ConfirmSelection();
 		void CycleMode();
@@ -45,5 +46,6 @@ namespace dae
 		RenderComponent* m_pModeArrow{};
 		GameObject* m_pModeLabelRoot{};
 		GameObject* m_pScoreRoot{};
+		float m_BgmCooldown{ 0.0f };
 	};
 }
