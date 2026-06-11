@@ -7,6 +7,7 @@
 #include "Components/CollisionComponent.h"
 #include "Components/HealthComponent.h"
 #include "Components/EnemyComponent.h"
+#include "Components/BombComponent.h"
 #include "Components/PlayfieldComponent.h"
 #include "EventQueue/EventManager.h"
 #include "Core/GameTime.h"
@@ -129,14 +130,22 @@ namespace dae
 				const float damageSize = m_TileWorldSize * kDamageColliderScale;
 				auto* collider = damageTile->AddComponent<CollisionComponent>(damageSize, damageSize, true);
 				collider->SetOffset({ -damageSize * 0.5f, -damageSize * 0.5f });
-				collider->SetOnCollisionCallback([pBombOwner](GameObject* other)
-					{
-						if (!other || other->IsMarkedForDeletion())
-							return;
+			collider->SetOnCollisionCallback([pBombOwner](GameObject* other)
+				{
+					if (!other || other->IsMarkedForDeletion())
+						return;
 
-						auto* health = other->GetComponent<HealthComponent>();
-						if (!health)
-							return;
+					if (auto* bombComp = other->GetComponent<BombComponent>())
+					{
+						Event detonateEvent(make_sdbm_hash("DetonateBombEvent"));
+						detonateEvent.nbArgs = 0;
+						EventManager::GetInstance().BroadcastImmediate(detonateEvent, other);
+						return;
+					}
+
+					auto* health = other->GetComponent<HealthComponent>();
+					if (!health)
+						return;
 
 						const int healthBefore = health->GetHealth();
 

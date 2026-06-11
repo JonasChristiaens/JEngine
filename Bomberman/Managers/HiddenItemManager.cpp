@@ -1,5 +1,5 @@
 #include "HiddenItemManager.h"
-#include "PlayfieldGrid.h"
+#include "Level/PlayfieldGrid.h"
 #include "Scene/Scene.h"
 #include "Scene/GameObject.h"
 #include "Components/TransformComponent.h"

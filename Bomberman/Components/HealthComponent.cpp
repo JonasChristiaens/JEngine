@@ -63,14 +63,6 @@ void dae::HealthComponent::ChangeCurrentHealth(int amount)
 			}
 		}
 
-		if (GetOwner()->HasComponent<BombRangeComponent>())
-		{
-			Event playAudioEvent(make_sdbm_hash("PlayAudioEvent"));
-			playAudioEvent.nbArgs = 1;
-			playAudioEvent.args[0].p = "bomberman_killed.wav";
-			EventManager::GetInstance().BroadcastEvent(playAudioEvent, GetOwner());
-		}
-
 		auto* deathAnim = GetOwner()->GetComponent<DeathAnimatorComponent>();
 		if (deathAnim)
 		{
@@ -85,6 +77,14 @@ void dae::HealthComponent::ChangeCurrentHealth(int amount)
 
 	if (amount < 0)
 	{
+		if (GetOwner()->HasComponent<BombRangeComponent>())
+		{
+			Event playAudioEvent(make_sdbm_hash("PlayAudioEvent"));
+			playAudioEvent.nbArgs = 1;
+			playAudioEvent.args[0].p = "bomberman_killed.wav";
+			EventManager::GetInstance().BroadcastEvent(playAudioEvent, GetOwner());
+		}
+
 		Event tookDamageEvent(make_sdbm_hash("TookDamageEvent"));
 		tookDamageEvent.nbArgs = 1;
 		tookDamageEvent.args[0].i = -amount;

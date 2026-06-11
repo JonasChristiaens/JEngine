@@ -1,7 +1,7 @@
 #pragma once
 #include "Scene/Scene.h"
 #include "Scene/GameObject.h"
-#include "GameMode.h"
+#include "Config/GameMode.h"
 
 namespace dae
 {

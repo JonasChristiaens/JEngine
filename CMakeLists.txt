@@ -112,16 +112,6 @@ target_include_directories(imgui PUBLIC
 )
 target_link_libraries(imgui PUBLIC SDL3::SDL3)
 
-# ----- ImGui Plot -----
-FetchContent_Declare(
-	imgui_plot
-	GIT_REPOSITORY https://github.com/soulthreads/imgui-plot.git
-	GIT_TAG        master
-	GIT_SHALLOW    TRUE
-)
-FetchContent_MakeAvailable(imgui_plot)
-target_link_libraries(imgui_plot PUBLIC imgui)
-
 # =================
 # Optional tools
 # =================
@@ -150,9 +140,6 @@ add_library(minigin STATIC
 	Minigin/Components/TransformComponent.cpp
 	Minigin/Components/RenderComponent.cpp
 	Minigin/Components/TextComponent.cpp
-	Minigin/Components/RotateComponent.cpp
-	Minigin/Components/FPSComponent.cpp
-	Minigin/Components/CacheExerciseComponent.cpp
 	Minigin/Components/SpriteAnimatorComponent.cpp
 	Minigin/Components/CollisionComponent.cpp
 	Minigin/Components/CollisionGrid.cpp
@@ -184,7 +171,6 @@ target_link_libraries(minigin PUBLIC
 	SDL3_mixer::SDL3_mixer
 	glm::glm
 	imgui
-	imgui_plot
 )
 
 if(VLD_FOUND)
@@ -210,10 +196,9 @@ add_executable(${GAME_TARGET} ${GAME_TARGET_PARAM}
 	Bomberman/Commands/ChangeScoreCommand.cpp
 	Bomberman/Commands/ResetAchievementsCommand.cpp
 	Bomberman/Commands/SkipLevelCommand.cpp
+	Bomberman/Commands/ToggleMuteCommand.cpp
 	Bomberman/Components/CameraComponent.cpp
 	Bomberman/Components/PlayfieldComponent.cpp
-	Bomberman/Components/PlayfieldGrid.cpp
-	Bomberman/Components/HiddenItemManager.cpp
 	Bomberman/Components/PlayerAnimatorComponent.cpp
 	Bomberman/Components/HealthComponent.cpp
 	Bomberman/Components/ScoreComponent.cpp
@@ -231,6 +216,8 @@ add_executable(${GAME_TARGET} ${GAME_TARGET_PARAM}
 	Bomberman/Components/HudComponent.cpp
 	Bomberman/Factories/EnemyFactory.cpp
 	Bomberman/Managers/ExplosionEffectManager.cpp
+	Bomberman/Managers/HiddenItemManager.cpp
+	Bomberman/Managers/HighScoreManager.cpp
 	Bomberman/Powerups/FlamesEffect.cpp
 	Bomberman/Powerups/ExtraBombEffect.cpp
 	Bomberman/Powerups/DetonatorEffect.cpp
@@ -244,7 +231,7 @@ add_executable(${GAME_TARGET} ${GAME_TARGET_PARAM}
 	Bomberman/Scenes/PlayerSetup.cpp
 	Bomberman/Scenes/ModeSetup.cpp
 	Bomberman/Level/LevelDataLoader.cpp
-	Bomberman/HighScoreManager.cpp
+	Bomberman/Level/PlayfieldGrid.cpp
 )
 
 target_compile_features(${GAME_TARGET} PRIVATE cxx_std_20)

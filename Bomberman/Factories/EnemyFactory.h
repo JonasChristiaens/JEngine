@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include <glm/vec3.hpp>
-#include "EnemyConfig.h"
+#include "Config/EnemyConfig.h"
 
 namespace dae
 {

@@ -11,8 +11,11 @@
 #include "Scene/GameObject.h"
 #include "Components/SceneStateMachineComponent.h"
 #include "State/TitleSceneState.h"
-#include "HighScoreManager.h"
+#include "Managers/HighScoreManager.h"
 #include "Resources/ResourceManager.h"
+#include "Commands/ToggleMuteCommand.h"
+#include "Input/InputManager.h"
+#include "Input/KeyCodes.h"
 
 #include <filesystem>
 #include <vector>
@@ -20,6 +23,13 @@ namespace fs = std::filesystem;
 
 namespace
 {
+	void BindMuteToggle(dae::GameObject& actor)
+	{
+		auto mute = std::make_unique<dae::ToggleMuteCommand>();
+		mute->SetGameActor(&actor);
+		dae::InputManager::GetInstance().BindKeyboardInput(dae::KeyCode::F2, dae::KeyState::Down, std::move(mute));
+	}
+
 	void load()
 	{
 		dae::HighScoreManager::Load((dae::ResourceManager::GetInstance().GetDataPath() / "highscores.bin").string());
@@ -28,6 +38,8 @@ namespace
 		auto stateMachineObject = std::make_unique<dae::GameObject>();
 		auto* stateMachineComponent = stateMachineObject->AddComponent<dae::SceneStateMachineComponent>();
 		scene.Add(std::move(stateMachineObject));
+
+		BindMuteToggle(*stateMachineComponent->GetOwner());
 
 		stateMachineComponent->GetStateMachine().SetState(std::make_unique<dae::TitleSceneState>(*stateMachineComponent));
 	}

@@ -1,5 +1,5 @@
 #include "PlayfieldComponent.h"
-#include "HiddenItemManager.h"
+#include "Managers/HiddenItemManager.h"
 #include "Scene/Scene.h"
 #include "Scene/GameObject.h"
 #include "Components/CollisionComponent.h"
@@ -9,7 +9,7 @@
 #include "Components/DeathAnimatorComponent.h"
 #include "Components/EnemyComponent.h"
 #include "EventQueue/EventManager.h"
-#include "EnemyConfig.h"
+#include "Config/EnemyConfig.h"
 #include <algorithm>
 #include <cmath>
 #include <random>

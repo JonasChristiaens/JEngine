@@ -2,7 +2,7 @@
 #include "PlayerSetup.h"
 #include "Components/PlayfieldComponent.h"
 #include "Factories/EnemyFactory.h"
-#include "EnemyConfig.h"
+#include "Config/EnemyConfig.h"
 #include <algorithm>
 
 namespace

@@ -2,7 +2,7 @@
 #include "BaseComponent.h"
 #include "EventQueue/IObserver.h"
 #include "Level/LevelData.h"
-#include "PlayfieldGrid.h"
+#include "Level/PlayfieldGrid.h"
 #include <SDL3/SDL.h>
 #include <glm/vec2.hpp>
 #include <memory>

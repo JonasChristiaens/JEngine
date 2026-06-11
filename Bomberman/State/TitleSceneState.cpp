@@ -12,8 +12,9 @@
 #include "State/GameSceneState.h"
 #include "State/TransitionSceneState.h"
 #include "Commands/Command.h"
-#include "GameMode.h"
-#include "HighScoreManager.h"
+#include "Config/GameMode.h"
+#include "Managers/HighScoreManager.h"
+#include "Commands/ToggleMuteCommand.h"
 #include <array>
 #include <iomanip>
 #include <sstream>
@@ -289,11 +290,16 @@ namespace dae
 		input.BindControllerInput(controllerIndex, ControllerButton::kDpadUp, KeyState::Down, std::make_unique<TitleMenuCommand>(*this, TitleMenuCommand::Action::Up));
 		input.BindControllerInput(controllerIndex, ControllerButton::kDpadDown, KeyState::Down, std::make_unique<TitleMenuCommand>(*this, TitleMenuCommand::Action::Down));
 		input.BindControllerInput(controllerIndex, ControllerButton::kX, KeyState::Down, std::make_unique<TitleMenuCommand>(*this, TitleMenuCommand::Action::Confirm));
+
+		auto mute = std::make_unique<ToggleMuteCommand>();
+		mute->SetGameActor(m_pRoot);
+		input.BindKeyboardInput(KeyCode::F2, KeyState::Down, std::move(mute));
 	}
 
 	void TitleSceneState::UnbindInput()
 	{
 		auto& input = InputManager::GetInstance();
+		input.UnBindKeyboardInput(KeyCode::F2, KeyState::Down);
 		input.UnBindKeyboardInput(KeyCode::Up, KeyState::Down);
 		input.UnBindKeyboardInput(KeyCode::Down, KeyState::Down);
 		input.UnBindKeyboardInput(KeyCode::Return, KeyState::Down);

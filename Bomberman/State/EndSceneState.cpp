@@ -10,8 +10,9 @@
 #include "Input/ControllerButtons.h"
 #include "Rendering/Renderer.h"
 #include "Commands/Command.h"
-#include "HighScoreManager.h"
+#include "Managers/HighScoreManager.h"
 #include "Resources/ResourceManager.h"
+#include "Commands/ToggleMuteCommand.h"
 #include "State/TitleSceneState.h"
 #include <iomanip>
 #include <sstream>
@@ -449,6 +450,10 @@ namespace dae
 	void EndSceneState::BindInput()
 	{
 		auto& input = InputManager::GetInstance();
+
+		auto mute = std::make_unique<ToggleMuteCommand>();
+		mute->SetGameActor(m_pRoot);
+		input.BindKeyboardInput(KeyCode::F2, KeyState::Down, std::move(mute));
 
 		if (m_Phase == Phase::CheckScores || m_Phase == Phase::EnterName)
 		{

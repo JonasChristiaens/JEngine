@@ -11,11 +11,12 @@
 #include "Components/DetonatorComponent.h"
 #include "Components/SkateComponent.h"
 #include "Components/DeathAnimatorComponent.h"
-#include "EnemyConfig.h"
+#include "Config/EnemyConfig.h"
 #include "Commands/MoveCommand.h"
 #include "Commands/SpawnBombCommand.h"
 #include "Commands/DetonateBombsCommand.h"
 #include "Commands/SkipLevelCommand.h"
+#include "Commands/ToggleMuteCommand.h"
 #include "Input/InputManager.h"
 #include "Input/ControllerButtons.h"
 #include "Input/KeyCodes.h"
@@ -95,6 +96,10 @@ namespace dae
 		auto skip = std::make_unique<SkipLevelCommand>();
 		skip->SetGameActor(&player);
 		input.BindKeyboardInput(KeyCode::F1, KeyState::Down, std::move(skip));
+
+		auto mute = std::make_unique<ToggleMuteCommand>();
+		mute->SetGameActor(&player);
+		input.BindKeyboardInput(KeyCode::F2, KeyState::Down, std::move(mute));
 	}
 
 	void BindControllerMovement(GameObject& player, unsigned int controllerIndex)

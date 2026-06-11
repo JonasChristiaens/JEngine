@@ -19,6 +19,7 @@ namespace
 		case dae::KeyCode::Down:   return SDL_SCANCODE_DOWN;
 		case dae::KeyCode::Return: return SDL_SCANCODE_RETURN;
 		case dae::KeyCode::F1:     return SDL_SCANCODE_F1;
+		case dae::KeyCode::F2:     return SDL_SCANCODE_F2;
 		default:                   return SDL_SCANCODE_UNKNOWN;
 		}
 	}

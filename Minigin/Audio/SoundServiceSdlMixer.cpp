@@ -77,6 +77,9 @@ namespace dae
 
 		void PlaySound(const std::string& relativePath)
 		{
+			if (m_Muted)
+				return;
+
 			std::lock_guard lock(m_QueueMutex);
 			m_Queue.push_back({ RequestType::Play, relativePath });
 			m_Condition.notify_one();
@@ -87,6 +90,16 @@ namespace dae
 			std::lock_guard lock(m_QueueMutex);
 			m_Queue.push_back({ RequestType::Preload, relativePath });
 			m_Condition.notify_one();
+		}
+
+		void SetMuted(bool muted)
+		{
+			m_Muted = muted;
+			if (muted)
+			{
+				std::lock_guard lock(m_QueueMutex);
+				m_Queue.clear();
+			}
 		}
 
 	private:
@@ -213,6 +226,7 @@ namespace dae
 		MIX_Mixer* m_pMixer{};
 		std::unordered_map<std::string, MIX_Audio*> m_LoadedSounds{};
 		std::vector<MIX_Track*> m_ActiveTracks{};
+		bool m_Muted{ false };
 	};
 
 	SoundServiceSdlMixer::SoundServiceSdlMixer()
@@ -232,5 +246,10 @@ namespace dae
 	void SoundServiceSdlMixer::PreloadSound(const std::string& relativePath)
 	{
 		m_pImpl->PreloadSound(relativePath);
+	}
+
+	void SoundServiceSdlMixer::SetMuted(bool muted)
+	{
+		m_pImpl->SetMuted(muted);
 	}
 }

@@ -1,6 +1,6 @@
 #pragma once
 #include "State/State.h"
-#include "GameMode.h"
+#include "Config/GameMode.h"
 
 namespace dae
 {
