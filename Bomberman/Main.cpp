@@ -22,7 +22,7 @@ namespace
 {
 	void load()
 	{
-		dae::HighScoreManager::Load(dae::ResourceManager::GetInstance().GetDataPath().string() + "highscores.bin");
+		dae::HighScoreManager::Load((dae::ResourceManager::GetInstance().GetDataPath() / "highscores.bin").string());
 
 		auto& scene = dae::SceneManager::GetInstance().CreateScene();
 		auto stateMachineObject = std::make_unique<dae::GameObject>();

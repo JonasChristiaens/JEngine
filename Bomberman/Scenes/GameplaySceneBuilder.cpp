@@ -35,7 +35,7 @@ namespace
 
 	std::vector<dae::LevelData> LoadLevels()
 	{
-		const std::string path = ResourceManager::GetInstance().GetDataPath().string() + "levels.bin";
+		const auto path = (dae::ResourceManager::GetInstance().GetDataPath() / "levels.bin").string();
 		return dae::LevelDataLoader::Load(path);
 	}
 

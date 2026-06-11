@@ -181,7 +181,7 @@ namespace dae
 
 		const int entryIndex = m_PendingEntries[m_CurrentPendingIndex].entryIndex;
 		HighScoreManager::UpdateName(entryIndex, m_CurrentName);
-		HighScoreManager::Save(ResourceManager::GetInstance().GetDataPath().string() + "highscores.bin");
+		HighScoreManager::Save((ResourceManager::GetInstance().GetDataPath() / "highscores.bin").string());
 		RefreshScoreDisplay();
 		RefreshNameDisplay();
 	}
