@@ -68,10 +68,14 @@ namespace dae
 
 	int ExplosionEffectManager::ClassifyTile(const PlayfieldComponent& playfield, float tileWorldSize, float x, float y)
 	{
-		const int col = static_cast<int>(x / tileWorldSize);
-		const int row = static_cast<int>(y / tileWorldSize);
-		const int gridCols = static_cast<int>(496.0f / 16.0f);
-		const int gridRows = static_cast<int>(208.0f / 16.0f);
+		constexpr float kEpsilon = 0.001f;
+
+		const auto& occupied = playfield.GetOccupiedTiles();
+		const int gridRows = static_cast<int>(occupied.size());
+		const int gridCols = gridRows > 0 ? static_cast<int>(occupied[0].size()) : 0;
+
+		const int col = static_cast<int>(x / tileWorldSize + kEpsilon);
+		const int row = static_cast<int>(y / tileWorldSize + kEpsilon);
 
 		if (row < 0 || row >= gridRows || col < 0 || col >= gridCols)
 			return 2;
@@ -81,12 +85,8 @@ namespace dae
 		if (isBorder || isPillar)
 			return 2;
 
-		const auto& occupied = playfield.GetOccupiedTiles();
-		if (static_cast<size_t>(row) < occupied.size() && static_cast<size_t>(col) < occupied[row].size())
-		{
-			if (occupied[row][col])
-				return 1;
-		}
+		if (occupied[row][col])
+			return 1;
 
 		return 0;
 	}
@@ -130,22 +130,22 @@ namespace dae
 				const float damageSize = m_TileWorldSize * kDamageColliderScale;
 				auto* collider = damageTile->AddComponent<CollisionComponent>(damageSize, damageSize, true);
 				collider->SetOffset({ -damageSize * 0.5f, -damageSize * 0.5f });
-			collider->SetOnCollisionCallback([pBombOwner](GameObject* other)
-				{
-					if (!other || other->IsMarkedForDeletion())
-						return;
-
-					if (auto* bombComp = other->GetComponent<BombComponent>())
+				collider->SetOnCollisionCallback([pBombOwner](GameObject* other)
 					{
-						Event detonateEvent(make_sdbm_hash("DetonateBombEvent"));
-						detonateEvent.nbArgs = 0;
-						EventManager::GetInstance().BroadcastImmediate(detonateEvent, other);
-						return;
-					}
+						if (!other || other->IsMarkedForDeletion())
+							return;
 
-					auto* health = other->GetComponent<HealthComponent>();
-					if (!health)
-						return;
+						if (other->GetComponent<BombComponent>())
+						{
+							Event detonateEvent(make_sdbm_hash("DetonateBombEvent"));
+							detonateEvent.nbArgs = 0;
+							EventManager::GetInstance().BroadcastImmediate(detonateEvent, other);
+							return;
+						}
+
+						auto* health = other->GetComponent<HealthComponent>();
+						if (!health)
+							return;
 
 						const int healthBefore = health->GetHealth();
 

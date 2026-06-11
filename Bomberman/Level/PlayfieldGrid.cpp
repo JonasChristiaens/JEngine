@@ -21,8 +21,9 @@ namespace dae
 
 	void PlayfieldGrid::ClearTile(float localX, float localY, float tileWorldSize)
 	{
-		const int col = static_cast<int>(localX / tileWorldSize);
-		const int row = static_cast<int>(localY / tileWorldSize);
+		constexpr float kEpsilon = 0.001f;
+		const int col = static_cast<int>(localX / tileWorldSize + kEpsilon);
+		const int row = static_cast<int>(localY / tileWorldSize + kEpsilon);
 		SetOccupied(row, col, false);
 	}
 

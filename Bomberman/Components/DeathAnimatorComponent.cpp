@@ -52,32 +52,34 @@ namespace dae
 			animator = owner->AddComponent<SpriteAnimatorComponent>();
 		}
 
+		auto finalizeDeath = [this, owner]()
+			{
+				m_IsPlaying = false;
+
+				auto* deathRender = owner->GetComponent<RenderComponent>();
+				if (deathRender)
+				{
+					deathRender->SetSourceRectangle(0.0f, 0.0f, 0.0f, 0.0f);
+				}
+
+				if (!m_BroadcastEntityDied)
+					return;
+
+				if (!EventManager::IsAlive())
+					return;
+
+				Event diedEvent(make_sdbm_hash("EntityDied"));
+				EventManager::GetInstance().BroadcastEvent(diedEvent, owner);
+			};
+
 		if (animator && !m_DeathFrames.empty())
 		{
 			animator->SetAnimation(m_DeathFrames, m_DeathFps, false);
-			animator->SetOnAnimationFinishedCallback([this, owner]()
-				{
-					m_IsPlaying = false;
-
-					if (!m_BroadcastEntityDied)
-						return;
-
-					if (!EventManager::IsAlive())
-						return;
-
-					Event diedEvent(make_sdbm_hash("EntityDied"));
-					EventManager::GetInstance().BroadcastEvent(diedEvent, owner);
-				});
+			animator->SetOnAnimationFinishedCallback(finalizeDeath);
 		}
 		else if (m_BroadcastEntityDied)
 		{
-			m_IsPlaying = false;
-
-			if (!EventManager::IsAlive())
-				return;
-
-			Event diedEvent(make_sdbm_hash("EntityDied"));
-			EventManager::GetInstance().BroadcastEvent(diedEvent, owner);
+			finalizeDeath();
 		}
 	}
 }

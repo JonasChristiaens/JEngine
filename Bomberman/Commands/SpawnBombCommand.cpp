@@ -10,7 +10,7 @@ namespace dae
 {
 	void SpawnBombCommand::Execute()
 	{
-		if (m_pGameActor == nullptr)
+		if (m_pGameActor == nullptr || m_pGameActor->IsMarkedForDeletion())
 			return;
 
 		auto* health = m_pGameActor->GetComponent<HealthComponent>();
