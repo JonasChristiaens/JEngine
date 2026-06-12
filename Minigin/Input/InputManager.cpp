@@ -13,17 +13,18 @@ bool dae::InputManager::ProcessInput()
 		}
 	}
 
-	for (auto& [index, controller] : m_Controllers)
+	for (auto& pair : m_Controllers)
 	{
-		controller->Update();
+		pair.second->Update();
 	}
 
 	m_KeyboardInput.Update();
 
 	std::vector<ControllerKey> controllerCommandsToRun{};
 	controllerCommandsToRun.reserve(m_ControllerCommands.size());
-	for (auto& [controllerKey, command] : m_ControllerCommands)
+	for (auto& pair : m_ControllerCommands)
 	{
+		const auto& controllerKey = pair.first;
 		auto controllerIt = m_Controllers.find(controllerKey.controllerIndex);
 		if (controllerIt != m_Controllers.end())
 		{
@@ -59,8 +60,9 @@ bool dae::InputManager::ProcessInput()
 
 	std::vector<KeyboardKey> keyboardCommandsToRun{};
 	keyboardCommandsToRun.reserve(m_KeyboardCommands.size());
-	for (auto& [keyboardKey, command] : m_KeyboardCommands)
+	for (auto& pair : m_KeyboardCommands)
 	{
+		const auto& keyboardKey = pair.first;
 		bool shouldExecute = false;
 
 		switch (keyboardKey.keyState)

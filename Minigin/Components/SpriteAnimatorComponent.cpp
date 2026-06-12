@@ -131,7 +131,7 @@ void dae::SpriteAnimatorComponent::UpdateSprite()
 
 	if (m_UseExplicitFrames)
 	{
-		if (m_CurrentFrame >= 0 && m_CurrentFrame < static_cast<int>(m_ExplicitFrames.size()))
+		if (m_CurrentFrame < static_cast<int>(m_ExplicitFrames.size()))
 			m_pRenderComponent->SetSourceRectangle(m_ExplicitFrames[m_CurrentFrame]);
 		return;
 	}

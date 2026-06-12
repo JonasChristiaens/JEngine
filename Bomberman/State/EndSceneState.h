@@ -32,7 +32,6 @@ namespace dae
 		static constexpr float kGlyphWidth{ 8.0f };
 		static constexpr float kGlyphHeight{ 8.0f };
 		static constexpr float kGlyphRowY{ 264.0f };
-		static constexpr float kGlyphRow2Y{ 272.0f };
 		static constexpr int kNameLength{ 4 };
 		static constexpr int kScoreDigits{ 5 };
 		static constexpr int kBackgroundLayer{ 0 };

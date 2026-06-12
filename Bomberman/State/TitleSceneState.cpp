@@ -39,7 +39,6 @@ namespace
 	constexpr float kGlyphWidth{ 8.0f };
 	constexpr float kGlyphHeight{ 8.0f };
 	constexpr float kGlyphRowY{ 264.0f };
-	constexpr float kGlyphRow2Y{ 272.0f };
 	constexpr float kArrowGlyphX{ 80.0f };
 	constexpr float kScoreWidth{ 72.0f };
 	constexpr int kMenuLayer{ 2 };
