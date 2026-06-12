@@ -22,7 +22,7 @@ namespace dae
 			return;
 
 		auto* capacity = m_pGameActor->GetComponent<BombCapacityComponent>();
-		if (capacity && !capacity->CanPlaceBomb())
+		if (!capacity || !capacity->CanPlaceBomb())
 			return;
 
 		const auto& pos = pTransform->GetLocalPosition();

@@ -33,16 +33,12 @@ namespace dae
 		SetGameMode(gameMode);
 	}
 
-	GameSceneState::GameSceneState(SceneStateMachineComponent& owner, GameMode gameMode, int levelIndex, const PlayerCarryOver& carryOver)
+	GameSceneState::GameSceneState(SceneStateMachineComponent& owner, GameMode gameMode, int levelIndex, const PlayerCarryOver& carryOver, const PlayerCarryOver& p2CarryOver)
 		: SceneState(owner)
 		, m_CurrentLevelIndex(levelIndex)
-		, m_CarriedBombCapacity(carryOver.bombCapacity)
-		, m_CarriedBombRange(carryOver.bombRange)
-		, m_CarriedDetonator(carryOver.hasDetonator)
-		, m_CarriedHasSkate(carryOver.hasSkate)
-		, m_CarriedHealth(carryOver.health)
-		, m_CarriedScore(carryOver.score)
 	{
+		m_Carried[0] = carryOver;
+		m_Carried[1] = p2CarryOver;
 		SetGameMode(gameMode);
 	}
 
@@ -54,10 +50,22 @@ namespace dae
 		m_Owner.SetActiveScene(scene);
 		m_Owner.ClearPlayers();
 
-		const auto data = BuildGameplayScene(scene, GetGameMode(), m_CurrentLevelIndex, { m_CarriedBombCapacity, m_CarriedBombRange, m_CarriedDetonator, m_CarriedHasSkate, m_CarriedHealth, m_CarriedScore });
-		m_Owner.RegisterPlayer(data.player1);
-		m_Owner.RegisterPlayer(data.player2);
-		m_AlivePlayerCount = (data.player1 ? 1 : 0) + (data.player2 ? 1 : 0);
+		const PlayerCarryOver& carryOver = m_Carried[0];
+		const PlayerCarryOver& p2CarryOver = m_Carried[1];
+		const auto data = BuildGameplayScene(scene, GetGameMode(), m_CurrentLevelIndex, carryOver, p2CarryOver);
+		m_pPlayers[0] = data.player1;
+		m_pPlayers[1] = data.player2;
+
+		const int playerCount = (GetGameMode() == GameMode::Versus) ? 1 : 2;
+		m_AlivePlayerCount = 0;
+		for (int i = 0; i < playerCount; ++i)
+		{
+			if (m_pPlayers[i])
+			{
+				m_Owner.RegisterPlayer(m_pPlayers[i]);
+				++m_AlivePlayerCount;
+			}
+		}
 		m_TotalLevels = static_cast<int>(LevelDataLoader::Load((ResourceManager::GetInstance().GetDataPath() / "levels.bin").string()).size());
 
 		m_StageClearPlayed = false;
@@ -84,6 +92,8 @@ namespace dae
 			scene->RemoveAll();
 		}
 		m_Owner.ClearPlayers();
+		m_pPlayers[0] = nullptr;
+		m_pPlayers[1] = nullptr;
 	}
 
 	void GameSceneState::Update()
@@ -109,24 +119,9 @@ namespace dae
 
 			if (m_CurrentLevelIndex >= m_TotalLevels)
 			{
-				const auto& players = m_Owner.GetPlayers();
-				int score1 = 0;
-				int score2 = 0;
-				bool hasPlayer2 = false;
-
-				if (!players.empty() && players[0])
-				{
-					auto* sc = players[0]->GetComponent<ScoreComponent>();
-					if (sc)
-						score1 = sc->GetScore();
-				}
-				if (players.size() > 1 && players[1])
-				{
-					hasPlayer2 = true;
-					auto* sc = players[1]->GetComponent<ScoreComponent>();
-					if (sc)
-						score2 = sc->GetScore();
-				}
+				const int score1 = m_Carried[0].score;
+				const int score2 = m_Carried[1].score;
+				const bool hasPlayer2 = (GetGameMode() == GameMode::Coop);
 
 				m_Owner.GetStateMachine().SetState(
 					std::make_unique<TransitionSceneState>(
@@ -138,7 +133,8 @@ namespace dae
 				return;
 			}
 
-			const PlayerCarryOver carryOver{ m_CarriedBombCapacity, m_CarriedBombRange, m_CarriedDetonator, m_CarriedHasSkate, m_CarriedHealth, m_CarriedScore };
+			const PlayerCarryOver& carryOver = m_Carried[0];
+			const PlayerCarryOver& p2CarryOver = m_Carried[1];
 			const int level = m_CurrentLevelIndex;
 			const GameMode mode = GetGameMode();
 
@@ -146,7 +142,7 @@ namespace dae
 				std::make_unique<TransitionSceneState>(
 					m_Owner,
 					"STAGE " + std::to_string(level + 1),
-					std::make_unique<GameSceneState>(m_Owner, mode, level, carryOver)
+					std::make_unique<GameSceneState>(m_Owner, mode, level, carryOver, p2CarryOver)
 				)
 			);
 			return;
@@ -156,14 +152,15 @@ namespace dae
 		{
 			m_PlayerSurvivedDamage = false;
 
-			const PlayerCarryOver carryOver{ m_CarriedBombCapacity, m_CarriedBombRange, m_CarriedDetonator, m_CarriedHasSkate, m_CarriedHealth, m_CarriedScore };
+			const PlayerCarryOver& carryOver = m_Carried[0];
+			const PlayerCarryOver& p2CarryOver = m_Carried[1];
 			const GameMode mode = GetGameMode();
 
 			m_Owner.GetStateMachine().SetState(
 				std::make_unique<TransitionSceneState>(
 					m_Owner,
 					"STAGE " + std::to_string(m_CurrentLevelIndex + 1),
-					std::make_unique<GameSceneState>(m_Owner, mode, m_CurrentLevelIndex, carryOver)
+					std::make_unique<GameSceneState>(m_Owner, mode, m_CurrentLevelIndex, carryOver, p2CarryOver)
 				)
 			);
 			return;
@@ -171,24 +168,9 @@ namespace dae
 
 		if (m_AlivePlayerCount <= 0)
 		{
-			const auto& players = m_Owner.GetPlayers();
-			int score1 = 0;
-			int score2 = 0;
-			bool hasPlayer2 = false;
-
-			if (!players.empty() && players[0])
-			{
-				auto* sc = players[0]->GetComponent<ScoreComponent>();
-				if (sc)
-					score1 = sc->GetScore();
-			}
-			if (players.size() > 1 && players[1])
-			{
-				hasPlayer2 = true;
-				auto* sc = players[1]->GetComponent<ScoreComponent>();
-				if (sc)
-					score2 = sc->GetScore();
-			}
+			const int score1 = m_Carried[0].score;
+			const int score2 = m_Carried[1].score;
+			const bool hasPlayer2 = (GetGameMode() == GameMode::Coop);
 
 			m_Owner.GetStateMachine().SetState(
 				std::make_unique<TransitionSceneState>(
@@ -229,11 +211,15 @@ namespace dae
 				return;
 			}
 
-			const auto& players = m_Owner.GetPlayers();
-			for (const auto* player : players)
+			for (int i = 0; i < kMaxPlayers; ++i)
 			{
-				if (player == &actor)
+				if (&actor == m_pPlayers[i])
 				{
+					auto* sc = actor.GetComponent<ScoreComponent>();
+					if (sc)
+						m_Carried[i].score = sc->GetScore();
+					m_Carried[i].health = 0;
+					m_pPlayers[i] = nullptr;
 					--m_AlivePlayerCount;
 					break;
 				}
@@ -247,49 +233,51 @@ namespace dae
 
 	void GameSceneState::SavePlayerState()
 	{
-		const auto& players = m_Owner.GetPlayers();
-		if (players.empty() || !players[0])
-			return;
+		for (int i = 0; i < kMaxPlayers; ++i)
+		{
+			if (!m_pPlayers[i])
+				continue;
 
-		auto* capacity = players[0]->GetComponent<BombCapacityComponent>();
-		if (capacity)
-			m_CarriedBombCapacity = capacity->GetMaxBombs();
+			auto* health = m_pPlayers[i]->GetComponent<HealthComponent>();
+			if (!health || health->IsDead())
+				continue;
 
-		auto* range = players[0]->GetComponent<BombRangeComponent>();
-		if (range)
-			m_CarriedBombRange = range->GetRange();
+			auto* capacity = m_pPlayers[i]->GetComponent<BombCapacityComponent>();
+			if (capacity)
+				m_Carried[i].bombCapacity = capacity->GetMaxBombs();
 
-		auto* detonator = players[0]->GetComponent<DetonatorComponent>();
-		if (detonator)
-			m_CarriedDetonator = detonator->HasDetonator();
+			auto* range = m_pPlayers[i]->GetComponent<BombRangeComponent>();
+			if (range)
+				m_Carried[i].bombRange = range->GetRange();
 
-		auto* skate = players[0]->GetComponent<SkateComponent>();
-		if (skate)
-			m_CarriedHasSkate = skate->HasSkate();
+			auto* detonator = m_pPlayers[i]->GetComponent<DetonatorComponent>();
+			if (detonator)
+				m_Carried[i].hasDetonator = detonator->HasDetonator();
 
-		auto* health = players[0]->GetComponent<HealthComponent>();
-		if (health)
-			m_CarriedHealth = health->GetHealth();
+			auto* skate = m_pPlayers[i]->GetComponent<SkateComponent>();
+			if (skate)
+				m_Carried[i].hasSkate = skate->HasSkate();
 
-		auto* score = players[0]->GetComponent<ScoreComponent>();
-		if (score)
-			m_CarriedScore = score->GetScore();
+			m_Carried[i].health = health->GetHealth();
+
+			auto* score = m_pPlayers[i]->GetComponent<ScoreComponent>();
+			if (score)
+				m_Carried[i].score = score->GetScore();
+		}
 	}
 
 	void GameSceneState::HandlePlayerSurvivedDamage(GameObject& actor)
 	{
-		const auto& players = m_Owner.GetPlayers();
-		bool isRegisteredPlayer = false;
-		for (const auto* player : players)
+		bool isRegistered = false;
+		for (int i = 0; i < kMaxPlayers; ++i)
 		{
-			if (player == &actor)
+			if (&actor == m_pPlayers[i])
 			{
-				isRegisteredPlayer = true;
+				isRegistered = true;
 				break;
 			}
 		}
-
-		if (!isRegisteredPlayer)
+		if (!isRegistered)
 			return;
 
 		auto* health = actor.GetComponent<HealthComponent>();

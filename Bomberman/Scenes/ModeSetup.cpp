@@ -1,6 +1,8 @@
 #include "ModeSetup.h"
 #include "PlayerSetup.h"
 #include "Components/PlayfieldComponent.h"
+#include "Components/CollisionComponent.h"
+#include "Components/EnemyComponent.h"
 #include "Factories/EnemyFactory.h"
 #include "Config/EnemyConfig.h"
 #include <algorithm>
@@ -99,7 +101,7 @@ namespace dae
 	{
 		auto* p1 = CreatePlayer(p.scene, p.player1Pos, p.carryOver);
 		p1->SetParent(&p.worldRoot, false);
-		BindPlayerControls(*p1, true, 0);
+		AssignPlayerInputs({ p1 });
 
 		for (int i = 0; i < p.balloomCount; ++i)
 			SpawnEnemy(p.scene, p.worldRoot, p.tileWorldSize, kBalloomConfig, kBalloomSpeed, nullptr, p.player1Pos, true);
@@ -115,21 +117,36 @@ namespace dae
 
 	std::pair<GameObject*, GameObject*> SetupCoopMode(const SpawnParams& p)
 	{
-		auto* p1 = CreatePlayer(p.scene, p.player1Pos, p.carryOver);
-		auto* p2 = CreatePlayer(p.scene, p.player2Pos);
-		p1->SetParent(&p.worldRoot, false);
-		p2->SetParent(&p.worldRoot, false);
-		BindPlayerControls(*p1, true, 0);
-		BindPlayerControls(*p2, false, GetSecondaryControllerIndex());
+		GameObject* p1 = nullptr;
+		GameObject* p2 = nullptr;
+
+		if (p.carryOver.health > 0)
+		{
+			p1 = CreatePlayer(p.scene, p.player1Pos, p.carryOver);
+			p1->SetParent(&p.worldRoot, false);
+		}
+
+		if (p.p2CarryOver.health > 0)
+		{
+			p2 = CreatePlayer(p.scene, p.player2Pos, p.p2CarryOver);
+			p2->SetParent(&p.worldRoot, false);
+		}
+
+		std::vector<GameObject*> alivePlayers{};
+		if (p1) alivePlayers.push_back(p1);
+		if (p2) alivePlayers.push_back(p2);
+		AssignPlayerInputs(alivePlayers);
+
+		GameObject* chaseTarget = p1 ? p1 : p2;
 
 		for (int i = 0; i < p.balloomCount; ++i)
 			SpawnEnemy(p.scene, p.worldRoot, p.tileWorldSize, kBalloomConfig, kBalloomSpeed, nullptr, (i == 0) ? p.player1Pos : p.player2Pos, true);
 		for (int i = 0; i < p.onealCount; ++i)
-			SpawnEnemy(p.scene, p.worldRoot, p.tileWorldSize, kOnealConfig, kOnealSpeed, (i == 0) ? p1 : p2, (i == 0) ? p.player1Pos : p.player2Pos, true);
+			SpawnEnemy(p.scene, p.worldRoot, p.tileWorldSize, kOnealConfig, kOnealSpeed, chaseTarget, (i == 0) ? p.player1Pos : p.player2Pos, true);
 		for (int i = 0; i < p.dollCount; ++i)
-			SpawnEnemy(p.scene, p.worldRoot, p.tileWorldSize, kDollConfig, kDollSpeed, (i == 0) ? p1 : p2, (i == 0) ? p.player1Pos : p.player2Pos, true);
+			SpawnEnemy(p.scene, p.worldRoot, p.tileWorldSize, kDollConfig, kDollSpeed, chaseTarget, (i == 0) ? p.player1Pos : p.player2Pos, true);
 		for (int i = 0; i < p.minvoCount; ++i)
-			SpawnEnemy(p.scene, p.worldRoot, p.tileWorldSize, kMinvoConfig, kMinvoSpeed, (i == 0) ? p1 : p2, (i == 0) ? p.player1Pos : p.player2Pos, true);
+			SpawnEnemy(p.scene, p.worldRoot, p.tileWorldSize, kMinvoConfig, kMinvoSpeed, chaseTarget, (i == 0) ? p.player1Pos : p.player2Pos, true);
 
 		return { p1, p2 };
 	}
@@ -139,8 +156,17 @@ namespace dae
 		auto* p1 = CreatePlayer(p.scene, p.player1Pos, p.carryOver);
 		p1->SetParent(&p.worldRoot, false);
 		auto* p2 = SpawnEnemy(p.scene, p.worldRoot, p.tileWorldSize, kBalloomConfig, kBalloomSpeed, nullptr, p.player1Pos, false);
-		BindPlayerControls(*p1, true, 0);
-		BindControllerMovement(*p2, GetSecondaryControllerIndex());
+		BindKeyboardMovement(*p1);
+		if (p2)
+		{
+			if (auto* collider = p2->GetComponent<CollisionComponent>())
+			{
+				collider->SetCollisionFilter([](GameObject* other) {
+					return other->HasComponent<EnemyComponent>();
+				});
+			}
+			BindEnemyMovementControls(*p2);
+		}
 
 		for (int i = 0; i < std::max(0, p.balloomCount - 1); ++i)
 			SpawnEnemy(p.scene, p.worldRoot, p.tileWorldSize, kBalloomConfig, kBalloomSpeed, nullptr, p.player2Pos, true);

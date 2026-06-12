@@ -12,7 +12,7 @@
 
 namespace dae
 {
-	HudComponent::HudComponent(GameObject* pOwner, float hudWidth, float hudHeight, const std::vector<GameObject*>& players)
+	HudComponent::HudComponent(GameObject* pOwner, float hudWidth, float hudHeight, const std::vector<GameObject*>& players, std::vector<int> initialLives, std::vector<int> initialScores)
 		: BaseComponent(pOwner)
 		, m_Width(hudWidth)
 		, m_Height(hudHeight)
@@ -21,6 +21,12 @@ namespace dae
 		const size_t count = players.size();
 		m_Scores.resize(count, 0);
 		m_Lives.resize(count, 4);
+
+		for (size_t i = 0; i < count && i < initialLives.size(); ++i)
+			m_Lives[i] = initialLives[i];
+		for (size_t i = 0; i < count && i < initialScores.size(); ++i)
+			m_Scores[i] = initialScores[i];
+
 		m_FontTexture = ResourceManager::GetInstance().LoadTexture("BombermanSprites_TitleScreen.png");
 		RefreshStats();
 		EventManager::GetInstance().AddObserver(*this);
@@ -72,7 +78,7 @@ namespace dae
 				if (i > 0) scoreText << "  ";
 				scoreText << "p" << (i + 1) << " " << std::setw(2) << std::setfill('0') << m_Scores[i];
 			}
-			RenderText(scoreText.str(), m_Width * 0.38f, y, scale);
+			RenderText(scoreText.str(), m_Width * 0.30f, y, scale);
 
 			std::ostringstream livesText;
 			for (size_t i = 0; i < m_Players.size(); ++i)
@@ -80,7 +86,7 @@ namespace dae
 				if (i > 0) livesText << "  ";
 				livesText << "p" << (i + 1) << " " << m_Lives[i];
 			}
-			RenderText(livesText.str(), m_Width * 0.70f, y, scale);
+			RenderText(livesText.str(), m_Width * 0.73f, y, scale);
 		}
 	}
 

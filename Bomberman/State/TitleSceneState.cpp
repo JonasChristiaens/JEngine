@@ -121,9 +121,19 @@ namespace dae
 
 	void TitleSceneState::Update()
 	{
+		const float deltaTime = GameTime::GetInstance().GetDeltaTime();
+
+		m_BlinkTimer += deltaTime;
+		if (m_BlinkTimer >= 0.25f)
+		{
+			m_BlinkTimer = 0.0f;
+			m_ArrowVisible = !m_ArrowVisible;
+			UpdateMenuSprites();
+		}
+
 		if (m_BgmCooldown > 0.0f)
 		{
-			m_BgmCooldown -= GameTime::GetInstance().GetDeltaTime();
+			m_BgmCooldown -= deltaTime;
 			return;
 		}
 
@@ -232,13 +242,13 @@ namespace dae
 	{
 		if (m_pStartArrow)
 		{
-			const float width = (m_SelectedIndex == 0) ? m_ArrowWidth : 0.0f;
-			m_pStartArrow->SetDestinationSize(width, m_ArrowHeight);
+			const bool visible = (m_SelectedIndex == 0) && m_ArrowVisible;
+			m_pStartArrow->SetDestinationSize(visible ? m_ArrowWidth : 0.0f, m_ArrowHeight);
 		}
 		if (m_pModeArrow)
 		{
-			const float width = (m_SelectedIndex == 1) ? m_ArrowWidth : 0.0f;
-			m_pModeArrow->SetDestinationSize(width, m_ArrowHeight);
+			const bool visible = (m_SelectedIndex == 1) && m_ArrowVisible;
+			m_pModeArrow->SetDestinationSize(visible ? m_ArrowWidth : 0.0f, m_ArrowHeight);
 		}
 	}
 
@@ -309,14 +319,14 @@ namespace dae
 	void TitleSceneState::BindInput()
 	{
 		auto& input = InputManager::GetInstance();
-		input.BindKeyboardInput(KeyCode::Up, KeyState::Down, std::make_unique<TitleMenuCommand>(*this, TitleMenuCommand::Action::Up));
-		input.BindKeyboardInput(KeyCode::Down, KeyState::Down, std::make_unique<TitleMenuCommand>(*this, TitleMenuCommand::Action::Down));
+		input.BindKeyboardInput(KeyCode::Left, KeyState::Down, std::make_unique<TitleMenuCommand>(*this, TitleMenuCommand::Action::Up));
+		input.BindKeyboardInput(KeyCode::Right, KeyState::Down, std::make_unique<TitleMenuCommand>(*this, TitleMenuCommand::Action::Down));
 		input.BindKeyboardInput(KeyCode::Return, KeyState::Down, std::make_unique<TitleMenuCommand>(*this, TitleMenuCommand::Action::Confirm));
 
 		const unsigned int controllerIndex = 0;
 		input.AddController(controllerIndex);
-		input.BindControllerInput(controllerIndex, ControllerButton::kDpadUp, KeyState::Down, std::make_unique<TitleMenuCommand>(*this, TitleMenuCommand::Action::Up));
-		input.BindControllerInput(controllerIndex, ControllerButton::kDpadDown, KeyState::Down, std::make_unique<TitleMenuCommand>(*this, TitleMenuCommand::Action::Down));
+		input.BindControllerInput(controllerIndex, ControllerButton::kDpadLeft, KeyState::Down, std::make_unique<TitleMenuCommand>(*this, TitleMenuCommand::Action::Up));
+		input.BindControllerInput(controllerIndex, ControllerButton::kDpadRight, KeyState::Down, std::make_unique<TitleMenuCommand>(*this, TitleMenuCommand::Action::Down));
 		input.BindControllerInput(controllerIndex, ControllerButton::kX, KeyState::Down, std::make_unique<TitleMenuCommand>(*this, TitleMenuCommand::Action::Confirm));
 
 		auto mute = std::make_unique<ToggleMuteCommand>();
@@ -328,13 +338,13 @@ namespace dae
 	{
 		auto& input = InputManager::GetInstance();
 		input.UnBindKeyboardInput(KeyCode::F2, KeyState::Down);
-		input.UnBindKeyboardInput(KeyCode::Up, KeyState::Down);
-		input.UnBindKeyboardInput(KeyCode::Down, KeyState::Down);
+		input.UnBindKeyboardInput(KeyCode::Left, KeyState::Down);
+		input.UnBindKeyboardInput(KeyCode::Right, KeyState::Down);
 		input.UnBindKeyboardInput(KeyCode::Return, KeyState::Down);
 
 		const unsigned int controllerIndex = 0;
-		input.UnBindControllerInput(controllerIndex, ControllerButton::kDpadUp, KeyState::Down);
-		input.UnBindControllerInput(controllerIndex, ControllerButton::kDpadDown, KeyState::Down);
+		input.UnBindControllerInput(controllerIndex, ControllerButton::kDpadLeft, KeyState::Down);
+		input.UnBindControllerInput(controllerIndex, ControllerButton::kDpadRight, KeyState::Down);
 		input.UnBindControllerInput(controllerIndex, ControllerButton::kX, KeyState::Down);
 	}
 

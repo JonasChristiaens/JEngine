@@ -9,6 +9,6 @@ namespace dae
 		void Execute() override;
 
 	private:
-		bool m_Muted{ false };
+		inline static bool m_Muted{ false };
 	};
 }

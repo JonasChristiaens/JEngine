@@ -15,6 +15,7 @@ namespace dae
 		GameObject& worldRoot;
 		float tileWorldSize;
 		const PlayerCarryOver& carryOver;
+		const PlayerCarryOver& p2CarryOver;
 		const glm::vec3& player1Pos;
 		const glm::vec3& player2Pos;
 		int balloomCount;

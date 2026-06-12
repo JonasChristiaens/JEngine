@@ -37,7 +37,6 @@ namespace dae
 		static constexpr int kScoreDigits{ 5 };
 		static constexpr int kBackgroundLayer{ 0 };
 		static constexpr int kTextLayer{ 1 };
-		static constexpr int kIndicatorLayer{ 2 };
 		static constexpr int kReturnArrowLayer{ 3 };
 		static constexpr float kArrowGlyphX{ 80.0f };
 
@@ -72,24 +71,23 @@ namespace dae
 		Scene* m_pScene{};
 		GameObject* m_pRoot{};
 		GameObject* m_pTextRoot{};
-		GameObject* m_pIndicator{};
-		RenderComponent* m_pIndicatorRender{};
+		RenderComponent* m_pCurrentLetterRender{};
+		bool m_IndicatorVisible{ true };
+		float m_BlinkTimer{ 0.0f };
 		GameObject* m_pReturnArrow{};
 		RenderComponent* m_pReturnArrowRender{};
 
 		void BuildScene();
 		void ClearScene();
-		void BindInput();
+		void BindInput(int playerIndex = -1);
 		void UnbindInput();
 		void RebuildTextDisplay();
-		void BuildNameEntryDisplay();
-		void UpdateIndicator();
 		void RefreshScoreDisplay();
 		void RefreshNameDisplay();
 		void AdvancePhase();
 		void SubmitCurrentName();
 
-		void CreateGlyph(Scene& scene, GameObject& parent, char c, float localX, float localY, int layer);
+		RenderComponent* CreateGlyph(Scene& scene, GameObject& parent, char c, float localX, float localY, int layer);
 		std::pair<float, float> GetCharacterSrcRect(char character) const;
 		char CycleLetter(char current, int direction) const;
 		std::string ScoreToString(int score) const;

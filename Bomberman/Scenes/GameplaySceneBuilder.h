@@ -22,6 +22,6 @@ namespace dae
 		int score{ 0 };
 	};
 
-	GameplaySceneData BuildGameplayScene(Scene& scene, GameMode gameMode, int levelIndex = 0, const PlayerCarryOver& carryOver = {});
+	GameplaySceneData BuildGameplayScene(Scene& scene, GameMode gameMode, int levelIndex = 0, const PlayerCarryOver& carryOver = {}, const PlayerCarryOver& p2CarryOver = {});
 	void ResetGameplayObservers();
 }

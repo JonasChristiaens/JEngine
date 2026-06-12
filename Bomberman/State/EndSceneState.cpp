@@ -14,6 +14,7 @@
 #include "Resources/ResourceManager.h"
 #include "Commands/ToggleMuteCommand.h"
 #include "State/TitleSceneState.h"
+#include "Core/GameTime.h"
 #include <iomanip>
 #include <sstream>
 
@@ -117,6 +118,19 @@ namespace dae
 		if (m_Phase == Phase::CheckScores)
 		{
 			AdvancePhase();
+			return;
+		}
+
+		if (m_Phase == Phase::EnterName && m_pCurrentLetterRender)
+		{
+			m_BlinkTimer += GameTime::GetInstance().GetDeltaTime();
+			if (m_BlinkTimer >= 0.25f)
+			{
+				m_BlinkTimer = 0.0f;
+				m_IndicatorVisible = !m_IndicatorVisible;
+				const float glyphSize = kGlyphWidth * m_Scale;
+				m_pCurrentLetterRender->SetDestinationSize(m_IndicatorVisible ? glyphSize : 0.0f, glyphSize);
+			}
 		}
 	}
 
@@ -134,12 +148,28 @@ namespace dae
 			std::swap(indices[0], indices[1]);
 		}
 
+		bool anyQualify = false;
+		bool qualifyMask[2] = { false, false };
 		for (int i = 0; i < (m_HasTwoPlayers ? 2 : 1); ++i)
 		{
 			if (scores[i] > 0 && HighScoreManager::IsHighScore(scores[i]))
 			{
-				const int entryIndex = HighScoreManager::SubmitScore("AAAA", scores[i]);
-				m_PendingEntries.push_back({ scores[i], indices[i], entryIndex });
+				anyQualify = true;
+				qualifyMask[i] = true;
+			}
+		}
+
+		if (anyQualify)
+		{
+			for (int i = 0; i < (m_HasTwoPlayers ? 2 : 1); ++i)
+			{
+				if (!qualifyMask[i])
+					continue;
+
+				const std::string placeholder = (indices[i] == 0) ? "AAAA" : "BBBB";
+				const int entryIndex = HighScoreManager::SubmitScore(placeholder, scores[i]);
+				if (entryIndex >= 0)
+					m_PendingEntries.push_back({ scores[i], indices[i], entryIndex });
 			}
 		}
 
@@ -154,10 +184,9 @@ namespace dae
 			m_CurrentName[4] = '\0';
 			RefreshScoreDisplay();
 			RefreshNameDisplay();
-			BuildNameEntryDisplay();
 
 			UnbindInput();
-			BindInput();
+			BindInput(m_PendingEntries[0].playerIndex);
 		}
 		else
 		{
@@ -194,7 +223,6 @@ namespace dae
 
 		m_CurrentName[m_CurrentCharIndex] = CycleLetter(m_CurrentName[m_CurrentCharIndex], direction);
 		RefreshNameDisplay();
-		UpdateIndicator();
 	}
 
 	void EndSceneState::ConfirmLetter()
@@ -223,17 +251,12 @@ namespace dae
 				m_CurrentName[3] = 'A';
 				m_CurrentName[4] = '\0';
 				RefreshNameDisplay();
-				BuildNameEntryDisplay();
+
+				UnbindInput();
+				BindInput(m_PendingEntries[m_CurrentPendingIndex].playerIndex);
 			}
 			else
 			{
-				if (m_pIndicator)
-				{
-					m_pIndicator->MarkForDeletion();
-					m_pIndicator = nullptr;
-					m_pIndicatorRender = nullptr;
-				}
-
 				m_Phase = Phase::WaitForReturn;
 				m_ReturnActive = true;
 
@@ -248,7 +271,6 @@ namespace dae
 		{
 			m_CurrentName[m_CurrentCharIndex] = 'A';
 			RefreshNameDisplay();
-			UpdateIndicator();
 		}
 	}
 
@@ -333,6 +355,8 @@ namespace dae
 		m_pTextRoot = textRoot.get();
 		m_pScene->Add(std::move(textRoot));
 
+		m_pCurrentLetterRender = nullptr;
+
 		const auto& entries = HighScoreManager::GetEntries();
 		const float rowYs[HighScoreManager::kMaxEntries] = { kScoreRow1Y, kScoreRow2Y, kScoreRow3Y, kScoreRow4Y };
 		const int pendingEntryIndex = (m_Phase == Phase::EnterName && m_CurrentPendingIndex < static_cast<int>(m_PendingEntries.size()))
@@ -368,67 +392,19 @@ namespace dae
 			const float cursorY = rowYs[i] * m_Scale;
 			const float glyphSize = kGlyphWidth * m_Scale;
 
+			int charIndex = 0;
 			for (char c : nameStr)
 			{
 				if (c == '\0')
 					break;
-				CreateGlyph(*m_pScene, *m_pTextRoot, c, cursorX, cursorY, kTextLayer);
+				auto* render = CreateGlyph(*m_pScene, *m_pTextRoot, c, cursorX, cursorY, kTextLayer);
+				if (i == pendingEntryIndex && charIndex == m_CurrentCharIndex)
+				{
+					m_pCurrentLetterRender = render;
+				}
 				cursorX += glyphSize;
+				++charIndex;
 			}
-		}
-	}
-
-	void EndSceneState::BuildNameEntryDisplay()
-	{
-		if (!m_pScene || !m_pRoot)
-			return;
-
-		if (m_pIndicator)
-		{
-			m_pIndicator->MarkForDeletion();
-			m_pIndicator = nullptr;
-			m_pIndicatorRender = nullptr;
-		}
-
-		if (m_CurrentPendingIndex >= static_cast<int>(m_PendingEntries.size()))
-			return;
-
-		const float rowYs[HighScoreManager::kMaxEntries] = { kScoreRow1Y, kScoreRow2Y, kScoreRow3Y, kScoreRow4Y };
-		const int rowIndex = m_PendingEntries[m_CurrentPendingIndex].entryIndex;
-		if (rowIndex < 0 || rowIndex >= HighScoreManager::kMaxEntries)
-			return;
-
-		auto indicator = std::make_unique<GameObject>();
-		auto* indicatorTransform = indicator->AddComponent<TransformComponent>();
-		const float indicatorX = (kNameStartX + static_cast<float>(m_CurrentCharIndex) * kGlyphWidth) * m_Scale;
-		const float indicatorY = (rowYs[rowIndex] + kGlyphHeight + 2.0f) * m_Scale;
-		indicatorTransform->SetLocalPosition(indicatorX, indicatorY);
-		m_pIndicatorRender = indicator->AddComponent<RenderComponent>();
-		m_pIndicatorRender->SetTexture("BombermanSprites_TitleScreen.png");
-		m_pIndicatorRender->SetSourceRectangle(88.0f, kGlyphRowY, kGlyphWidth, kGlyphHeight);
-		m_pIndicatorRender->SetDestinationSize(kGlyphWidth * m_Scale, kGlyphHeight * m_Scale);
-		m_pIndicatorRender->SetRenderLayer(kIndicatorLayer);
-		indicator->SetParent(m_pRoot, false);
-		m_pIndicator = indicator.get();
-		m_pScene->Add(std::move(indicator));
-	}
-
-	void EndSceneState::UpdateIndicator()
-	{
-		if (!m_pIndicator || m_CurrentPendingIndex >= static_cast<int>(m_PendingEntries.size()))
-			return;
-
-		const float rowYs[HighScoreManager::kMaxEntries] = { kScoreRow1Y, kScoreRow2Y, kScoreRow3Y, kScoreRow4Y };
-		const int rowIndex = m_PendingEntries[m_CurrentPendingIndex].entryIndex;
-		if (rowIndex < 0 || rowIndex >= HighScoreManager::kMaxEntries)
-			return;
-
-		auto* transform = m_pIndicator->GetComponent<TransformComponent>();
-		if (transform)
-		{
-			const float x = (kNameStartX + static_cast<float>(m_CurrentCharIndex) * kGlyphWidth) * m_Scale;
-			const float y = (rowYs[rowIndex] + kGlyphHeight + 2.0f) * m_Scale;
-			transform->SetLocalPosition(x, y);
 		}
 	}
 
@@ -436,8 +412,7 @@ namespace dae
 	{
 		m_pRoot = nullptr;
 		m_pTextRoot = nullptr;
-		m_pIndicator = nullptr;
-		m_pIndicatorRender = nullptr;
+		m_pCurrentLetterRender = nullptr;
 		m_pReturnArrow = nullptr;
 		m_pReturnArrowRender = nullptr;
 
@@ -448,7 +423,7 @@ namespace dae
 		}
 	}
 
-	void EndSceneState::BindInput()
+	void EndSceneState::BindInput(int playerIndex)
 	{
 		auto& input = InputManager::GetInstance();
 
@@ -458,15 +433,21 @@ namespace dae
 
 		if (m_Phase == Phase::CheckScores || m_Phase == Phase::EnterName)
 		{
-			input.BindKeyboardInput(KeyCode::Up, KeyState::Down, std::make_unique<EndSceneCommand>(*this, EndSceneCommand::Action::LetterUp));
-			input.BindKeyboardInput(KeyCode::Down, KeyState::Down, std::make_unique<EndSceneCommand>(*this, EndSceneCommand::Action::LetterDown));
-			input.BindKeyboardInput(KeyCode::Return, KeyState::Down, std::make_unique<EndSceneCommand>(*this, EndSceneCommand::Action::Confirm));
+			if (playerIndex == 0 || playerIndex == -1)
+			{
+				input.BindKeyboardInput(KeyCode::Left, KeyState::Down, std::make_unique<EndSceneCommand>(*this, EndSceneCommand::Action::LetterUp));
+				input.BindKeyboardInput(KeyCode::Right, KeyState::Down, std::make_unique<EndSceneCommand>(*this, EndSceneCommand::Action::LetterDown));
+				input.BindKeyboardInput(KeyCode::Return, KeyState::Down, std::make_unique<EndSceneCommand>(*this, EndSceneCommand::Action::Confirm));
+			}
 
-			const unsigned int controllerIndex = 0;
-			input.AddController(controllerIndex);
-			input.BindControllerInput(controllerIndex, ControllerButton::kDpadUp, KeyState::Down, std::make_unique<EndSceneCommand>(*this, EndSceneCommand::Action::LetterUp));
-			input.BindControllerInput(controllerIndex, ControllerButton::kDpadDown, KeyState::Down, std::make_unique<EndSceneCommand>(*this, EndSceneCommand::Action::LetterDown));
-			input.BindControllerInput(controllerIndex, ControllerButton::kX, KeyState::Down, std::make_unique<EndSceneCommand>(*this, EndSceneCommand::Action::Confirm));
+			if (playerIndex == 1 || playerIndex == -1)
+			{
+				const unsigned int controllerIndex = 0;
+				input.AddController(controllerIndex);
+				input.BindControllerInput(controllerIndex, ControllerButton::kDpadUp, KeyState::Down, std::make_unique<EndSceneCommand>(*this, EndSceneCommand::Action::LetterUp));
+				input.BindControllerInput(controllerIndex, ControllerButton::kDpadDown, KeyState::Down, std::make_unique<EndSceneCommand>(*this, EndSceneCommand::Action::LetterDown));
+				input.BindControllerInput(controllerIndex, ControllerButton::kX, KeyState::Down, std::make_unique<EndSceneCommand>(*this, EndSceneCommand::Action::Confirm));
+			}
 		}
 		else if (m_Phase == Phase::WaitForReturn)
 		{
@@ -484,7 +465,7 @@ namespace dae
 		input.ClearAllBindings();
 	}
 
-	void EndSceneState::CreateGlyph(Scene& scene, GameObject& parent, char c, float localX, float localY, int layer)
+	RenderComponent* EndSceneState::CreateGlyph(Scene& scene, GameObject& parent, char c, float localX, float localY, int layer)
 	{
 		auto [glyphX, glyphY] = GetCharacterSrcRect(c);
 
@@ -498,6 +479,7 @@ namespace dae
 		render->SetRenderLayer(layer);
 		glyph->SetParent(&parent, false);
 		scene.Add(std::move(glyph));
+		return render;
 	}
 
 	std::pair<float, float> EndSceneState::GetCharacterSrcRect(char character) const

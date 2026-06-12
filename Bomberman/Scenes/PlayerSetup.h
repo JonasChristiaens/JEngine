@@ -1,6 +1,7 @@
 #pragma once
 #include "GameplaySceneBuilder.h"
 #include <glm/vec3.hpp>
+#include <vector>
 
 namespace dae
 {
@@ -11,5 +12,6 @@ namespace dae
 	void BindKeyboardMovement(GameObject& player);
 	void BindControllerMovement(GameObject& player, unsigned int controllerIndex);
 	void BindPlayerControls(GameObject& player, bool keyboard, unsigned int controllerIndex);
-	unsigned int GetSecondaryControllerIndex();
+	void AssignPlayerInputs(const std::vector<GameObject*>& players);
+	void BindEnemyMovementControls(GameObject& enemy);
 }

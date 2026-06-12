@@ -2,6 +2,7 @@
 #include "EventQueue/EventManager.h"
 #include "Scene/GameObject.h"
 #include "Components/HealthComponent.h"
+#include "Components/DetonatorComponent.h"
 
 namespace dae
 {
@@ -12,6 +13,10 @@ namespace dae
 
 		auto* health = m_pGameActor->GetComponent<HealthComponent>();
 		if (health && health->IsDead())
+			return;
+
+		auto* detonator = m_pGameActor->GetComponent<DetonatorComponent>();
+		if (!detonator || !detonator->HasDetonator())
 			return;
 
 		Event remoteDetonateEvent(make_sdbm_hash("RemoteDetonateEvent"));

@@ -13,7 +13,7 @@ namespace dae
 	class HudComponent final : public BaseComponent, public IObserver
 	{
 	public:
-		HudComponent(GameObject* pOwner, float hudWidth, float hudHeight, const std::vector<GameObject*>& players);
+		HudComponent(GameObject* pOwner, float hudWidth, float hudHeight, const std::vector<GameObject*>& players, std::vector<int> initialLives = {}, std::vector<int> initialScores = {});
 		~HudComponent() override;
 
 		void Update() override;

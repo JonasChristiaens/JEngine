@@ -29,6 +29,10 @@ namespace
 		config.softBlockCount = levelData.softBlockCount;
 		config.reservedTiles = levelData.reservedTiles;
 		config.pickupType = levelData.pickupType;
+
+		config.reservedTiles.insert(config.reservedTiles.end(), {
+			{3, 2}, {4, 1}, {4, 2}, {5, 1}, {5, 2}, {5, 3}, {3, 3}, {4, 3}
+		});
 		return config;
 	}
 
@@ -44,7 +48,7 @@ namespace
 
 namespace dae
 {
-	GameplaySceneData BuildGameplayScene(Scene& scene, GameMode gameMode, int levelIndex, const PlayerCarryOver& carryOver)
+	GameplaySceneData BuildGameplayScene(Scene& scene, GameMode gameMode, int levelIndex, const PlayerCarryOver& carryOver, const PlayerCarryOver& p2CarryOver)
 	{
 		const auto windowSize = Renderer::GetInstance().GetWindowSize();
 		const float windowWidth = static_cast<float>(windowSize.x);
@@ -91,7 +95,7 @@ namespace dae
 		const size_t levelIdx = static_cast<size_t>(idx);
 
 		const SpawnParams spawnParams{
-			scene, *worldRootPtr, tileWorldSize, carryOver,
+			scene, *worldRootPtr, tileWorldSize, carryOver, p2CarryOver,
 			player1Pos, player2Pos,
 			std::max(0, levels.at(levelIdx).balloomCount),
 			std::max(0, levels.at(levelIdx).onealCount),
@@ -115,7 +119,9 @@ namespace dae
 		GameObject* player1 = players.first;
 		GameObject* player2 = players.second;
 
-		cameraRoot->AddComponent<CameraComponent>(player1, windowWidth, playfieldScaledWidth);
+		auto* camera = cameraRoot->AddComponent<CameraComponent>(player1, windowWidth, playfieldScaledWidth);
+		if (player2)
+			camera->SetSecondTarget(player2);
 		scene.Add(std::move(cameraRoot));
 
 		if (!g_BombObserver)
@@ -124,9 +130,27 @@ namespace dae
 			g_EntityDeathObserver = std::make_unique<EntityDeathObserver>(scene);
 
 		std::vector<GameObject*> hudPlayers{};
-		if (player1) hudPlayers.push_back(player1);
-		if (player2) hudPlayers.push_back(player2);
-		hudRoot->AddComponent<HudComponent>(windowWidth, hudHeight, hudPlayers);
+		std::vector<int> hudLives{};
+		std::vector<int> hudScores{};
+		if (gameMode == GameMode::Coop)
+		{
+			hudPlayers.push_back(player1);
+			hudLives.push_back(carryOver.health);
+			hudScores.push_back(carryOver.score);
+			hudPlayers.push_back(player2);
+			hudLives.push_back(p2CarryOver.health);
+			hudScores.push_back(p2CarryOver.score);
+		}
+		else
+		{
+			if (player1)
+			{
+				hudPlayers.push_back(player1);
+				hudLives.push_back(carryOver.health);
+				hudScores.push_back(carryOver.score);
+			}
+		}
+		hudRoot->AddComponent<HudComponent>(windowWidth, hudHeight, hudPlayers, hudLives, hudScores);
 
 		return { player1, player2, tileWorldSize };
 	}

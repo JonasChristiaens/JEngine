@@ -9,7 +9,7 @@ namespace dae
 	{
 	public:
 		explicit GameSceneState(SceneStateMachineComponent& owner, GameMode gameMode = GameMode::Solo);
-		explicit GameSceneState(SceneStateMachineComponent& owner, GameMode gameMode, int levelIndex, const PlayerCarryOver& carryOver);
+		explicit GameSceneState(SceneStateMachineComponent& owner, GameMode gameMode, int levelIndex, const PlayerCarryOver& carryOver, const PlayerCarryOver& p2CarryOver = {});
 
 		void OnEnter() override;
 		void OnExit() override;
@@ -17,19 +17,17 @@ namespace dae
 		void Notify(GameObject& actor, Event event) override;
 
 	private:
+		static constexpr int kMaxPlayers{ 2 };
+
 		int m_CurrentLevelIndex{ 0 };
 		int m_TotalLevels{ 0 };
 		bool m_LevelCompleted{ false };
-		int m_CarriedBombCapacity{ 1 };
-		int m_CarriedBombRange{ 1 };
-		bool m_CarriedDetonator{ false };
-		bool m_CarriedHasSkate{ false };
-		int m_CarriedHealth{ 4 };
-		int m_CarriedScore{ 0 };
+		PlayerCarryOver m_Carried[kMaxPlayers]{};
 		int m_AlivePlayerCount{ 0 };
 		bool m_PlayerSurvivedDamage{ false };
 		bool m_RespawnAfterDeathAnim{ false };
 		GameObject* m_pRespawnPlayer{ nullptr };
+		GameObject* m_pPlayers[kMaxPlayers]{ nullptr, nullptr };
 		float m_BgmCooldown{ 0.0f };
 		bool m_StageClearPlayed{ false };
 

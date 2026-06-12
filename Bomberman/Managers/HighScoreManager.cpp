@@ -1,5 +1,6 @@
 #include "HighScoreManager.h"
 #include <algorithm>
+#include <filesystem>
 #include <fstream>
 
 namespace
@@ -69,7 +70,11 @@ namespace dae
 
 	void HighScoreManager::Save(const std::string& filepath)
 	{
-		std::ofstream file(filepath, std::ios::binary);
+		const std::filesystem::path path(filepath);
+		std::error_code ec;
+		std::filesystem::create_directories(path.parent_path(), ec);
+
+		std::ofstream file(path, std::ios::binary);
 		if (!file.is_open())
 			return;
 

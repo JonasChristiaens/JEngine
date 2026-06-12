@@ -24,6 +24,11 @@ namespace dae
 			return;
 		}
 
+		if (m_pSecondTarget != nullptr && m_pSecondTarget->IsMarkedForDeletion())
+		{
+			m_pSecondTarget = nullptr;
+		}
+
 		if (m_pTransform == nullptr)
 			m_pTransform = GetOwner()->GetComponent<TransformComponent>();
 		if (m_pTransform == nullptr)
@@ -33,7 +38,23 @@ namespace dae
 		const float halfWindowWidth = m_WindowWidth * 0.5f;
 		const float minX = 0.0f;
 		const float maxX = std::max(minX, m_PlayfieldWidth - m_WindowWidth);
-		const float desiredX = targetPosition.x - halfWindowWidth;
+
+		float desiredCenterX = targetPosition.x;
+		if (m_pSecondTarget != nullptr)
+		{
+			const auto& secondPos = m_pSecondTarget->GetLocalPosition();
+			const float minPlayerX = std::min(targetPosition.x, secondPos.x);
+			const float maxPlayerX = std::max(targetPosition.x, secondPos.x);
+
+			desiredCenterX = (targetPosition.x + secondPos.x) * 0.5f;
+
+			if (desiredCenterX - halfWindowWidth > minPlayerX)
+				desiredCenterX = minPlayerX + halfWindowWidth;
+			if (desiredCenterX + halfWindowWidth < maxPlayerX)
+				desiredCenterX = maxPlayerX - halfWindowWidth;
+		}
+
+		const float desiredX = desiredCenterX - halfWindowWidth;
 		const float clampedX = std::clamp(desiredX, minX, maxX);
 
 		m_pTransform->SetLocalPosition(-clampedX, 0.0f, 0.0f);

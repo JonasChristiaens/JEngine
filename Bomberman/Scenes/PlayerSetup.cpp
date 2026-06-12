@@ -136,9 +136,70 @@ namespace dae
 		BindControllerMovement(player, controllerIndex);
 	}
 
-	unsigned int GetSecondaryControllerIndex()
+	void AssignPlayerInputs(const std::vector<GameObject*>& players)
 	{
+		if (players.empty())
+			return;
+
 		auto& input = InputManager::GetInstance();
-		return input.HasController(1) ? 1u : 0u;
+
+		int controllerCount = 0;
+		for (unsigned int i = 0; i < 4; ++i)
+		{
+			if (input.HasController(i))
+				++controllerCount;
+		}
+
+		const bool isSolo = (players.size() == 1);
+
+		if (isSolo)
+		{
+			BindPlayerControls(*players[0], true, 0);
+			return;
+		}
+
+		BindKeyboardMovement(*players[0]);
+
+		const size_t playerCount = players.size();
+		for (size_t i = 0; i < playerCount; ++i)
+		{
+			int controllerIdx = -1;
+
+			if (static_cast<int>(playerCount) <= controllerCount)
+			{
+				controllerIdx = static_cast<int>(i);
+			}
+			else
+			{
+				const int offset = controllerCount - static_cast<int>(playerCount - i);
+				if (offset >= 0)
+					controllerIdx = offset;
+			}
+
+			if (controllerIdx >= 0)
+				BindControllerMovement(*players[i], static_cast<unsigned int>(controllerIdx));
+		}
 	}
+}
+
+void dae::BindEnemyMovementControls(GameObject& enemy)
+{
+	constexpr float kEnemySpeed{ 90.0f };
+	auto& input = InputManager::GetInstance();
+
+	const unsigned int controllerIndex = 0;
+	if (!input.HasController(controllerIndex))
+		return;
+
+	auto bindController = [&](unsigned int button, const glm::vec3& dir)
+		{
+			auto cmd = std::make_unique<MoveCommand>(dir, kEnemySpeed);
+			cmd->SetGameActor(&enemy);
+			input.BindControllerInput(controllerIndex, button, KeyState::Pressed, std::move(cmd));
+		};
+
+	bindController(ControllerButton::kDpadUp, { 0, -1, 0 });
+	bindController(ControllerButton::kDpadDown, { 0, 1, 0 });
+	bindController(ControllerButton::kDpadLeft, { -1, 0, 0 });
+	bindController(ControllerButton::kDpadRight, { 1, 0, 0 });
 }

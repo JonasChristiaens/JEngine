@@ -47,5 +47,7 @@ namespace dae
 		GameObject* m_pModeLabelRoot{};
 		GameObject* m_pScoreRoot{};
 		float m_BgmCooldown{ 0.0f };
+		float m_BlinkTimer{ 0.0f };
+		bool m_ArrowVisible{ true };
 	};
 }
