@@ -30,7 +30,7 @@ namespace dae
 		std::vector<GameObject*> m_Players{};
 		std::vector<int> m_Scores{};
 		std::vector<int> m_Lives{};
-		std::unique_ptr<Texture2D> m_FontTexture{};
+		Texture2D* m_FontTexture{};
 
 		float m_RemainingMs{ static_cast<float>(kMaxTime * kTimerScale) };
 

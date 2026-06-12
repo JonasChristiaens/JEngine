@@ -114,7 +114,7 @@ namespace
 namespace dae::EnemyFactory
 {
 	GameObject* CreateEnemy(Scene& scene, GameObject& parent, int gridColumns, int gridRows, float tileWorldSize, float moveSpeed,
-		const EnemyConfig& config, GameObject* pChaseTarget, const std::vector<glm::vec3>& reservedWorldPositions, bool useAiMovement)
+		const EnemyConfig& config, const std::vector<GameObject*>& chaseTargets, const std::vector<glm::vec3>& reservedWorldPositions, bool useAiMovement)
 	{
 		auto enemy = std::make_unique<GameObject>();
 		auto* transform = enemy->AddComponent<TransformComponent>();
@@ -136,10 +136,11 @@ namespace dae::EnemyFactory
 		{
 			auto* movement = enemy->AddComponent<EnemyMovementComponent>(moveSpeed, config.minDirectionTime, config.maxDirectionTime);
 			movement->SetChaseAlignmentThreshold(tileWorldSize);
-			if (pChaseTarget && config.chaseAxis != EnemyChaseAxis::None)
+			if (config.chaseAxis != EnemyChaseAxis::None)
 			{
-				movement->SetChaseTarget(pChaseTarget);
 				movement->SetChaseAxis(config.chaseAxis);
+				for (auto* pTarget : chaseTargets)
+					movement->AddChaseTarget(pTarget);
 			}
 		}
 		enemy->AddComponent<HealthComponent>(1);

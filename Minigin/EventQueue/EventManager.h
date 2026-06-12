@@ -9,7 +9,6 @@ namespace dae
 	class EventManager final : public Singleton<EventManager>, public Subject
 	{
 	public:
-		static bool IsAlive() { return s_isAlive; }
 		void BroadcastEvent(Event e, GameObject* pSubjectActor) { QueueEvent(e, pSubjectActor); }
 		void BroadcastImmediate(Event e, GameObject* pSubjectActor) { NotifyObservers(e, pSubjectActor); }
 
@@ -44,10 +43,8 @@ namespace dae
 
 	private:
 		friend class Singleton<EventManager>;
-		EventManager() { s_isAlive = true; }
-		~EventManager() { s_isAlive = false; }
-
-		inline static bool s_isAlive{ false };
+		EventManager() = default;
+		~EventManager() = default;
 
 		struct QueuedEvent
 		{

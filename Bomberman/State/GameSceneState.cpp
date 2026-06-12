@@ -54,7 +54,7 @@ namespace dae
 		const PlayerCarryOver& p2CarryOver = m_Carried[1];
 		const auto data = BuildGameplayScene(scene, GetGameMode(), m_CurrentLevelIndex, carryOver, p2CarryOver);
 		m_pPlayers[0] = data.player1;
-		m_pPlayers[1] = data.player2;
+		m_pPlayers[1] = (GetGameMode() == GameMode::Versus) ? nullptr : data.player2;
 
 		const int playerCount = (GetGameMode() == GameMode::Versus) ? 1 : 2;
 		m_AlivePlayerCount = 0;
@@ -72,7 +72,7 @@ namespace dae
 
 		Event playBgmEvent(make_sdbm_hash("PlayAudioEvent"));
 		playBgmEvent.nbArgs = 1;
-		playBgmEvent.args[0].p = const_cast<char*>("Main_BGM.flac");
+		playBgmEvent.args[0].p = "Main_BGM.flac";
 		EventManager::GetInstance().BroadcastImmediate(playBgmEvent, m_Owner.GetOwner());
 		m_BgmCooldown = 1.0f;
 	}
@@ -106,7 +106,7 @@ namespace dae
 		{
 			Event playBgmEvent(make_sdbm_hash("PlayAudioEvent"));
 			playBgmEvent.nbArgs = 1;
-			playBgmEvent.args[0].p = const_cast<char*>("Main_BGM.flac");
+		playBgmEvent.args[0].p = "Main_BGM.flac";
 			EventManager::GetInstance().BroadcastImmediate(playBgmEvent, m_Owner.GetOwner());
 			m_BgmCooldown = 1.0f;
 		}
@@ -197,7 +197,7 @@ namespace dae
 
 				Event playSfxEvent(make_sdbm_hash("PlayAudioEvent"));
 				playSfxEvent.nbArgs = 1;
-				playSfxEvent.args[0].p = const_cast<char*>("Stage_Clear.flac");
+				playSfxEvent.args[0].p = "Stage_Clear.flac";
 				EventManager::GetInstance().BroadcastImmediate(playSfxEvent, m_Owner.GetOwner());
 			}
 		}

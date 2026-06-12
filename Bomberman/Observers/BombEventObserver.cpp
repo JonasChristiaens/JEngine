@@ -168,7 +168,12 @@ void dae::BombEventObserver::Notify(GameObject& actor, Event event)
 	{
 		auto& bombs = m_PlayerBombs[&actor];
 		if (bombs.empty())
+		{
+			auto* detonator = actor.GetComponent<DetonatorComponent>();
+			if (detonator)
+				detonator->StopDetonateChain();
 			return;
+		}
 
 		auto* bomb = bombs.front();
 		bombs.erase(bombs.begin());
@@ -184,13 +189,11 @@ void dae::BombEventObserver::Notify(GameObject& actor, Event event)
 			}
 		}
 
-		if (!bombs.empty())
+		if (bombs.empty())
 		{
-			auto chainObj = std::make_unique<dae::GameObject>();
-			dae::Event chainEvent(kRemoteDetonateEventId);
-			chainEvent.nbArgs = 0;
-			chainObj->AddComponent<dae::DelayedEventComponent>(chainEvent, 0.15f);
-			m_pScene->Add(std::move(chainObj));
+			auto* detonator = actor.GetComponent<DetonatorComponent>();
+			if (detonator)
+				detonator->StopDetonateChain();
 		}
 	}
 }

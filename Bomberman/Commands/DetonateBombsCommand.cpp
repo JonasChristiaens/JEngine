@@ -19,8 +19,6 @@ namespace dae
 		if (!detonator || !detonator->HasDetonator())
 			return;
 
-		Event remoteDetonateEvent(make_sdbm_hash("RemoteDetonateEvent"));
-		remoteDetonateEvent.nbArgs = 0;
-		EventManager::GetInstance().BroadcastEvent(remoteDetonateEvent, m_pGameActor);
+		detonator->StartDetonateChain();
 	}
 }

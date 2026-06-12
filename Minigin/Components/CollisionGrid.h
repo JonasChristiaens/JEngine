@@ -16,7 +16,7 @@ namespace dae
 		static void Cleanup();
 
 	private:
-		inline static std::vector<std::vector<std::vector<CollisionComponent*>>> s_Cells{};
+		inline static std::vector<std::vector<std::vector<const CollisionComponent*>>> s_Cells{};
 		inline static float s_CellSize{};
 		inline static float s_OriginX{};
 		inline static float s_OriginY{};

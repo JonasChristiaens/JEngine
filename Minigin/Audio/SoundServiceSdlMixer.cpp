@@ -137,21 +137,18 @@ namespace dae
 
 		void ThreadMain()
 		{
-			using namespace std::chrono_literals;
-
 			for (;;)
 			{
 				Request request{};
 
 				{
 					std::unique_lock lock(m_QueueMutex);
-					m_Condition.wait_for(lock, 100ms, [this]() { return !m_Queue.empty() || !m_Running; });
+					m_Condition.wait(lock, [this]() { return !m_Queue.empty() || !m_Running; });
 
 					if (m_Queue.empty())
 					{
 						if (!m_Running)
 							break;
-						CleanupFinishedTracks();
 						continue;
 					}
 

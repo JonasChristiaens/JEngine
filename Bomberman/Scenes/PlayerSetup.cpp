@@ -182,12 +182,11 @@ namespace dae
 	}
 }
 
-void dae::BindEnemyMovementControls(GameObject& enemy)
+void dae::BindEnemyMovementControls(GameObject& enemy, unsigned int controllerIndex)
 {
 	constexpr float kEnemySpeed{ 90.0f };
 	auto& input = InputManager::GetInstance();
 
-	const unsigned int controllerIndex = 0;
 	if (!input.HasController(controllerIndex))
 		return;
 

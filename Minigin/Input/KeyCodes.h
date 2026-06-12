@@ -12,6 +12,8 @@ namespace dae
 		R,
 		B,
 		Left,
+		Up,
+		Down,
 		Right,
 		Return,
 		F1,

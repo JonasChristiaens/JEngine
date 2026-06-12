@@ -30,8 +30,8 @@ namespace dae
 		GameObject* GetParent() const { return m_pParent; }
 		const std::vector<GameObject*>& GetChildren() const { return m_Children; }
 
-		const glm::vec3& GetWorldPosition() const;
-		const glm::vec3& GetLocalPosition() const;
+		glm::vec3 GetWorldPosition() const;
+		glm::vec3 GetLocalPosition() const;
 
 		// Setters
 		void MarkForDeletion();

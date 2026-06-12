@@ -43,31 +43,6 @@ if(NOT EMSCRIPTEN)
 	find_package(SDL3 CONFIG REQUIRED)
 endif()
 
-# ----- SDL3_ttf -----
-if(EMSCRIPTEN)
-	set(SDLTTF_VENDORED              ON  CACHE BOOL "" FORCE)
-	set(SDLTTF_USE_VENDORED_FREETYPE  ON  CACHE BOOL "" FORCE)
-	set(SDLTTF_USE_VENDORED_HARFBUZZ  ON  CACHE BOOL "" FORCE)
-
-	FetchContent_Declare(
-		SDL3_ttf
-		GIT_REPOSITORY https://github.com/libsdl-org/SDL_ttf.git
-		GIT_TAG        release-3.2.2
-		GIT_SHALLOW    TRUE
-	)
-else()
-	FetchContent_Declare(
-		SDL3_ttf
-		URL https://www.libsdl.org/projects/SDL_ttf/release/SDL3_ttf-devel-3.2.2-VC.zip
-	)
-endif()
-FetchContent_MakeAvailable(SDL3_ttf)
-
-if(NOT EMSCRIPTEN)
-	list(PREPEND CMAKE_PREFIX_PATH "${sdl3_ttf_SOURCE_DIR}")
-	find_package(SDL3_ttf CONFIG REQUIRED)
-endif()
-
 # ----- SDL3_mixer -----
 if(EMSCRIPTEN)
 	FetchContent_Declare(
@@ -133,13 +108,11 @@ add_library(minigin STATIC
 	Minigin/Rendering/Renderer.cpp
 	Minigin/Rendering/Texture2D.cpp
 	Minigin/Resources/ResourceManager.cpp
-	Minigin/Resources/Font.cpp
 	Minigin/Input/InputManager.cpp
 	Minigin/Input/ControllerInput.cpp
 	Minigin/Input/KeyboardInput.cpp
 	Minigin/Components/TransformComponent.cpp
 	Minigin/Components/RenderComponent.cpp
-	Minigin/Components/TextComponent.cpp
 	Minigin/Components/SpriteAnimatorComponent.cpp
 	Minigin/Components/CollisionComponent.cpp
 	Minigin/Components/CollisionGrid.cpp
@@ -167,7 +140,6 @@ target_include_directories(minigin PUBLIC
 
 target_link_libraries(minigin PUBLIC
 	SDL3::SDL3
-	SDL3_ttf::SDL3_ttf
 	SDL3_mixer::SDL3_mixer
 	glm::glm
 	imgui
@@ -259,7 +231,7 @@ endif()
 # ================
 if(EMSCRIPTEN)
 	set(EMSCRIPTEN_COMPILE_FLAGS "-g -sNO_DISABLE_EXCEPTION_CATCHING")
-	set(EMSCRIPTEN_LINK_FLAGS    "-sNO_DISABLE_EXCEPTION_CATCHING -sUSE_FREETYPE=1 -sUSE_HARFBUZZ=1 -g -sALLOW_MEMORY_GROWTH=0 -sINITIAL_MEMORY=1024MB --preload-file \"${CMAKE_CURRENT_SOURCE_DIR}/Bomberman/Data@/\"")
+	set(EMSCRIPTEN_LINK_FLAGS    "-sNO_DISABLE_EXCEPTION_CATCHING -g -sALLOW_MEMORY_GROWTH=0 -sINITIAL_MEMORY=1024MB --preload-file \"${CMAKE_CURRENT_SOURCE_DIR}/Bomberman/Data@/\"")
 
 	set_target_properties(${GAME_TARGET} imgui minigin PROPERTIES
 		COMPILE_FLAGS "${EMSCRIPTEN_COMPILE_FLAGS}"
@@ -277,7 +249,6 @@ elseif(WIN32)
 	add_custom_command(TARGET ${GAME_TARGET} POST_BUILD
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different
 			"$<TARGET_FILE:SDL3::SDL3>"
-			"$<TARGET_FILE:SDL3_ttf::SDL3_ttf>"
 			"$<TARGET_FILE:SDL3_mixer::SDL3_mixer>"
 			"$<TARGET_FILE_DIR:${GAME_TARGET}>"
 	)

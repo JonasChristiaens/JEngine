@@ -13,5 +13,5 @@ namespace dae
 	void BindControllerMovement(GameObject& player, unsigned int controllerIndex);
 	void BindPlayerControls(GameObject& player, bool keyboard, unsigned int controllerIndex);
 	void AssignPlayerInputs(const std::vector<GameObject*>& players);
-	void BindEnemyMovementControls(GameObject& enemy);
+	void BindEnemyMovementControls(GameObject& enemy, unsigned int controllerIndex);
 }

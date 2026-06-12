@@ -6,12 +6,14 @@
 #include "Components/PlayfieldComponent.h"
 #include "Components/BombRangeComponent.h"
 #include "Components/EnemyComponent.h"
+#include "Components/HealthComponent.h"
 #include "Core/GameTime.h"
 #include "EventQueue/EventManager.h"
 #include <glm/glm.hpp>
 #include <random>
 #include <array>
 #include <utility>
+#include <algorithm>
 
 namespace
 {
@@ -54,9 +56,10 @@ namespace dae
 
 		const float deltaTime = GameTime::GetInstance().GetDeltaTime();
 
-		if (m_pChaseTarget && m_ChaseAxis != EnemyChaseAxis::None)
+		auto* chaseTarget = FindClosestChaseTarget();
+		if (chaseTarget && m_ChaseAxis != EnemyChaseAxis::None)
 		{
-			auto* targetTransform = m_pChaseTarget->GetComponent<TransformComponent>();
+			auto* targetTransform = chaseTarget->GetComponent<TransformComponent>();
 			if (targetTransform)
 			{
 				const glm::vec3 targetLocal = targetTransform->GetLocalPosition();
@@ -343,5 +346,58 @@ namespace dae
 		}
 
 		return true;
+	}
+
+	void EnemyMovementComponent::AddChaseTarget(GameObject* pTarget)
+	{
+		if (pTarget)
+			m_ChaseTargets.push_back(pTarget);
+	}
+
+	GameObject* EnemyMovementComponent::FindClosestChaseTarget() const
+	{
+		for (auto it = m_ChaseTargets.begin(); it != m_ChaseTargets.end();)
+		{
+			auto* target = *it;
+			if (!target || target->IsMarkedForDeletion())
+			{
+				it = const_cast<std::vector<GameObject*>&>(m_ChaseTargets).erase(it);
+				continue;
+			}
+			auto* health = target->GetComponent<HealthComponent>();
+			if (health && health->IsDead())
+			{
+				it = const_cast<std::vector<GameObject*>&>(m_ChaseTargets).erase(it);
+				continue;
+			}
+			++it;
+		}
+
+		if (m_ChaseTargets.empty())
+			return nullptr;
+
+		const glm::vec3 myLocal = m_pTransform->GetLocalPosition();
+		GameObject* closest = nullptr;
+		float closestDistSq = std::numeric_limits<float>::max();
+
+		for (auto* target : m_ChaseTargets)
+		{
+			auto* tx = target->GetComponent<TransformComponent>();
+			if (!tx)
+				continue;
+
+			const glm::vec3 targetLocal = tx->GetLocalPosition();
+			const float dx = targetLocal.x - myLocal.x;
+			const float dy = targetLocal.y - myLocal.y;
+			const float distSq = dx * dx + dy * dy;
+
+			if (distSq < closestDistSq)
+			{
+				closestDistSq = distSq;
+				closest = target;
+			}
+		}
+
+		return closest;
 	}
 }

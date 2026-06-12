@@ -5,6 +5,8 @@
 #include "Components/HealthComponent.h"
 #include "Components/SkateComponent.h"
 #include "Core/GameTime.h"
+#include "Rendering/Renderer.h"
+#include <algorithm>
 #include <glm/geometric.hpp>
 
 namespace dae
@@ -51,5 +53,21 @@ namespace dae
 		{
 			transform->SetLocalPosition(nextPosition);
 		}
+
+		ClampToCameraBounds(transform);
+	}
+
+	void MoveCommand::ClampToCameraBounds(dae::TransformComponent* transform)
+	{
+		float cameraOffsetX = 0.0f;
+		float cameraOffsetY = 0.0f;
+		Renderer::GetInstance().GetCameraOffset(cameraOffsetX, cameraOffsetY);
+		const auto windowSize = Renderer::GetInstance().GetWindowSize();
+		const float visibleLeft = -cameraOffsetX;
+		const float visibleRight = -cameraOffsetX + static_cast<float>(windowSize.x);
+
+		glm::vec3 pos = transform->GetLocalPosition();
+		pos.x = std::clamp(pos.x, visibleLeft, visibleRight);
+		transform->SetLocalPosition(pos);
 	}
 }

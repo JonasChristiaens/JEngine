@@ -1,6 +1,7 @@
 #pragma once
 #include "BaseComponent.h"
 #include <functional>
+#include <utility>
 #include <vector>
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
@@ -43,7 +44,8 @@ namespace dae
 		std::function<void(GameObject*)> m_OnCollision{ nullptr };
 		std::function<bool(GameObject*)> m_CollisionFilter{ nullptr };
 		mutable TransformComponent* m_pTransform{};
-		int m_LastQueryId{ 0 };
+		mutable int m_LastQueryId{ 0 };
+		mutable std::vector<std::pair<int, int>> m_OccupiedCells{};
 		mutable bool m_Registered{ false };
 		mutable glm::vec3 m_LastRegisteredPos{ -1.0f, -1.0f, -1.0f };
 	};

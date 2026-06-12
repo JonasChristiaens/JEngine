@@ -151,26 +151,24 @@ void dae::GameObject::SetLocalPosition(const glm::vec3& pos)
 	}
 }
 
-const glm::vec3& dae::GameObject::GetLocalPosition() const
+glm::vec3 dae::GameObject::GetLocalPosition() const
 {
 	if (auto* pTransform = GetComponent<TransformComponent>())
 	{
 		return pTransform->GetLocalPosition();
 	}
 
-	static const glm::vec3 zero{ 0.f, 0.f, 0.f };
-	return zero;
+	return { 0.f, 0.f, 0.f };
 }
 
-const glm::vec3& dae::GameObject::GetWorldPosition() const
+glm::vec3 dae::GameObject::GetWorldPosition() const
 {
 	if (auto* pTransform = GetComponent<TransformComponent>())
 	{
 		return pTransform->GetWorldPosition();
 	}
 
-	static const glm::vec3 zero{ 0.f, 0.f, 0.f };
-	return zero;
+	return { 0.f, 0.f, 0.f };
 }
 
 void dae::GameObject::SetPositionDirty()

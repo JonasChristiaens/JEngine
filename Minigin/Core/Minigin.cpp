@@ -10,7 +10,6 @@
 #endif
 
 #include <SDL3/SDL.h>
-#include <SDL3_ttf/SDL_ttf.h>
 #include "Minigin.h"
 #include "Audio/ServiceLocator.h"
 #include "Audio/SoundServiceSdlMixer.h"
@@ -51,10 +50,6 @@ void PrintSDLVersion()
 	LogSDLVersion("Compiled with SDL ", SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_MICRO_VERSION);
 	int version = SDL_GetVersion();
 	LogSDLVersion("Linked with SDL   ", SDL_VERSIONNUM_MAJOR(version), SDL_VERSIONNUM_MINOR(version), SDL_VERSIONNUM_MICRO(version));
-
-	LogSDLVersion("Compiled with SDL_ttf ", SDL_TTF_MAJOR_VERSION, SDL_TTF_MINOR_VERSION, SDL_TTF_MICRO_VERSION);
-	version = TTF_Version();
-	LogSDLVersion("Linked with SDL_ttf   ", SDL_VERSIONNUM_MAJOR(version), SDL_VERSIONNUM_MINOR(version), SDL_VERSIONNUM_MICRO(version));
 }
 
 dae::Minigin::Minigin(const std::filesystem::path& dataPath)
@@ -128,8 +123,8 @@ void dae::Minigin::RunOneFrame()
 	m_LastTime = currentTime;
 
 	dae::GameTime::GetInstance().SetDeltaTime(deltaTime);
-	Renderer::GetInstance().ResetCameraOffset();
 	m_Quit = !InputManager::GetInstance().ProcessInput();
+	Renderer::GetInstance().ResetCameraOffset();
 	dae::EventManager::GetInstance().ProcessQueuedEvents();
 
 	SceneManager::GetInstance().Update();

@@ -1,4 +1,5 @@
 #include "TransitionSceneState.h"
+#include "GlyphHelper.h"
 #include "Components/SceneStateMachineComponent.h"
 #include "Components/RenderComponent.h"
 #include "Components/TransformComponent.h"
@@ -52,7 +53,7 @@ namespace dae
 
 		Event playSoundEvent(make_sdbm_hash("PlayAudioEvent"));
 		playSoundEvent.nbArgs = 1;
-		playSoundEvent.args[0].p = const_cast<char*>(soundPath);
+		playSoundEvent.args[0].p = soundPath;
 		EventManager::GetInstance().BroadcastImmediate(playSoundEvent, m_Root);
 
 		m_SoundPlayed = true;
@@ -193,23 +194,6 @@ namespace dae
 
 	std::pair<float, float> TransitionSceneState::GetCharacterSrcRect(char character) const
 	{
-		if (character >= '0' && character <= '9')
-		{
-			const int index = character - '0';
-			return { static_cast<float>(index) * kGlyphWidth, kGlyphRowY };
-		}
-
-		char upper = character;
-		if (upper >= 'a' && upper <= 'z')
-		{
-			upper = static_cast<char>(upper - ('a' - 'A'));
-		}
-		if (upper >= 'A' && upper <= 'Z')
-		{
-			const int index = upper - 'A';
-			return { static_cast<float>(index) * kGlyphWidth, kGlyphRow2Y };
-		}
-
-		return { 0.0f, kGlyphRow2Y };
+		return GlyphHelper::GetCharacterSrcRect(character);
 	}
 }

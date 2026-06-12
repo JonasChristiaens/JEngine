@@ -13,7 +13,7 @@ namespace dae
 		s_OriginY = originY;
 		s_Cols = cols;
 		s_Rows = rows;
-		s_Cells.assign(static_cast<size_t>(rows), std::vector<std::vector<CollisionComponent*>>(static_cast<size_t>(cols)));
+		s_Cells.assign(static_cast<size_t>(rows), std::vector<std::vector<const CollisionComponent*>>(static_cast<size_t>(cols)));
 	}
 
 	void CollisionGrid::Register(const CollisionComponent* pCollider)
@@ -41,24 +41,27 @@ namespace dae
 		const int rowStart = std::max(0, static_cast<int>(top / s_CellSize));
 		const int rowEnd = std::min(s_Rows - 1, static_cast<int>((bottom - 0.001f) / s_CellSize));
 
+		auto& occupied = pCollider->m_OccupiedCells;
+		occupied.clear();
+
 		for (int r = rowStart; r <= rowEnd; ++r)
 		{
 			for (int c = colStart; c <= colEnd; ++c)
 			{
-				s_Cells[static_cast<size_t>(r)][static_cast<size_t>(c)].push_back(const_cast<CollisionComponent*>(pCollider));
+				s_Cells[static_cast<size_t>(r)][static_cast<size_t>(c)].push_back(pCollider);
+				occupied.emplace_back(r, c);
 			}
 		}
 	}
 
 	void CollisionGrid::Unregister(const CollisionComponent* pCollider)
 	{
-		for (auto& row : s_Cells)
+		for (auto [r, c] : pCollider->m_OccupiedCells)
 		{
-			for (auto& cell : row)
-			{
-				cell.erase(std::remove(cell.begin(), cell.end(), const_cast<CollisionComponent*>(pCollider)), cell.end());
-			}
+			auto& cell = s_Cells[static_cast<size_t>(r)][static_cast<size_t>(c)];
+			cell.erase(std::remove(cell.begin(), cell.end(), pCollider), cell.end());
 		}
+		pCollider->m_OccupiedCells.clear();
 	}
 
 	void CollisionGrid::Query(const glm::vec3& worldPos, float width, float height, std::vector<CollisionComponent*>& outResults)
@@ -87,7 +90,7 @@ namespace dae
 					if (pOther->m_LastQueryId != s_QueryId)
 					{
 						pOther->m_LastQueryId = s_QueryId;
-						outResults.push_back(pOther);
+						outResults.push_back(const_cast<CollisionComponent*>(pOther));
 					}
 				}
 			}

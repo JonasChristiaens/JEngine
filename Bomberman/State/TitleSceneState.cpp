@@ -1,4 +1,5 @@
 #include "TitleSceneState.h"
+#include "GlyphHelper.h"
 #include "Components/SceneStateMachineComponent.h"
 #include "Scene/SceneManager.h"
 #include "Scene/Scene.h"
@@ -107,7 +108,7 @@ namespace dae
 
 		Event playBgmEvent(make_sdbm_hash("PlayAudioEvent"));
 		playBgmEvent.nbArgs = 1;
-		playBgmEvent.args[0].p = const_cast<char*>("Title_Screen.flac");
+		playBgmEvent.args[0].p = "Title_Screen.flac";
 		EventManager::GetInstance().BroadcastImmediate(playBgmEvent, m_pRoot);
 		m_BgmCooldown = 1.0f;
 	}
@@ -141,7 +142,7 @@ namespace dae
 		{
 			Event playBgmEvent(make_sdbm_hash("PlayAudioEvent"));
 			playBgmEvent.nbArgs = 1;
-			playBgmEvent.args[0].p = const_cast<char*>("Title_Screen.flac");
+		playBgmEvent.args[0].p = "Title_Screen.flac";
 			EventManager::GetInstance().BroadcastImmediate(playBgmEvent, m_pRoot);
 			m_BgmCooldown = 1.0f;
 		}
@@ -399,23 +400,6 @@ namespace dae
 
 	std::pair<float, float> TitleSceneState::GetCharacterSrcRect(char character) const
 	{
-		if (character >= '0' && character <= '9')
-		{
-			const int index = character - '0';
-			return { index * kGlyphWidth, kGlyphRowY };
-		}
-
-		char upper = character;
-		if (upper >= 'a' && upper <= 'z')
-		{
-			upper = static_cast<char>(upper - ('a' - 'A'));
-		}
-		if (upper >= 'A' && upper <= 'Z')
-		{
-			const int index = upper - 'A';
-			return { index * kGlyphWidth, kGlyphRow2Y };
-		}
-
-		return { 0.0f, kGlyphRow2Y };
+		return GlyphHelper::GetCharacterSrcRect(character);
 	}
 }

@@ -25,7 +25,7 @@ namespace dae
 	};
 
 	GameObject* SpawnEnemy(Scene& scene, GameObject& parent, float tileWorldSize, const EnemyConfig& config, float moveSpeed,
-		GameObject* pChaseTarget, const glm::vec3& reservedWorldPosition, bool useAiMovement);
+		const std::vector<GameObject*>& chaseTargets, const glm::vec3& reservedWorldPosition, bool useAiMovement);
 
 	std::pair<GameObject*, GameObject*> SetupSoloMode(const SpawnParams& p);
 	std::pair<GameObject*, GameObject*> SetupCoopMode(const SpawnParams& p);

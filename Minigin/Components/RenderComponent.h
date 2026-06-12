@@ -20,7 +20,7 @@ namespace dae
 		void Render() const override;
 
 		void SetTexture(const std::string& filename);
-		void SetTexture(std::unique_ptr<Texture2D> texture);
+		void SetTexture(Texture2D* texture);
 
 		void SetSourceRectangle(float x, float y, float width, float height);
 		void SetSourceRectangle(const SDL_FRect& rect);
@@ -39,7 +39,7 @@ namespace dae
 		int GetRenderLayer() const noexcept { return m_RenderLayer; }
 
 	private:
-		std::unique_ptr<Texture2D> m_Texture{};
+		Texture2D* m_Texture{};
 		SDL_FRect m_SourceRect{};
 		bool m_UseSourceRect{ false };
 

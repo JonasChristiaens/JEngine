@@ -4,6 +4,8 @@
 
 namespace dae
 {
+	class TransformComponent;
+
 	class MoveCommand final : public Command
 	{
 	public:
@@ -13,6 +15,8 @@ namespace dae
 		void Execute() override;
 
 	private:
+		static void ClampToCameraBounds(TransformComponent* transform);
+
 		glm::vec3 m_Direction;
 		float m_Speed;
 	};

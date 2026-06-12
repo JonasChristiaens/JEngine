@@ -2,6 +2,7 @@
 #include "BaseComponent.h"
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
+#include <vector>
 
 namespace dae
 {
@@ -24,7 +25,7 @@ namespace dae
 
 		void Update() override;
 
-		void SetChaseTarget(GameObject* pTarget) { m_pChaseTarget = pTarget; }
+		void AddChaseTarget(GameObject* pTarget);
 		void SetChaseAxis(EnemyChaseAxis axis) { m_ChaseAxis = axis; }
 		void SetChaseAlignmentThreshold(float threshold) { m_ChaseAlignmentThreshold = threshold; }
 		void SetEnabled(bool enabled) { m_Enabled = enabled; }
@@ -39,7 +40,7 @@ namespace dae
 		float m_MaxDirectionTime{};
 		float m_TimeUntilDirectionChange{};
 
-		GameObject* m_pChaseTarget{};
+		std::vector<GameObject*> m_ChaseTargets{};
 		EnemyChaseAxis m_ChaseAxis{ EnemyChaseAxis::None };
 		float m_ChaseAlignmentThreshold{ 24.0f };
 		bool m_Enabled{ true };
@@ -51,5 +52,6 @@ namespace dae
 		void PickRandomDirection();
 		float RandomRange(float min, float max) const;
 		bool IsLineOfSightClear(const glm::vec3& from, const glm::vec3& to, float tileSize, bool horizontal) const;
+		GameObject* FindClosestChaseTarget() const;
 	};
 }

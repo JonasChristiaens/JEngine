@@ -10,6 +10,6 @@ namespace dae
 
 	namespace EnemyFactory
 	{
-		GameObject* CreateEnemy(Scene& scene, GameObject& parent, int gridColumns, int gridRows, float tileWorldSize, float moveSpeed, const EnemyConfig& config, GameObject* pChaseTarget = nullptr, const std::vector<glm::vec3>& reservedWorldPositions = {}, bool useAiMovement = true);
+		GameObject* CreateEnemy(Scene& scene, GameObject& parent, int gridColumns, int gridRows, float tileWorldSize, float moveSpeed, const EnemyConfig& config, const std::vector<GameObject*>& chaseTargets = {}, const std::vector<glm::vec3>& reservedWorldPositions = {}, bool useAiMovement = true);
 	}
 }

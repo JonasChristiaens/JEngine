@@ -54,9 +54,9 @@ void dae::RenderComponent::SetTexture(const std::string& filename)
 	m_Texture = ResourceManager::GetInstance().LoadTexture(filename);
 }
 
-void dae::RenderComponent::SetTexture(std::unique_ptr<Texture2D> texture)
+void dae::RenderComponent::SetTexture(Texture2D* texture)
 {
-	m_Texture = std::move(texture);
+	m_Texture = texture;
 }
 
 void dae::RenderComponent::SetSourceRectangle(float x, float y, float width, float height)
