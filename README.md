@@ -1,103 +1,188 @@
-﻿# JEngine — Programming 4 Game Engine Project  
+﻿# JEngine — Programming 4 Game Engine Project
 
-Welcome to **JEngine**, my personal game engine developed for the *Programming 4* course at [DAE](https://digitalartsandentertainment.be/).  
-This project aims to put game programming patterns and engine architecture principles into practice by building a reusable 2D C++ game engine from the ground up.  
+**JEngine** is a 2D game engine built in C++20 for the *Programming 4* course at [DAE](https://digitalartsandentertainment.be/). The engine recreates **Bomberman** (1983), a classic arcade game, while putting game programming patterns and engine architecture into practice.
 
-The ultimate goal of this assignment is to recreate a classic 80’s arcade game, in my case, **Bomberman**, while exploring how to design efficient systems for rendering, input, and game logic.  
+**Source control**: [github.com/JonasChristiaens/JEngine](https://github.com/JonasChristiaens/JEngine)
 
-'JEngine' started from the **[Minigin](https://github.com/avadae/minigin)** template created by *Alex Vanden Abeele*, which provides a minimal SDL3 setup and basic scaffolding.  
-From there, I’ve expanded and customized the code to develop my own engine structure, patterns, and features.  
+**Live web build**: [JEngine](https://jonaschristiaens.github.io/JEngine/)
 
-This repository documents my progress throughout the project.  
-You’ll find build instructions, design notes, and demonstrations of how each engine system works as the project evolves.
+[![Build Status](https://github.com/JonasChristiaens/JEngine/actions/workflows/cmake.yml/badge.svg)](https://github.com/JonasChristiaens/JEngine)
+[![Build Status](https://github.com/JonasChristiaens/JEngine/actions/workflows/emscripten.yml/badge.svg)](https://github.com/JonasChristiaens/JEngine)
 
-This is the website version of my project [JEngine](https://jonaschristiaens.github.io/JEngine/).
+---
 
-# Minigin
+## Project Structure
 
-Minigin is a very small project using [SDL3](https://www.libsdl.org/) and [glm](https://github.com/g-truc/glm) for 2D c++ game projects. It is in no way a game engine, only a barebone start project where everything sdl related has been set up. It contains glm for vector math, to aleviate the need to write custom vector and matrix classes.
+```
+JEngine/
+├── Minigin/          # Engine library (static lib)
+│   ├── Core/         # Game loop, time, singleton CRTP
+│   ├── Scene/        # GameObject (ECS), Scene, SceneManager
+│   ├── Components/   # Transform, Render, Collision, Animation
+│   ├── Input/        # Keyboard + gamepad (XInput/SDL), command binding
+│   ├── Rendering/    # SDL3 renderer wrapper, texture cache
+│   ├── Resources/    # Texture & text file loading
+│   ├── EventQueue/   # Observer-based event system with queued dispatch
+│   ├── Audio/        # Service locator, SDL3_mixer (dedicated thread)
+│   ├── Commands/     # Abstract Command base class
+│   └── State/        # Generic finite state machine
+└── Bomberman/        # Game executable
+	├── Scenes/       # Scene builder, player/mode setup
+	├── State/        # Title, Game, End, Transition scene states
+	├── Components/   # Health, Bomb, Enemy AI, Camera, HUD, etc.
+	├── Commands/     # Move, SpawnBomb, Detonate, SkipLevel, ToggleMute
+	├── Observers/    # Bomb event handler, entity death handler
+	├── Managers/     # Explosion effects, hidden items, high scores
+	├── Powerups/     # Strategy pattern: Flames, ExtraBomb, Detonator, Skate
+	├── Factories/    # EnemyFactory
+	├── Level/        # Binary level loader (.bin), playfield grid
+	└── Config/       # Enemy configs, game mode enum
+```
 
-[![Build Status](https://github.com/avadae/minigin/actions/workflows/cmake.yml/badge.svg)](https://github.com/JonasChristiaens/JEngine)
-[![Build Status](https://github.com/avadae/minigin/actions/workflows/emscripten.yml/badge.svg)](https://github.com/JonasChristiaens/JEngine)
-[![GitHub Release](https://img.shields.io/github/v/release/avadae/minigin?logo=github&sort=semver)](https://github.com/JonasChristiaens/JEngine)
+**Two CMake targets**: `minigin` (static library) and `bomberman` (executable). The engine has no knowledge of the game, all game-specific code lives in `Bomberman/`.
 
-# Goal
+---
 
-Minigin can/may be used as a start project for the exam assignment in the course [Programming 4](https://youtu.be/j96Oh6vzhmg) at DAE. In that assignment students need to recreate a popular 80's arcade game with a game engine they need to program themselves. During the course we discuss several game programming patterns, using the book '[Game Programming Patterns](https://gameprogrammingpatterns.com/)' by [Robert Nystrom](https://github.com/munificent) as reading material. 
+## Engine Architecture & Design Choices
 
-# Disclaimer
+### Game Loop
 
-Minigin is, despite perhaps the suggestion in its name, **not** a game engine. It is just a very simple SDL3 ready project with some of the scaffolding in place to get started. None of the patterns discussed in the course are used yet (except singleton which use we challenge during the course). It is up to the students to implement their own vision for their engine, apply patterns as they see fit, create their game as efficient as possible.
+`Minigin::RunOneFrame()` runs at ~60 FPS with a fixed sleep-based cap:
 
-# Use
+```
+Process SDL events → Input dispatch → Reset camera → Queued events → Scene.Update() → Scene.LateUpdate() → Render → Sleep(~16ms)
+```
 
-Get the source from this project, or since students need to have their work on github too, they can use this repository as a template. Hit the "Use this template" button on the top right corner of the github page of this project.
+Delta time is accumulated each frame and exposed via `GameTime::GetDeltaTime()`.
 
-## Windows version
+### Entity-Component System (ECS)
 
-Either
-- Open the root folder in Visual Studio 2026; this will be recognized as a cmake project.
-  
-Or
-- Install CMake 
-- Install CMake and CMake Tools extensions in Visual Code
-- Open the root folder in Visual Code,  this will be recognized as a cmake project.
+`GameObject` acts as the entity. Components derive from `BaseComponent` and are stored in a `vector<unique_ptr<BaseComponent>>` indexed by `type_index` for O(1) lookup. One component per type enforced. Components are created via templated `AddComponent<T>(args...)`.
 
-Or
-- Use whatever editor you like :)
+**Why this over data-oriented ECS**: For a game of this scale (tens of objects, not thousands), the flexibility of runtime component attachment and the simplicity of virtual `Update()` seemed like the perfect choice.
 
-## Emscripten (web) version
+### Command Pattern
 
-### On windows
+Abstract `Command` with `Execute()` decouples input from action. `InputManager` binds keyboard keys and gamepad buttons to `unique_ptr<Command>`. Concrete commands (`MoveCommand`, `SpawnBombCommand`, etc.) hold a back-pointer to their `GameObject` actor.
 
-For installing all of the needed tools on Windows I recommend using [Chocolatey](https://chocolatey.org/). You can then run the following in a terminal to install what is needed:
+### Observer & Event Queue
 
-    choco install -y cmake
-    choco install -y emscripten
-    choco install -y ninja
-    choco install -y python
+`EventManager` is both Singleton and `Subject`. Events carry a compile-time SDBM hash ID (`make_sdbm_hash("PlaceBombEvent")`) and up to 8 variant arguments (`int | float | void*`). I have set up 2 dispatch modes:
+- **Queued**: `BroadcastEvent()` defers to next frame's `ProcessQueuedEvents()`, which prevents ordering issues when events trigger cascading changes.
+- **Immediate**: `BroadcastImmediate()` fires synchronously. This is used for audio and critical state changes.
 
-In a terminal, navigate to the root folder. Run this: 
+Gameplay systems communicate exclusively through events (`PlaceBombEvent`, `DetonateBombEvent`, `ChangeHealthEvent`, `ChangeScoreEvent`, `EntityDied`). No system directly calls another system's methods.
 
-    mkdir build_web
-    cd build_web
-    emcmake cmake ..
-    emmake ninja
+### State Machine
 
-To be able to see the webpage you can start a python webserver in the build_web folder
+Generic `State` + `StateMachine` (`OnEnter` / `OnExit` / `Update` / `Render`). Used for scene-level flow (Title → Game → End) and enemy AI (Idle). Scene states self-manage input bindings and scene creation/teardown. Transition between states is type-safe via `unique_ptr<State>`.
 
-    python -m http.server
+### Service Locator (Audio)
 
-Then browse to http://localhost:8000 and you're good to go.
+`ServiceLocator` provides global access to `ISoundService` with a null-object fallback. The concrete `SoundServiceSdlMixer` runs a **dedicated audio thread** with a command queue (Preload, Play, Stop, StopAll), communicating via `mutex` + `condition_variable` + `atomic`. Audio events flow through `AudioEventObserver` (registered once globally), which translates `PlayAudioEvent` → `ISoundService::PlaySound()`.
 
-### On OSX
+### Collision
 
-On Mac you can use homebrew
+`CollisionGrid` is a spatial hash grid for broad-phase AABB queries. `CollisionComponent` supports triggers (non-blocking overlap callbacks), collision filters (`function<bool(GameObject*)>`), and on-collision callbacks. Movement uses speculative queries: `WouldCollide(hypotheticalPosition)` tests before committing a move.
 
-    brew install cmake
-    brew install emscripten
-    brew install python
+### Rendering
 
-In a terminal on OSX, navigate to the root folder. Run this: 
+SDL3 renderer with camera offset applied to all draw calls. `RenderComponent` supports spritesheet source rects, independent scale, pivot points, and destination size overrides. `SpriteAnimatorComponent` drives the source rect orthogonally via grid-based or explicit frame lists. Render order is done by assigned layer.
 
-    mkdir build_web
-    cd build_web
-    emcmake cmake .. -DCMAKE_OSX_ARCHITECTURES=""
-    emmake make
+### Resource Management
 
-To be able to see the webpage you can start a python webserver in the build_web folder
+`ResourceManager` caches textures by filename via `unordered_map`. Data path resolved at startup (`./Data/` or `../Data/`). `Texture2D` is an RAII move-only wrapper around `SDL_Texture` with nearest-neighbor filtering (pixel art).
 
-    python3 -m http.server
+---
 
-Then browse to http://localhost:8000 and you're good to go.
+## Game Features
 
-## Github Actions
+- **3 game modes**: Solo, Co-op, Versus (1v1: player vs. player-controlled enemy)
+- **5 stages** with randomized soft block placement, increasing difficulty
+- **4 enemy types** (Balloom, Oneal, Doll, Minvo) with distinct AI: none / chase-Y / chase-X / chase-both with line-of-sight
+- **4 power-ups**: Extra Bomb, Flames, Detonator, Skate — hidden inside soft blocks
+- **Chain scoring**: successive kills within 0.5s multiply points (100 → 200 → 400 → … → 10,000)
+- **Persistent highscore list** (4 entries, 4-letter arcade-style name entry, saved to disk)
+- **Level skip** (F1), **mute toggle** (F2)
+- **Keyboard + gamepad** fully supported in all menus and gameplay
+- **WebAssembly build** for browser play (Emscripten)
 
-This project is build with github actions.
-- The CMake workflow builds the project in Debug and Release for Windows and serves as a check that the project builds on that platform.
-- The Emscripten workflow generates a web version of the project and publishes it as a [github page](https://avadae.github.io/minigin/). 
-  - The url of that page will be `https://<username>.github.io/<repository>/`
-- You can embed this page with 
+---
 
-```<iframe style="position: absolute; top: 0px; left: 0px; width: 1024px; height: 576px;" src="https://<username>.github.io/<repository>/" loading="lazy"></iframe>```
+## Controls
 
+### Keyboard (Player 1)
+
+| Key | Action |
+|-----|--------|
+| **W** | Move up |
+| **A** | Move left |
+| **S** | Move down |
+| **D** | Move right |
+| **R** | Place bomb |
+| **B** | Detonate bomb (requires Detonator power-up) |
+
+### Gamepad
+
+| Button | Action |
+|--------|--------|
+| **D-Pad** | Move |
+| **Y** | Place bomb |
+| **B** | Detonate bomb (requires Detonator power-up) |
+
+### Menus (Title / High Score)
+
+| Input | Action |
+|-------|--------|
+| **Left / Right** (or **Up / Down** for score entry) | Navigate |
+| **Enter** | Confirm |
+| **D-Pad** | Navigate |
+| **X** | Confirm |
+
+### Global
+
+| Key | Action |
+|-----|--------|
+| **F1** | Skip current level |
+| **F2** | Toggle mute |
+
+### Versus Mode
+
+Player 1 uses keyboard (WASD + R + B). Opponent controlled by a second human on **Controller 0** (D-Pad to move). Any additional controllers (2–3) join as extra enemies.
+
+---
+
+## Patterns Used
+
+| Pattern | Where |
+|---------|-------|
+| **Component (ECS)** | `GameObject` + `BaseComponent` hierarchy |
+| **Command** | Input binding: `MoveCommand`, `SpawnBombCommand`, etc. |
+| **Observer** | `EventManager` + `IObserver` across all gameplay systems |
+| **Event Queue** | `EventManager::BroadcastEvent()` → deferred dispatch |
+| **State** | `State` + `StateMachine` for scene flow and enemy AI |
+| **Singleton** | `Renderer`, `InputManager`, `ResourceManager`, `SceneManager`, `GameTime`, `EventManager` |
+| **Service Locator** | `ServiceLocator::GetSoundService()` |
+| **Null Object** | `NullSoundService` (Emscripten fallback) |
+| **Factory** | `EnemyFactory`, `GameplaySceneBuilder` |
+| **PIMPL** | `KeyboardInput`, `ControllerInput`, `SoundServiceSdlMixer` |
+
+---
+
+## Dependencies
+
+- **SDL3** v3.4.0 — windowing, input, rendering
+- **SDL3_mixer** v3.2.0 — audio playback
+- **glm** v1.0.3 — vector math
+- **Dear ImGui** v1.92.7 — debug UI
+- **Steamworks SDK 1.63** — (optional) Steam achievements integration
+
+All fetched via CMake `FetchContent` except Steamworks which is present locally. Windows debug builds optionally use Visual Leak Detector.
+
+---
+
+## Credits
+
+- **Project starting point**: [Minigin](https://github.com/avadae/minigin) by Alex Vanden Abeele
+- **Patterns reference**: [Game Programming Patterns](https://gameprogrammingpatterns.com/) by Robert Nystrom
+- **SDL3**, **SDL3_mixer**, **glm**, **Dear ImGui** — open-source libraries under their respective licenses
