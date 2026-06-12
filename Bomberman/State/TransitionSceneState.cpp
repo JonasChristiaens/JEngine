@@ -17,7 +17,6 @@ namespace
 {
 	constexpr float kGlyphWidth{ 8.0f };
 	constexpr float kGlyphHeight{ 8.0f };
-	constexpr float kGlyphRowY{ 264.0f };
 	constexpr float kTextScale{ 4.0f };
 	constexpr int kTextRenderLayer{ 1 };
 	constexpr float kMinDisplayTime{ 1.0f };
