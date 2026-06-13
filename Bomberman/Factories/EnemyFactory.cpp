@@ -12,6 +12,7 @@
 #include "Components/DeathAnimatorComponent.h"
 #include "State/EnemyIdleState.h"
 #include "Components/RectBounds.h"
+#include <algorithm>
 #include <cmath>
 #include <random>
 #include <glm/vec3.hpp>
@@ -66,7 +67,8 @@ namespace
 
 	glm::vec3 SelectSpawnPosition(const dae::GameObject& parent, int gridColumns, int gridRows,
 		float tileWorldSize, float colliderSize,
-		const std::vector<glm::vec3>& reservedWorldPositions)
+		const std::vector<glm::vec3>& reservedWorldPositions,
+		int maxColumn)
 	{
 		std::vector<std::pair<int, int>> reservedTiles{};
 		reservedTiles.reserve(reservedWorldPositions.size());
@@ -83,10 +85,12 @@ namespace
 				return false;
 			};
 
+		const int endColumn = std::min(maxColumn, gridColumns);
+
 		std::vector<std::pair<int, int>> validCells{};
 		for (int row = 0; row < gridRows; ++row)
 		{
-			for (int column = 0; column < gridColumns; ++column)
+			for (int column = 0; column < endColumn; ++column)
 			{
 				if (isReserved(column, row))
 					continue;
@@ -114,12 +118,13 @@ namespace
 namespace dae::EnemyFactory
 {
 	GameObject* CreateEnemy(Scene& scene, GameObject& parent, int gridColumns, int gridRows, float tileWorldSize, float moveSpeed,
-		const EnemyConfig& config, const std::vector<GameObject*>& chaseTargets, const std::vector<glm::vec3>& reservedWorldPositions, bool useAiMovement)
+		const EnemyConfig& config, const std::vector<GameObject*>& chaseTargets, const std::vector<glm::vec3>& reservedWorldPositions, bool useAiMovement,
+		int maxColumn)
 	{
 		auto enemy = std::make_unique<GameObject>();
 		auto* transform = enemy->AddComponent<TransformComponent>();
 		const float colliderSize = tileWorldSize * config.colliderScale;
-		transform->SetLocalPosition(SelectSpawnPosition(parent, gridColumns, gridRows, tileWorldSize, colliderSize, reservedWorldPositions));
+		transform->SetLocalPosition(SelectSpawnPosition(parent, gridColumns, gridRows, tileWorldSize, colliderSize, reservedWorldPositions, maxColumn));
 
 		auto* render = enemy->AddComponent<RenderComponent>();
 		render->SetTexture("BombermanSprites_General.png");

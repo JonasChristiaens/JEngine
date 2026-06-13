@@ -1,5 +1,6 @@
 #pragma once
 #include "GameplaySceneBuilder.h"
+#include <climits>
 #include <glm/vec3.hpp>
 #include <utility>
 
@@ -25,7 +26,8 @@ namespace dae
 	};
 
 	GameObject* SpawnEnemy(Scene& scene, GameObject& parent, float tileWorldSize, const EnemyConfig& config, float moveSpeed,
-		const std::vector<GameObject*>& chaseTargets, const glm::vec3& reservedWorldPosition, bool useAiMovement);
+		const std::vector<GameObject*>& chaseTargets, const glm::vec3& reservedWorldPosition, bool useAiMovement,
+		int maxColumn = INT_MAX);
 
 	std::pair<GameObject*, GameObject*> SetupSoloMode(const SpawnParams& p);
 	std::pair<GameObject*, GameObject*> SetupCoopMode(const SpawnParams& p);

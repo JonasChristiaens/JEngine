@@ -16,8 +16,8 @@
 ```
 JEngine/
 ├── Minigin/          # Engine library (static lib)
-│   ├── Core/         # Game loop, time, singleton CRTP
-│   ├── Scene/        # GameObject (ECS), Scene, SceneManager
+│   ├── Core/         # Game loop, time, singleton
+│   ├── Scene/        # GameObject, Scene, SceneManager
 │   ├── Components/   # Transform, Render, Collision, Animation
 │   ├── Input/        # Keyboard + gamepad (XInput/SDL), command binding
 │   ├── Rendering/    # SDL3 renderer wrapper, texture cache
@@ -33,7 +33,7 @@ JEngine/
 	├── Commands/     # Move, SpawnBomb, Detonate, SkipLevel, ToggleMute
 	├── Observers/    # Bomb event handler, entity death handler
 	├── Managers/     # Explosion effects, hidden items, high scores
-	├── Powerups/     # Strategy pattern: Flames, ExtraBomb, Detonator, Skate
+	├── Powerups/     # Flames, ExtraBomb, Detonator, Skate
 	├── Factories/    # EnemyFactory
 	├── Level/        # Binary level loader (.bin), playfield grid
 	└── Config/       # Enemy configs, game mode enum

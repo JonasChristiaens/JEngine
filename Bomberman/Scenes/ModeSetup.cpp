@@ -85,11 +85,12 @@ namespace
 namespace dae
 {
 	GameObject* SpawnEnemy(Scene& scene, GameObject& parent, float tileWorldSize, const EnemyConfig& config, float moveSpeed,
-		const std::vector<GameObject*>& chaseTargets, const glm::vec3& reservedWorldPosition, bool useAiMovement)
+		const std::vector<GameObject*>& chaseTargets, const glm::vec3& reservedWorldPosition, bool useAiMovement,
+		int maxColumn)
 	{
 		const int gridColumns = static_cast<int>(kPlayfieldWidth / 16.0f);
 		const int gridRows = static_cast<int>(kPlayfieldHeight / 16.0f);
-		auto* enemy = EnemyFactory::CreateEnemy(scene, parent, gridColumns, gridRows, tileWorldSize, moveSpeed, config, chaseTargets, { reservedWorldPosition }, useAiMovement);
+		auto* enemy = EnemyFactory::CreateEnemy(scene, parent, gridColumns, gridRows, tileWorldSize, moveSpeed, config, chaseTargets, { reservedWorldPosition }, useAiMovement, maxColumn);
 		if (enemy)
 		{
 			if (auto* playfield = parent.GetComponent<PlayfieldComponent>())
@@ -162,7 +163,10 @@ namespace dae
 		if (input.HasController(1))
 			BindControllerMovement(*p1, 1);
 
-		auto* p2 = SpawnEnemy(p.scene, p.worldRoot, p.tileWorldSize, kBalloomConfig, kBalloomSpeed, {}, p.player1Pos, false);
+		const int gridColumns = static_cast<int>(kPlayfieldWidth / 16.0f);
+		const int playerEnemyMaxColumn = gridColumns - 8;
+
+		auto* p2 = SpawnEnemy(p.scene, p.worldRoot, p.tileWorldSize, kBalloomConfig, kBalloomSpeed, {}, p.player1Pos, false, playerEnemyMaxColumn);
 		if (p2)
 		{
 			if (auto* collider = p2->GetComponent<CollisionComponent>())
@@ -179,7 +183,7 @@ namespace dae
 			if (!input.HasController(ci))
 				continue;
 
-			auto* extra = SpawnEnemy(p.scene, p.worldRoot, p.tileWorldSize, kBalloomConfig, kBalloomSpeed, {}, p.player2Pos, false);
+			auto* extra = SpawnEnemy(p.scene, p.worldRoot, p.tileWorldSize, kBalloomConfig, kBalloomSpeed, {}, p.player2Pos, false, playerEnemyMaxColumn);
 			if (extra)
 			{
 				if (auto* collider = extra->GetComponent<CollisionComponent>())
