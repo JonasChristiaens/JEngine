@@ -28,7 +28,6 @@ namespace dae
 		bool m_RespawnAfterDeathAnim{ false };
 		GameObject* m_pRespawnPlayer{ nullptr };
 		GameObject* m_pPlayers[kMaxPlayers]{ nullptr, nullptr };
-		float m_BgmCooldown{ 0.0f };
 		bool m_StageClearPlayed{ false };
 
 		void SavePlayerState();

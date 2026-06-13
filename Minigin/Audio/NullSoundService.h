@@ -8,6 +8,7 @@ namespace dae
 	public:
 		void PlaySound(const std::string&) override {}
 		void PreloadSound(const std::string&) override {}
+		void PlayLooping(const std::string&) override {}
 		void SetMuted(bool) override {}
 	};
 }

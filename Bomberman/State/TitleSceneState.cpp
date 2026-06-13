@@ -105,11 +105,10 @@ namespace dae
 		UpdateModeLabel();
 		BindInput();
 
-		Event playBgmEvent(make_sdbm_hash("PlayAudioEvent"));
+		Event playBgmEvent(make_sdbm_hash("PlayLoopingAudioEvent"));
 		playBgmEvent.nbArgs = 1;
 		playBgmEvent.args[0].p = "Title_Screen.flac";
 		EventManager::GetInstance().BroadcastImmediate(playBgmEvent, m_pRoot);
-		m_BgmCooldown = 1.0f;
 	}
 
 	void TitleSceneState::OnExit()
@@ -129,21 +128,6 @@ namespace dae
 			m_BlinkTimer = 0.0f;
 			m_ArrowVisible = !m_ArrowVisible;
 			UpdateMenuSprites();
-		}
-
-		if (m_BgmCooldown > 0.0f)
-		{
-			m_BgmCooldown -= deltaTime;
-			return;
-		}
-
-		if (!ServiceLocator::GetSoundService().IsPlaying())
-		{
-			Event playBgmEvent(make_sdbm_hash("PlayAudioEvent"));
-			playBgmEvent.nbArgs = 1;
-		playBgmEvent.args[0].p = "Title_Screen.flac";
-			EventManager::GetInstance().BroadcastImmediate(playBgmEvent, m_pRoot);
-			m_BgmCooldown = 1.0f;
 		}
 	}
 

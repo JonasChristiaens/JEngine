@@ -17,7 +17,6 @@
 #include "Level/LevelDataLoader.h"
 #include "Resources/ResourceManager.h"
 #include "Audio/ServiceLocator.h"
-#include "Core/GameTime.h"
 
 namespace
 {
@@ -70,11 +69,10 @@ namespace dae
 
 		m_StageClearPlayed = false;
 
-		Event playBgmEvent(make_sdbm_hash("PlayAudioEvent"));
+		Event playBgmEvent(make_sdbm_hash("PlayLoopingAudioEvent"));
 		playBgmEvent.nbArgs = 1;
 		playBgmEvent.args[0].p = "Main_BGM.flac";
 		EventManager::GetInstance().BroadcastImmediate(playBgmEvent, m_Owner.GetOwner());
-		m_BgmCooldown = 1.0f;
 	}
 
 	void GameSceneState::OnExit()
@@ -98,19 +96,6 @@ namespace dae
 
 	void GameSceneState::Update()
 	{
-		if (m_BgmCooldown > 0.0f)
-		{
-			m_BgmCooldown -= GameTime::GetInstance().GetDeltaTime();
-		}
-		else if (!ServiceLocator::GetSoundService().IsPlaying())
-		{
-			Event playBgmEvent(make_sdbm_hash("PlayAudioEvent"));
-			playBgmEvent.nbArgs = 1;
-		playBgmEvent.args[0].p = "Main_BGM.flac";
-			EventManager::GetInstance().BroadcastImmediate(playBgmEvent, m_Owner.GetOwner());
-			m_BgmCooldown = 1.0f;
-		}
-
 		if (m_LevelCompleted)
 		{
 			m_LevelCompleted = false;

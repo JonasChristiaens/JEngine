@@ -61,6 +61,16 @@ namespace dae
 			m_ActiveTracks.clear();
 			m_ActiveTrackCount.store(0);
 
+			for (auto* pTrack : m_LoopingTracks)
+			{
+				if (pTrack)
+				{
+					MIX_StopTrack(pTrack, 0);
+					MIX_DestroyTrack(pTrack);
+				}
+			}
+			m_LoopingTracks.clear();
+
 			for (auto& [_, pAudio] : m_LoadedSounds)
 			{
 				if (pAudio)
@@ -84,6 +94,16 @@ namespace dae
 
 			std::lock_guard lock(m_QueueMutex);
 			m_Queue.push_back({ RequestType::Play, relativePath });
+			m_Condition.notify_one();
+		}
+
+		void PlayLooping(const std::string& relativePath)
+		{
+			if (m_Muted)
+				return;
+
+			std::lock_guard lock(m_QueueMutex);
+			m_Queue.push_back({ RequestType::PlayLooping, relativePath });
 			m_Condition.notify_one();
 		}
 
@@ -125,6 +145,7 @@ namespace dae
 		{
 			Preload,
 			Play,
+			PlayLooping,
 			Stop,
 			StopAll
 		};
@@ -181,6 +202,17 @@ namespace dae
 				}
 				m_ActiveTracks.clear();
 				m_ActiveTrackCount.store(0);
+
+				for (auto* pTrack : m_LoopingTracks)
+				{
+					if (pTrack)
+					{
+						MIX_StopTrack(pTrack, 0);
+						MIX_DestroyTrack(pTrack);
+					}
+				}
+				m_LoopingTracks.clear();
+
 				return;
 			}
 
@@ -195,6 +227,37 @@ namespace dae
 
 			if (request.type == RequestType::Preload)
 				return;
+
+			if (request.type == RequestType::PlayLooping)
+			{
+				auto* pLoopTrack = MIX_CreateTrack(m_pMixer);
+				if (pLoopTrack == nullptr)
+				{
+					SDL_Log("MIX_CreateTrack failed for looping: %s", SDL_GetError());
+					return;
+				}
+
+				if (!MIX_SetTrackAudio(pLoopTrack, pAudio))
+				{
+					SDL_Log("MIX_SetTrackAudio failed for looping: %s", SDL_GetError());
+					MIX_DestroyTrack(pLoopTrack);
+					return;
+				}
+
+				const SDL_PropertiesID props = SDL_CreateProperties();
+				SDL_SetNumberProperty(props, MIX_PROP_PLAY_LOOPS_NUMBER, -1);
+				if (!MIX_PlayTrack(pLoopTrack, props))
+				{
+					SDL_Log("MIX_PlayTrack failed for looping: %s", SDL_GetError());
+					SDL_DestroyProperties(props);
+					MIX_DestroyTrack(pLoopTrack);
+					return;
+				}
+				SDL_DestroyProperties(props);
+
+				m_LoopingTracks.push_back(pLoopTrack);
+				return;
+			}
 
 			auto* pTrack = MIX_CreateTrack(m_pMixer);
 			if (pTrack == nullptr)
@@ -271,6 +334,7 @@ namespace dae
 		MIX_Mixer* m_pMixer{};
 		std::unordered_map<std::string, MIX_Audio*> m_LoadedSounds{};
 		std::vector<MIX_Track*> m_ActiveTracks{};
+		std::vector<MIX_Track*> m_LoopingTracks{};
 		std::atomic<int> m_ActiveTrackCount{ 0 };
 		bool m_Muted{ false };
 	};
@@ -287,6 +351,11 @@ namespace dae
 	void SoundServiceSdlMixer::PlaySound(const std::string& relativePath)
 	{
 		m_pImpl->PlaySound(relativePath);
+	}
+
+	void SoundServiceSdlMixer::PlayLooping(const std::string& relativePath)
+	{
+		m_pImpl->PlayLooping(relativePath);
 	}
 
 	bool SoundServiceSdlMixer::IsPlaying() const
